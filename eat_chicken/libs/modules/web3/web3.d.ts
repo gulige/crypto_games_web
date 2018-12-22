@@ -1,0 +1,1 @@
+declare function Web3(any)

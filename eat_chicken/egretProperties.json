@@ -1,0 +1,57 @@
+{
+  "engineVersion": "5.2.12",
+  "compilerVersion": "5.2.12",
+  "template": {},
+  "target": {
+    "current": "web"
+  },
+  "modules": [
+    {
+      "name": "egret"
+    },
+    {
+      "name": "game"
+    },
+    {
+      "name": "tween"
+    },
+    {
+      "name": "assetsmanager"
+    },
+    {
+      "name": "promise"
+    },
+    {
+      "name": "tiled",
+      "path": "../libsrc/tiled"
+    },
+    {
+      "name": "scatter",
+      "path": "../libsrc/scatter"
+    },
+    {
+      "name": "scatter-plugin-eos",
+      "path": "../libsrc/scatter-plugin-eos"
+    },
+    {
+      "name": "scatter-plugin-web3",
+      "path": "../libsrc/scatter-plugin-web3"
+    },
+    {
+      "name": "scatter-plugin-tron",
+      "path": "../libsrc/scatter-plugin-tron"
+    },
+    {
+      "name": "eos",
+      "path": "../libsrc/eos"
+    },
+    {
+      "name": "web3",
+      "path": "../libsrc/web3"
+    },
+    {
+      "name": "TronWeb",
+      "path": "../libsrc/TronWeb"
+    }
+  ]
+}
