@@ -209,7 +209,8 @@
                 this.logout.touchEnabled = true;
                 this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame ,this) 
 
-                ScatterUtils.getIdentiy().then( identiy=>{
+                //根据Scatter当前身份状况判断是否已经登陆/登出，并显示相应按钮
+                ScatterUtils.getIdentity().then( identiy=>{
                     if (identiy==null){ 
                         this.stage.addChild(this.login);
                     } else {
@@ -358,7 +359,7 @@
              * 
              */
             private createGame(){
-                ScatterUtils.getIdentiy().then( identity=>{
+                ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         alert(ScatterUtils.message.authority)
                         return
@@ -391,7 +392,7 @@
              */
             private joinGame(){
 
-                ScatterUtils.getIdentiy().then( identity=>{
+                ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         alert(ScatterUtils.message.authority)
                         return
@@ -423,7 +424,7 @@
              * 
              */
             private async setMap(){
-                 ScatterUtils.getIdentiy().then( identity=>{
+                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         alert(ScatterUtils.message.authority)
                         return
@@ -454,7 +455,7 @@
              * 
              */     
             private async move(moveX:number, moveY:number, position:any){
-                 ScatterUtils.getIdentiy().then( identity=>{
+                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         alert(ScatterUtils.message.authority)
                         return
@@ -516,7 +517,7 @@
              * 
              */
             private async kickOff(){
-                ScatterUtils.getIdentiy().then( identity=>{
+                ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         alert(ScatterUtils.message.authority)
                         return
@@ -667,12 +668,7 @@
              * 
              */
             private async loginGame(){
-                ScatterUtils.connect().then( connected=>{
-                    if (!connected){
-                        alert("亲，还没有装钱包哟")
-                        return
-                    }
-                })
+
                 ScatterUtils.login().then( message=>{
                     
                     if (message.login){  //登陆成功， 进行登陆/登出按钮转换

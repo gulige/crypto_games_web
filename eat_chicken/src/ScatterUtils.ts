@@ -8,8 +8,8 @@ class ScatterUtils extends Object {
     public static message = {
         authority:"未授权用户，请先登录",
         walletlock: "钱包已上锁",
-        identity: "钱包还没有身份",
-        nowallet: "还没有安装钱包",
+        noidentity: "未验证钱包身份",
+        nowallet: "亲，还没有装钱包哟",
         login: "已登陆",
         logout: "已登出"
     }    
@@ -139,7 +139,7 @@ class ScatterUtils extends Object {
         } catch (e) {           
             //console.log("login fail,", e)
             //没有解锁或没有身份
-            return { login:false, details : this.message.walletlock }  
+            return { login:false, details : "未能使用钱包，可能是"+this.message.walletlock+"或者"+this.message.noidentity }  
         }
     }
 
@@ -417,7 +417,11 @@ class ScatterUtils extends Object {
        
     }
 
-    public static async getIdentiy(){
+    /**
+     * descrition: 获取当前钱包用户身份，用于判断登录状态
+     * 
+     */
+    public static async getIdentity(){
         return ScatterJS.scatter.identity
     }
 
