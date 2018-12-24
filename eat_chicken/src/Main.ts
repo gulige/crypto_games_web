@@ -402,7 +402,7 @@
                         alert("请选择加入的游戏房间")
                         return
                     }
-                    ScatterUtils.joinGame(this.selectedHouse.getID(), this.selectedHouse.getJoinEos(), 10, 10).then( transaction=>{
+                    ScatterUtils.joinGame(this.selectedHouse.getID(), this.selectedHouse.getJoinEos(), 4, 4).then( transaction=>{
                         console.log("transaction", transaction)        
                         
                         if ( !transaction.processed ){  //交易失败
@@ -481,7 +481,7 @@
                                // let position = currentPlayer[0].getPosition()
                                 egret.Tween.get(currentPlayerBitmap).to( position, 1000, egret.Ease.sineIn )
                                 .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
-                                .wait(500).call(this.checkCell.bind(this,currentPlayer[0]));       
+                                .wait(500).call(this.checkCell.bind(this,moveX,moveY));       
                             } else {  //如果找不到相应的玩家，直接更新棋盘玩家，没有移动效果
                                 this.updatePlayersInBoard(gameId)
                             }
@@ -497,19 +497,24 @@
                 
             }
 
-            private async checkCell(currentPlayer:Player){
-                //console.log("currentPlayer",currentPlayer)
-               // console.log("getPlayerList",this.selectedHouse.getPlayerList())
-                let _currentPlayer = this.selectedHouse.getPlayerList().filter( player=>{
-                    return player.getName() == currentPlayer.getName()
-                })
-                let encounter = await this.selectedHouse.getPlayerList().filter( player=>{
-                    return player.getCellId() == _currentPlayer[0].getCellId()
-                })
-                console.log("encounter",encounter)
-                if (encounter.length > 1){
-                    this.attackTarget(currentPlayer.getPosition(), currentPlayer)
-                }
+            /**
+             * Description: 检查当前移动目标格子里面是否有其他玩家存在，进行战斗模式
+             * @rowX 
+             * @rowY
+             */
+            private async checkCell(rowX:number, rowY:number){
+                
+                this.board.getCellByXY(rowX, rowY).then( async cell=>{
+                    let cell_id = cell.getID()
+                    let playersInCell = await this.selectedHouse.getPlayerList().filter( player=>{
+                        return player.getCellId() == cell_id
+                    })
+                    console.log("playersInCell",playersInCell)
+                    if (playersInCell.length > 1){
+                        this.attackTarget(cell.getPosition(), playersInCell)
+                    }
+
+                })                                           
             }
 
             /**
@@ -696,7 +701,7 @@
              */
              private async logoutGame(){
                 ScatterUtils.logout().then( message=>{
-                    ScatterUtils.getCurrentAccountName().then( name=>{
+               //     ScatterUtils.getCurrentAccountName().then( name=>{
                         alert(message.details)
                         if (message.logout){
                             if (this.stage.contains(this.logout)) {
@@ -706,7 +711,7 @@
                                 this.stage.addChild(this.login)
                             }
                         }
-                    })                                           
+             //       })                                           
                 }).catch( e=>{
                     console.log("e",e)
                     alert(e)
@@ -920,7 +925,7 @@
              *  参数：@warriorOffsetPoint: 攻击执行士兵中心点
              *       @actionObject: 攻击对象
              */
-            private attackTarget(playerOffsetPoint, actionObject){
+            private attackTarget(playerOffsetPoint, playersInCell){
                 let _actionShow = this.createBitmapByName("sword_png")
                     _actionShow.x = playerOffsetPoint.x
                     _actionShow.y = playerOffsetPoint.y          
@@ -936,11 +941,17 @@
                 this.board.addChild(fighting); 
                 fighting.play(4)
                 this.actionSound(RES.getRes("fighting_mp3").url)
+
+                //显示玩家生命值
+                playersInCell.map(player=>{
+                    let _life = player.getLife()
+                    _life.remain = _life.remain - _life.full*0.2
+                    player.setLife(_life)
+                    this.showLife(this.board, player)
+
+                })
                 // 生命值减损，默认一次攻击扣减20%
-                let _life = actionObject.getLife()
-                _life.remain = _life.remain - _life.full*0.2
-                actionObject.setLife(_life)
-                this.showLife(this.board, actionObject)
+                
        //         if ( _life.remain <=0){ // 生命值为0，则相关对象被消灭           
        //             this.board.removePlayer(actionObject) 
                     /*
@@ -966,7 +977,7 @@
                     }
                     */
                     //获取金币
-                    let gold = actionObject.getGold()
+                    //let gold = actionObject.getGold()
                     //创建攻击动画效果
                     let moneyFactory = new egret.MovieClipDataFactory(RES.getRes("money_json"),RES.getRes("money_png"));
                     let money:egret.MovieClip = new egret.MovieClip(moneyFactory.generateMovieClipData("money"));

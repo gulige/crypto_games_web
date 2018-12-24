@@ -59,6 +59,14 @@ class Board extends egret.DisplayObjectContainer {
         return this.cellList
     }
 
+    public async getCellByXY(rowX:number, rowY:number ) {
+        let cell = await this.cellList.filter(_cell=>{
+            let cell_X_Y = _cell.getXY()
+            return (cell_X_Y.x == rowX && cell_X_Y.y==rowY ) 
+        })
+        return cell[0]
+    }
+
     public putPlayer(player){
         this.playerContainer.addChild(player)
     }

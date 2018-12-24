@@ -10,8 +10,8 @@ class ScatterUtils extends Object {
         walletlock: "钱包已上锁",
         noidentity: "未验证钱包身份",
         nowallet: "亲，还没有装钱包哟",
-        login: "已登陆",
-        logout: "已登出"
+        login: "已登陆游戏",
+        logout: "已登出游戏"
     }    
     /**
      * descrition: 设置Scatter钱包 EO主链/测试链值
@@ -392,10 +392,11 @@ class ScatterUtils extends Object {
         //ScatterJS.scatter.forgetIdentity();
         try{
             //ScatterJS.scatter.logout();
+            let _currentAccountName = this.currentAccount.name
             ScatterJS.scatter.forgetIdentity();
             this.currentAccount = null;
             this.eos = null;
-            return {logout:true, details: this.message.logout}
+            return {logout:true, details: _currentAccountName + this.message.logout}
         } catch (e){
             console.log(e)
             return {logout:false, details: "登出失败"}

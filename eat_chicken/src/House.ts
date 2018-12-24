@@ -52,6 +52,23 @@ class House extends egret.DisplayObjectContainer {
         return result;
     }
 
+    public async getPlayerByName(name:string){
+        let player = await this.playerList.filter( _player=>{
+            return _player.getName() == name
+        })
+        if (player.length > 0){
+            return player[0];  //一个游戏房间中玩家名字是唯一
+        } else {
+            return null;
+        }
+    }
+
+    public async getPlayerListByCellId(cell_id){
+        let players = this.playerList.filter( player=>{
+            return player.getCellId() == cell_id
+        })
+    }
+
     public getBitmap(){
         return this.houseBitmap
     }
