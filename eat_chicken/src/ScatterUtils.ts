@@ -132,6 +132,7 @@ class ScatterUtils extends Object {
                 const tron = ScatterJS.scatter.trx(this.network.TRX, new TronWeb(fullNode, fullNode, eventServer));
                 */
                 //console.log("login success,", this.currentAccount)
+
                 return { login:true, details :this.currentAccount.name }
             })
             return message
@@ -424,6 +425,20 @@ class ScatterUtils extends Object {
      */
     public static async getIdentity(){
         return ScatterJS.scatter.identity
+    }
+
+    public static async nowseconds(){
+        let result = await fetch('http://114.115.135.201:52920/api/?a=now', {
+                    method: 'GET'
+               // body: JSON.stringify({category:[newCategory]})        
+             })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(myJson) {
+                return myJson
+            })
+        return result
     }
 
 }

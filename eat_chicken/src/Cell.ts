@@ -17,10 +17,13 @@ class Cell extends egret.DisplayObjectContainer {
         this.cellBitmap.width = 80;   //cell的长/宽
         this.cellBitmap.height = 80;
         this.position = new egret.Point(this.cellBitmap.width*rowX, this.cellBitmap.height*colY);
-        this.cellBitmap.x = this.position.x //初始化位置
-        this.cellBitmap.y = this.position.y
+        this.x = this.position.x //初始化位置
+        this.y = this.position.y
         this.cellBitmap.touchEnabled = true;
         this.cell_X_Y = {x:rowX, y:colY}
+
+        this.addChild(this.cellBitmap)
+        this.touchEnabled = true;
        // this.town = _town
        // this.id = new Date().getTime()
     }
@@ -45,13 +48,13 @@ class Cell extends egret.DisplayObjectContainer {
     }
 
      public getPosition(){
-        var position = {x:this.cellBitmap.x, y:this.cellBitmap.y}
+        var position = {x:this.x, y:this.y}
         return position
     }
 
     public setPosition(_position: egret.Point): void{
-        this.cellBitmap.x = _position.x
-        this.cellBitmap.y = _position.y
+        this.x = _position.x
+        this.y = _position.y
     }
 
 

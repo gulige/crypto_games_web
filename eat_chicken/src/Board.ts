@@ -32,7 +32,7 @@ class Board extends egret.DisplayObjectContainer {
         for (var _x=0;_x<x; _x++){
             for (var _y=0;_y<y; _y++){
                 let cell = this.createCell(_x, _y, this.cellList.length )
-                this.addChild(cell.getBitmap());
+                this.addChild(cell);
             }
         }
         //将玩家容器加入棋盘，用于不同游戏房间的玩家重置
@@ -59,6 +59,14 @@ class Board extends egret.DisplayObjectContainer {
         return this.cellList
     }
 
+    public async getCellById(cellId:number ) {
+        let cell = await this.cellList.filter(cell=>{
+           
+            return (cell.getID() == cellId ) 
+        })
+        return cell[0]
+    }
+
     public async getCellByXY(rowX:number, rowY:number ) {
         let cell = await this.cellList.filter(_cell=>{
             let cell_X_Y = _cell.getXY()
@@ -76,7 +84,7 @@ class Board extends egret.DisplayObjectContainer {
     }
 
     public removePlayer(player:Player){
-        this.playerContainer.removeChild(player.getBitmap())
+        this.playerContainer.removeChild(player)
     }
 
 

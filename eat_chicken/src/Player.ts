@@ -24,6 +24,9 @@ class Player extends egret.DisplayObjectContainer {
         this.playerBitmap.x = this.position.x //初始化位置
         this.playerBitmap.y = this.position.y
         this.playerBitmap.touchEnabled = true;
+        this.addChild(this.playerBitmap)
+        this.touchEnabled = true;
+
         this.house = house
         this.uuid = new Date().getTime() // will use [username + date] or uuid generator later
     }
@@ -52,13 +55,13 @@ class Player extends egret.DisplayObjectContainer {
     }
 
      public getPosition(){
-        var position = {x:this.playerBitmap.x, y:this.playerBitmap.y}
+        var position = {x:this.x, y:this.y}
         return position
     }
 
     public setPosition(_position: egret.Point): void{
-        this.playerBitmap.x = _position.x
-        this.playerBitmap.y = _position.y
+        this.x = _position.x
+        this.y = _position.y
     }
 
     public getName(){

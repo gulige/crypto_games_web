@@ -2,7 +2,7 @@
 
 class House extends egret.DisplayObjectContainer {
 
-    private game: any;
+    private game: any;   // 合约返回的完整 game json 数据, 含board, player 信息
     private houseBitmap: egret.Bitmap
     private id: number
     private joinEos: string
@@ -17,6 +17,8 @@ class House extends egret.DisplayObjectContainer {
         0.3,0.6,0,0,0,
         0,0,0,1,0
     ];
+    private clock:Clock
+    private game_progress:number
 
     public constructor(param: string, _game:any) {
         super();
@@ -30,19 +32,29 @@ class House extends egret.DisplayObjectContainer {
         this.houseBitmap.width = 80;
         this.houseBitmap.height = 80;
         this.houseBitmap.touchEnabled = true;
+        this.addChild(this.houseBitmap)
+        this.touchEnabled = true;
+
         this.id = this.game.game_id
         this.joinEos = this.game.join_eos
         this.playerList =[]  //初始化士兵列表
+
+        this.createPlayer(this.game.players)
+        this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
+        this.game_progress - this.game.game_progress
     }
 
-    public createPlayer(accName, cell_id){        
-        var player = new Player(this)
-        player.setName(accName)
-        player.setCellId(cell_id)
-        //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);
-        //warrior.getBitmap().filters = [colorFlilter];
-        this.playerList.push(player)
-        return player        
+    public createPlayer(playersJson){ 
+        playersJson.map( (playerJson, idx)=>{
+            var player = new Player(this)
+            player.setName(playerJson.acc_name)
+            player.setCellId(playerJson.cell_id)
+            //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);
+            //warrior.getBitmap().filters = [colorFlilter];
+            this.playerList.push(player)
+            //return player 
+        })       
+               
     }
 
     private createBitmapByName(name: string) {
@@ -78,13 +90,13 @@ class House extends egret.DisplayObjectContainer {
     }
 
     public getPosition(){
-        var position = {x:this.houseBitmap.x, y:this.houseBitmap.y}
+        var position = {x:this.x, y:this.y}
         return position
     }
 
     public setPosition(_position: egret.Point): void{
-        this.houseBitmap.x = _position.x
-        this.houseBitmap.y = _position.y
+        this.x = _position.x
+        this.y = _position.y
     }
 
     public getLife(){
@@ -128,5 +140,21 @@ class House extends egret.DisplayObjectContainer {
 
     public clearPlayerList(){
         this.playerList=[]
+    }
+
+    public getClock(){
+        return this.clock;
+    }
+
+    public getBoard(){
+        return this.game.board
+    }
+
+    public getProgress(){
+        return this.game.game_progress
+    }
+
+    public getStep(){
+        return this.game.step
     }
 }

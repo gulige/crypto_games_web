@@ -53,6 +53,8 @@
             private login:egret.Bitmap;
             private logout:egret.Bitmap;
 
+            private clock:Clock
+
             private canvas;
             //临时随机演示
             private townRandomName = ["johny", "kitty", "peter"]
@@ -92,7 +94,7 @@
 
                // await ScatterUtils.login()
                 //await ScatterUtils.getAccountInfo()
-                // await  ScatterUtils.getAccountInfo()
+                 
                 //await  ScatterUtils.getAllGamesInfo()
                 //await ScatterUtils.getGameInfo(3)
                 
@@ -254,9 +256,29 @@
                 
                 //更新游戏房间列表，位置为上栏
                 this.refreshHouseList()
+                // 建立与合约的定时器，每5秒更新一次数据到每个游戏房间，然后更新正在打开的棋盘玩家，然后渲染战斗（如果有的话）
+                egret.setInterval(()=>{
+                    ScatterUtils.nowseconds().then( seconds=>{
+                        console.log("second", seconds.now)
+                        this.refreshHouseList().then(()=>{
+                        // console.log("selectedHouse",this.selectedHouse.getID())
+                        // console.log("houseList1",this.houseList)
+                            if (this.selectedHouse){  //如果有正在打开的地图棋盘，更新棋盘玩家信息  ***该逻辑需要更多验证
+                                this.houseList.map( async house=>{
+                                    if (house.getID() == this.selectedHouse.getID() ){
+                                        this.selectedHouse = house
+                                        await this.updateObjectsInBoard(house)
+                                        this.checkBattersInHouse(house, seconds.now)
+                                    }
+                                    
+                                })
+                                
+                            }
+                        })
+                    })
+                    
+                }, this, 5000)  //每5秒从合约从取得所有游戏信息并更新
             }
-
-
             
             /**
              * 初始化棋盘，生成里面cell元素并定位，生成点击cell触发移动事件
@@ -272,9 +294,9 @@
                     //cell添加点击移动事件
                     let cells = this.board.getCellList()
                     cells.map( cell=>{
-                        let cellBiteMap = cell.getBitmap()
+                        
                         let cellXY = cell.getXY()  // cell在棋盘中的 X/Y 轴坐标
-                        cellBiteMap.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{              
+                        cell.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{              
                             this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
                         
                         }, this)
@@ -287,33 +309,40 @@
              * 棋盘中玩家状态更新。从合约获取玩家信息，清空棋盘上玩家对象，重新生成最新玩家对象并加入棋盘 
              * 
              */
-            private async updatePlayersInBoard(gameId:number){
-                //获取游戏信息时加载loading等待图标
-                const loadingView = new LoadingUI();
-                this.board.addChild(loadingView);        
-
-                // 获取该房间游戏的信息，显示在棋盘上
-                ScatterUtils.getGameInfo(gameId).then( result=>{
-                    this.board.removeChild(loadingView);
-                    //清除棋盘上原有玩家以及游戏房间中的玩家对象
-                    this.board.clearPlayers()
-                    this.selectedHouse.clearPlayerList()
-
-                    console.log("game info", result)
-                    if (result.rows.length > 0){
-                        let players = result.rows[0].players
-                        players.map( (playerJson, idx)=>{
-                            this.createPlayer(playerJson)  //根据合约最新返回的玩家信息，创建游戏中的玩家对象
-                        })
-                    } else {
-                        alert("无玩家")
-                    }
+            private async updateObjectsInBoard(house: House){
+                //
+                this.board.clearPlayers()
+                let board = house.getBoard()  //board 为合约返回并存储在house的棋盘/格子数组
+                let cellList = this.board.getCellList()
+                cellList.map( async (cell, idx)=>{
+                    /*
+                    let cell_id = player.getCellId()  // playerJson 包含合约返回的player所在cell_id
+                    //let player = this.selectedHouse.createPlayer(playerJson.acc_name, cell_id)
                     
-                }).catch((e) => {
-                    console.error(e);
-                    alert("获取游戏信息失败："+ e)
-                })
+                    let cell = await this.board.getCellList().filter( cell=>{  //通过cell_id，查找所在地图的cell位置，并返回cell对象
+                        return cell.getID() == cell_id
+                    })
+                   */
+                    let element = board[idx]  //取得合约棋盘每个格子数据集
+                    let playerArray = element.players
+                    let itemId = element.item 
+                    let item = Item.createBitmapById(itemId)
+                   // console.log("item",item)
+                    item.x = cell.x
+                    item.y = cell.y
+                    this.board.putPlayer(item);
 
+                    playerArray.map( playerName=>{
+                        house.getPlayerByName(playerName).then( player=>{
+                            if (player){
+                                player.setPosition( new egret.Point(cell.x, cell.y ))
+                                this.board.putPlayer(player);  //将创建的玩家放入棋盘
+                            }
+                        })                      
+                    })
+                    
+ 
+                })
             }
             
             /**
@@ -323,28 +352,35 @@
             private async refreshHouseList(){
                 
                 // 
-                await ScatterUtils.getAllGamesInfo().then( games=>{
+              /*  ScatterUtils.nowseconds(0).then( result=>{
+                    console.log("nowseconds", result)
+
+                }) */
+                await ScatterUtils.getAllGamesInfo().then( async games=>{
                     //清除已有游戏房间
-                    this.houseList.map( house=>{
-                        if (this.stage.contains(house.getBitmap())){
-                            this.stage.removeChild(house.getBitmap());
+                    await this.houseList.map( house=>{
+                        if (this.stage.contains(house)){
+                            this.stage.removeChild(house);
                             house.destroy()
                         }
                         
                     })
+                    this.houseList = []
                     // 重新添加游戏房间
                     console.log(games)
-                    games.rows.map( (game,idx)=>{
-                        console.log(game)
-                        this.createHouse({name:"johny", bitmap:"house_png"},game).then( house=>{
-                            console.log(house)
-                            house.setPosition(new egret.Point(100*(1+idx),5))
-                            this.houseList.push(house)
+                    if (games.rows){
+                        await games.rows.map( (gameJson,idx)=>{
+                            //console.log(gameJson)
+                            this.createHouse({name:"johny", bitmap:"house_png"},gameJson).then( house=>{
+                                console.log(house)
+                                house.setPosition(new egret.Point(100*(1+idx),5))
+                                this.stage.addChild(house)
+                                this.houseList.push(house)
+                            })
                         })
-                        ////let house = new House(game)
-                        //house.setPosition(new egret.Point(100,100))
-                        //this.stage.addChild(_player);
-                    })
+                    }else {
+                        alert("无游戏信息")
+                    }
 
                 }).catch((e) => {
                     console.error(e);
@@ -354,6 +390,7 @@
                 
             }
 
+            
             /**
              * 创建游戏(房间) 
              * 
@@ -469,21 +506,23 @@
                             alert("移动失败："+transaction.error.details[0].message)
                         } else {    
                             let name = await ScatterUtils.getCurrentAccountName() //通过钱包获取当前玩家账户名
-                            console.log("name", name)
-                            console.log("this.selectedHouse", this.selectedHouse)
-                            let currentPlayer = this.selectedHouse.getPlayerList().filter( player=>{
+                           // console.log("name", name)
+                           // console.log("getPlayerList", this.selectedHouse.getPlayerList())
+                            let currentPlayer = await this.selectedHouse.getPlayerList().filter( player=>{
                                 
                                 return player.getName() == name  //通过当前玩家账户名 取得当前棋盘玩家对象
                             })
                             console.log("currentPlayer", currentPlayer)
                             if (currentPlayer.length>0){ //如果找到相应的玩家，则先产生移动效果，再更新棋盘玩家
-                                let currentPlayerBitmap = currentPlayer[0].getBitmap()
+                                //let currentPlayerBitmap = currentPlayer[0].getBitmap()
                                // let position = currentPlayer[0].getPosition()
-                                egret.Tween.get(currentPlayerBitmap).to( position, 1000, egret.Ease.sineIn )
-                                .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
-                                .wait(500).call(this.checkCell.bind(this,moveX,moveY));       
+                                egret.Tween.get(currentPlayer[0]).to( position, 500, egret.Ease.sineIn )
+                               // .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
+                            //    .wait(500).call(this.checkCell.bind(this,moveX,moveY));       
                             } else {  //如果找不到相应的玩家，直接更新棋盘玩家，没有移动效果
-                                this.updatePlayersInBoard(gameId)
+                             //   this.updatePlayersInBoard(gameId).then( ()=>{
+                             //       this.checkCell(moveX,moveY)
+                              //  })
                             }
                                                 
                         }
@@ -498,12 +537,83 @@
             }
 
             /**
-             * Description: 检查当前移动目标格子里面是否有其他玩家存在，进行战斗模式
+             * 根据当前游戏战斗结算，对棋盘进行战斗渲染
+             * 
+             */
+            private async checkBattersInHouse(house: House, seconds:number){
+                let board = house.getBoard()  //取得合约返回的棋盘数据
+                let progress = house.getProgress()  //取得当前游戏progress
+                let step = house.getStep()          //取得当前游戏step
+                board.map( async (cell, idx)=>{
+
+                    if (cell.players.length > 0){ // 如果棋盘格子里面有玩家，则进一步查找是否有战斗发生
+                        //console.log("cell.players.length", cell.players.length)
+                       let attact_evt = await cell.event_list.filter( event=>{  //返回符合条件的战斗事件
+                           return (event.progress==progress && event.step==step && event.evt=="attack" && (seconds - event.when) <= 5 )
+                       })
+                       console.log("attact_evt", attact_evt)
+                       if (attact_evt.length > 0){  //如果有战斗，则渲染战斗场景
+                           this.board.getCellById(cell.cell_id).then( async cell=>{
+                                
+                                let playersInCell = await this.selectedHouse.getPlayerList().filter( player=>{
+                                    return player.getCellId() == cell.getID()
+                                })
+                                console.log("playersInCell",playersInCell)
+                                // if (playersInCell.length > 1){
+                                    this.attackTarget(cell.getPosition(), playersInCell)
+                                // }
+
+                            })
+                       }
+                    }
+                })
+            }
+
+            /**
+             * Description: 此方法暂时废弃
              * @rowX 
              * @rowY
              */
-            private async checkCell(rowX:number, rowY:number){
-                
+            private async checkCell(gameId:number){
+
+                ScatterUtils.getGameInfo(gameId).then( async result=>{
+                   // this.board.removeChild(loadingView);
+                    //清除棋盘上原有玩家以及游戏房间中的玩家对象
+                   // this.board.clearPlayers()
+                   // this.selectedHouse.clearPlayerList()
+
+                    console.log("game info", result)
+                    if (result.rows.length > 0){
+                        let board = result.rows[0].board
+                        console.log("board", board)
+                        board.map( (cell, idx)=>{
+                            //this.createPlayer(playerJson)  //根据合约最新返回的玩家信息，创建游戏中的玩家对象
+                            //return cell.players.length > 1
+                            if (cell.players.length > 1){
+                                console.log("cell.players.length", cell.players.length)
+                                this.board.getCellById(cell.cell_id).then( async cell=>{
+                                    //let cell_id = cell.getID()
+                                    let playersInCell = await this.selectedHouse.getPlayerList().filter( player=>{
+                                        return player.getCellId() == cell.getID()
+                                    })
+                                    console.log("playersInCell",playersInCell)
+                                   // if (playersInCell.length > 1){
+                                        this.attackTarget(cell.getPosition(), playersInCell)
+                                   // }
+
+                                })
+                            }
+                        })
+
+                    } else {
+                        alert("获取游戏信息失败")
+                    }
+                    
+                }).catch((e) => {
+                    console.error(e);
+                    alert("获取游戏信息失败："+ e)
+                })
+                /*
                 this.board.getCellByXY(rowX, rowY).then( async cell=>{
                     let cell_id = cell.getID()
                     let playersInCell = await this.selectedHouse.getPlayerList().filter( player=>{
@@ -514,7 +624,9 @@
                         this.attackTarget(cell.getPosition(), playersInCell)
                     }
 
-                })                                           
+                })   
+                */  
+
             }
 
             /**
@@ -533,19 +645,27 @@
                         alert("请选择Kick Off的游戏房间")
                         return
                     }
-                    ScatterUtils.kickOff(this.selectedHouse.getID()).then( transaction=>{
+                    let game_id = this.selectedHouse.getID()
+                    ScatterUtils.kickOff(game_id).then( transaction=>{
                         console.log(transaction)
                         if ( !transaction.processed ){  //交易失败
                             transaction = JSON.parse(transaction)
                             alert("KickOff游戏失败："+transaction.error.details[0].message)
                         } else {
-                            alert("游戏 Kick Off！")
-                            this.refreshHouseList()
+                            //alert("游戏 Kick Off！")
+                            let clock = this.selectedHouse.getClock()
+                            //clock.x = 1150
+                            //clock.y = 150
+                           // this.stage.addChild(clock)
+                            clock.start()  // 选中游戏的时间开始计时
+                            //this.refreshHouseList()   // 更新房间的状态
+                            /*
                             this.initBoard().then( ()=>{  //如果棋盘没有初始化，则先初始化再更新棋盘玩家 
                                 
                                 this.updatePlayersInBoard(this.selectedHouse.getID())
                             })
-                            
+                            */
+                            //egret.setInterval(this.checkCell.bind(this,game_id), this, 30000)
                         }
                     })
                 })
@@ -557,28 +677,31 @@
              *  参数：@param: 创建城市所需要的参数。 格式：{name:城市名, bitmap:位图名}
              *       @game: 合约返回的游戏信息， 包含game_id，join_eos等，初始化游戏房间时使用
              */
-            private async createHouse(param, game) {
+            private async createHouse(param, gameJson) {
                 //示例中临时随机指定城市名
                 param.name = this.townRandomName[this.num]
                 this.num = this.num < 2? this.num+1 : this.num-1
 
             // this.unmountMovement()        
-                let house = new House(param, game)
-                let houseBitMap = house.getBitmap()
-                this.stage.addChild(houseBitMap); 
+                let house = new House(param, gameJson)
+                //let houseBitMap = house.getBitmap()
+                //this.stage.addChild(houseBitMap); 
                 //this.selectedHouse = house
                 // 以下为点击房间所产生的相应事件行为
-                houseBitMap.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{  
+                house.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{  
 
                         if(this.selectedHouse == house){
                             // 重复点击同一个house, 看是否需要处理
                             //return
                         }
                         this.selectedHouse = house
+                        console.log("this.selectedHouse", this.selectedHouse)
                         this.showLife(this.stage, house)
-                        this.showText(game.game_id+"号房:"+(game.game_progress==2?"已开局":"未开局"), {x: houseBitMap.x, y: houseBitMap.y+80 } )
+                        this.showText(gameJson.game_id+"号房:"+(gameJson.game_progress==2?"已开局":"未开局"), {x: house.x, y: house.y+80 } )
                         this.initBoard().then( ()=>{  //如果棋盘没有初始化，则先初始化再更新棋盘玩家 
-                            this.updatePlayersInBoard(game.game_id)
+                            this.updateObjectsInBoard(house).then( ()=>{
+                                this.updateClockInStage(house.getClock())
+                            })
                         })
 
                     
@@ -593,11 +716,24 @@
             // console.log("create", result)
             }
 
+            private updateClockInStage(_clock:Clock){
+                if (this.stage.contains(this.clock)){
+                    this.stage.removeChild(this.clock)
+                }
+                this.clock = _clock
+                this.clock.x = 1150
+                this.clock.y = 150
+                this.clock.start()
+                this.stage.addChild(this.clock)
+            }
+
+
 
             /** 
              *  描述：更新棋盘玩家时，生成最新玩家信息
              *  参数：@playerJson 合约返回的player信息，包含账户名acc_name, 所在位置cell_id
              */
+            
             private async createPlayer(playerJson){
                 //this.unmountMovement()
                 if (!this.selectedHouse){   // 判断是否有选中的城市，没有则不生成士兵        
@@ -607,7 +743,7 @@
             //  let playerList =this.selectedHouse.getPlayerList()
             //  if (playerList.length < 5){  // 每城市只允许5组战士，超出将不再生成，直至有生成士兵被摧毁，形成空缺
                     let cell_id = playerJson.cell_id  // playerJson 包含合约返回的player所在cell_id
-                    let player = this.selectedHouse.createPlayer(playerJson.acc_name, cell_id)
+                    let player = this.selectedHouse.createPlayer(playerJson)
                     
                     let cell = await this.board.getCellList().filter( cell=>{  //通过cell_id，查找所在地图的cell位置，并返回cell对象
                         return cell.getID() == cell_id
@@ -616,22 +752,22 @@
                     //将player定位在相应cell的位置
                     let _x = cell_position.x 
                     let _y = cell_position.y 
-                    player.setPosition( new egret.Point(_x, _y ))
+                 //   player.setPosition( new egret.Point(_x, _y ))
                     //将player加入舞台
-                    let playerBitmap = player.getBitmap()        
-                    this.board.putPlayer(playerBitmap);  //将创建的玩家放入棋盘
+                  //  let playerBitmap = player.getBitmap()        
+                 //   this.board.putPlayer(playerBitmap);  //将创建的玩家放入棋盘
                     //this.board.setChildIndex(playerBitmap, 10)
 
                     // 可拖拉移动玩家
                     //playerBitmap.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.mouseDown, this);
                     //playerBitmap.addEventListener(egret.TouchEvent.TOUCH_END, this.mouseUp, this);
 
-                    playerBitmap.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{  
+                //    playerBitmap.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{  
                     
                         //this.selectedPlayer = player
-                        this.showLife(this.board, player)
+                  //      this.showLife(this.board, player)
                     
-                    }, this)
+                  //  }, this)
                     //指定当前生成士兵为选定士兵
                     /*
                     this.selectedPlayer = player
@@ -675,7 +811,7 @@
             private async loginGame(){
 
                 ScatterUtils.login().then( message=>{
-                    
+                      ScatterUtils.getAccountInfo()
                     if (message.login){  //登陆成功， 进行登陆/登出按钮转换
                         alert("欢迎: "+ message.details)
                         if (this.stage.contains(this.login)) {
