@@ -54,6 +54,8 @@
             private logout:egret.Bitmap;
 
             private clock:Clock
+            private backgroundMusic:egret.Sound = new egret.Sound()
+            private backgroundMusicChannel:egret.SoundChannel
 
             private canvas;
             //临时随机演示
@@ -195,16 +197,27 @@
                 kickOffFlat.x=10
                 kickOffFlat.y=300
                 kickOffFlat.touchEnabled = true;
-                kickOffFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.kickOff ,this)   
+                kickOffFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.kickOff ,this)  
 
+                //开炮动画实现
+                this.animation( {json:"pao_json",png:"pao_png", data:"pao",x:0,y:800} ).then( animate=>{
+                    this.stage.addChild(animate)
+                    animate.play(-1)
+                }) 
 
+                //青蛙动画实现
+                this.animation( {json:"frog_json",png:"frog_png", data:"frog",x:1130,y:830} ).then( animate=>{
+                    this.stage.addChild(animate)
+                    animate.play(-1)
+                }) 
+
+                //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");           
                 this.login.x=1150
                 this.login.y=10
                 this.login.touchEnabled = true;
                 this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame ,this) 
-
-                //小旗图标，点击Kick off游戏，位置为左栏
+             
                 this.logout = this.createBitmapByName("logout_png");     
                 this.logout.x=1150
                 this.logout.y=10
@@ -220,39 +233,43 @@
                         this.stage.addChild(this.logout);
                     }
                 }) 
-                
+                //************************ 
 
-                
+                let play_glory = this.createBitmapByName("play_png");
+                this.stage.addChild(play_glory);
+                play_glory.x=1150
+                play_glory.y=300
+                play_glory.touchEnabled = true;
+                play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url) ,this) 
 
+                let play_honor = this.createBitmapByName("play_png");
+                this.stage.addChild(play_honor);
+                play_honor.x=1150
+                play_honor.y=350
+                play_honor.touchEnabled = true;
+                play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url) ,this)
+
+                let play_easy = this.createBitmapByName("play_png");
+                this.stage.addChild(play_easy);
+                play_easy.x=1150
+                play_easy.y=400
+                play_easy.touchEnabled = true;
+                play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url) ,this)
+
+                let play_stop = this.createBitmapByName("stop_png");
+                this.stage.addChild(play_stop);
+                play_stop.x=1150
+                play_stop.y=450
+                play_stop.touchEnabled = true;
+                play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
+                    if (this.backgroundMusicChannel){
+                        this.backgroundMusicChannel.stop()
+                    }            
+
+                } ,this)
+                
                 this.stage.addChild(this.textfield)
-                /*
-                //红色旗，增援任务创建图标，位置为左栏
-                let _flat = this.createBitmapByName("flat_png");
-                this.addChild(_flat);
-                _flat.x=0
-                _flat.y=100
-                _flat.touchEnabled = true;
-                _flat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.initTask.bind(this,"enforce") ,this)
-                //瞄准视觉图，攻击任务创建图标，位置为左栏
-                let _attack = this.createBitmapByName("attack_png");
-                this.addChild(_attack);
-                _attack.x=0
-                _attack.y=150
-                _attack.touchEnabled = true;
-                _attack.addEventListener(egret.TouchEvent.TOUCH_TAP,this.initTask.bind(this, "attack"),this) 
-                //士兵图，士兵创建图标，位置为左栏
                 
-                //绿色旗，士兵召回图标，位置为左栏
-                
-                
-                //以下为全局共享图标创建：增援/标记/攻击/待命/攻击中。根据操作对象不同而使用
-                this.enforce = this.createBitmapByName("flat_png")
-                this.sword = this.createBitmapByName("sword_png")
-                this.attack = this.createBitmapByName("attack_png")
-                this.idle = this.createBitmapByName("flat_png")
-                this.fight = this.createBitmapByName("fight_gif")
-                this.addChild(this._route);
-                */
                 
                 //更新游戏房间列表，位置为上栏
                 this.refreshHouseList()
@@ -269,6 +286,16 @@
                                         this.selectedHouse = house
                                         await this.updateObjectsInBoard(house)
                                         this.checkBattersInHouse(house, seconds.now)
+                                        //创建随机生成的礼炮/烟花动画
+                                        this.animation({json:"firework_json",png:"firework_png", data:"firework",x:500*Math.random(),y:500*Math.random()}).then( animate=>{
+                                            this.board.addChild(animate); 
+                                            animate.play(1)
+                                            setTimeout(()=> {
+                                                this.board.removeChild(animate)                                    
+                                                animate == null
+
+                                            }, 4000); //4秒钟后消除烟花效果
+                                        })
                                     }
                                     
                                 })
@@ -287,7 +314,7 @@
             private async initBoard(){  //棋盘为静态物体
                 if (this.board == null) {
                     this.board = new Board(11,11)   // 构建棋盘 11 x 11
-                    this.board.x = 180  //定位棋盘在stage中的位置
+                    this.board.x = 200  //定位棋盘在stage中的位置
                     this.board.y = 110 
                     this.stage.addChild(this.board);
 
@@ -306,7 +333,7 @@
             }
 
             /**
-             * 棋盘中玩家状态更新。从合约获取玩家信息，清空棋盘上玩家对象，重新生成最新玩家对象并加入棋盘 
+             * 棋盘中玩家状态更新。从合约获取玩家信息，清空棋盘上玩家/物品对象，重新生成最新玩家对象和物品并加入棋盘 
              * 
              */
             private async updateObjectsInBoard(house: House){
@@ -326,11 +353,13 @@
                     let element = board[idx]  //取得合约棋盘每个格子数据集
                     let playerArray = element.players
                     let itemId = element.item 
-                    let item = Item.createBitmapById(itemId)
+                   // let item = ItemUtils.createBitmapById(itemId)
                    // console.log("item",item)
-                    item.x = cell.x
-                    item.y = cell.y
-                    this.board.putPlayer(item);
+                    let item = await ItemUtils.createItemById(itemId)
+                    //item.x = cell.x
+                   // item.y = cell.y
+                    cell.addItem(item)
+                    //this.board.putPlayer(item); //将道具物品放入棋盘
 
                     playerArray.map( playerName=>{
                         house.getPlayerByName(playerName).then( player=>{
@@ -518,7 +547,7 @@
                                // let position = currentPlayer[0].getPosition()
                                 egret.Tween.get(currentPlayer[0]).to( position, 500, egret.Ease.sineIn )
                                // .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
-                            //    .wait(500).call(this.checkCell.bind(this,moveX,moveY));       
+                                .wait(500).call(this.checkCellItem.bind(this,moveX,moveY));       
                             } else {  //如果找不到相应的玩家，直接更新棋盘玩家，没有移动效果
                              //   this.updatePlayersInBoard(gameId).then( ()=>{
                              //       this.checkCell(moveX,moveY)
@@ -548,8 +577,8 @@
 
                     if (cell.players.length > 0){ // 如果棋盘格子里面有玩家，则进一步查找是否有战斗发生
                         //console.log("cell.players.length", cell.players.length)
-                       let attact_evt = await cell.event_list.filter( event=>{  //返回符合条件的战斗事件
-                           return (event.progress==progress && event.step==step && event.evt=="attack" && (seconds - event.when) <= 5 )
+                       let attact_evt = await cell.event_list.filter( event=>{  //返回符合条件的战斗事件: 条件：与游戏progress，step一致，并且属于最新发生的attack事件
+                           return (event.progress==progress && event.step==step && event.evt=="attack" && (seconds - event.when) < 8 )
                        })
                        console.log("attact_evt", attact_evt)
                        if (attact_evt.length > 0){  //如果有战斗，则渲染战斗场景
@@ -574,8 +603,8 @@
              * @rowX 
              * @rowY
              */
-            private async checkCell(gameId:number){
-
+            private async checkCellItem(rowX:number, rowY:number){
+                /*
                 ScatterUtils.getGameInfo(gameId).then( async result=>{
                    // this.board.removeChild(loadingView);
                     //清除棋盘上原有玩家以及游戏房间中的玩家对象
@@ -613,19 +642,15 @@
                     console.error(e);
                     alert("获取游戏信息失败："+ e)
                 })
-                /*
+                */
                 this.board.getCellByXY(rowX, rowY).then( async cell=>{
-                    let cell_id = cell.getID()
-                    let playersInCell = await this.selectedHouse.getPlayerList().filter( player=>{
-                        return player.getCellId() == cell_id
-                    })
-                    console.log("playersInCell",playersInCell)
-                    if (playersInCell.length > 1){
-                        this.attackTarget(cell.getPosition(), playersInCell)
-                    }
+                    let item = cell.getItem()
+                    item.setPosition(new egret.Point(0, 0))
+                    let position = {x:0, y:-30}
+                    egret.Tween.get(item).to( position, 500, egret.Ease.sineIn )
 
                 })   
-                */  
+                  
 
             }
 
@@ -854,6 +879,19 @@
                 })
             } 
 
+
+            private async animation(animateJson){
+                //创建攻击动画效果
+                let animateFactory = new egret.MovieClipDataFactory(RES.getRes(animateJson.json),RES.getRes(animateJson.png));
+                let animate:egret.MovieClip = new egret.MovieClip(animateFactory.generateMovieClipData(animateJson.data));
+                // role.gotoAndPlay(1, 3);
+                animate.x = animateJson.x;
+                animate.y = animateJson.y;
+               // animate.width = 800;
+               // animate.height = 800;               
+                return animate;
+            }
+
         //******************************************************************************************************************* */    
         //************************************************以下为无用或辅助方法************************************************* */
         //******************************************************************************************************************* */
@@ -975,34 +1013,51 @@
                 sound.load(_url)
             }
 
+
+            /** 
+             *  描述：游戏背景行为声效
+             *  参数：@_url: 音效地址
+             */
+            private backgroundSound(_url){
+                if (this.backgroundMusicChannel){
+                    this.backgroundMusicChannel.stop()
+                }
+                this.backgroundMusic.addEventListener(egret.Event.COMPLETE, this.play, this);
+                this.backgroundMusic.load(_url)
+            }
+
+            private play(){
+                this.backgroundMusicChannel = this.backgroundMusic.play(0,0);
+            }
+
             /** 
              *  描述：移动士兵到舞台点击的位置
              *  参数：@evt: 鼠标点击地图后产生的移动终止点
              */
             private movePlayer(evt:egret.TouchEvent){
-            console.log("moving")
-            // let warrior = this.selectedWarrior
-            if (this.selectedPlayer == null || typeof(this.selectedPlayer)=="undefined"  ) {
-                return
-            }
+                console.log("moving")
+                // let warrior = this.selectedWarrior
+                if (this.selectedPlayer == null || typeof(this.selectedPlayer)=="undefined"  ) {
+                    return
+                }
 
-            if (this.stage.contains(this._life)){ //移除当前选中士兵标签
-                this.stage.removeChild(this._life)
-            }
-            //移除已存在缓动
-            let playerBitmap = this.selectedPlayer.getBitmap()
-            egret.Tween.removeTweens(playerBitmap)
-            //定义移动起始/终结
-            let startPoint = {x:playerBitmap.x, y:playerBitmap.y }
-            let endPoint = {x:evt.stageX, y:evt.stageY }
+                if (this.stage.contains(this._life)){ //移除当前选中士兵标签
+                    this.stage.removeChild(this._life)
+                }
+                //移除已存在缓动
+                let playerBitmap = this.selectedPlayer.getBitmap()
+                egret.Tween.removeTweens(playerBitmap)
+                //定义移动起始/终结
+                let startPoint = {x:playerBitmap.x, y:playerBitmap.y }
+                let endPoint = {x:evt.stageX, y:evt.stageY }
 
-            let action = this.selectedPlayer.getTask().action
-            this.drawRoute(startPoint, endPoint, action)
-            // 士兵终点位置微调：offset = 图片尺寸/2
-            let playerOffsetPoint = {x:evt.stageX - 17, y:evt.stageY -25 }
-            //行军时间为3秒
-            egret.Tween.get( playerBitmap ).to( playerOffsetPoint, 3000, egret.Ease.sineIn ).wait(500).call(this.doAction.bind(this, this.selectedPlayer, action, playerOffsetPoint, endPoint)); 
-            
+                let action = this.selectedPlayer.getTask().action
+                this.drawRoute(startPoint, endPoint, action)
+                // 士兵终点位置微调：offset = 图片尺寸/2
+                let playerOffsetPoint = {x:evt.stageX - 17, y:evt.stageY -25 }
+                //行军时间为3秒
+                egret.Tween.get( playerBitmap ).to( playerOffsetPoint, 3000, egret.Ease.sineIn ).wait(500).call(this.doAction.bind(this, this.selectedPlayer, action, playerOffsetPoint, endPoint)); 
+                
 
             }
 

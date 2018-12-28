@@ -5,6 +5,7 @@ class Cell extends egret.DisplayObjectContainer {
     private position: egret.Point = new egret.Point(0,0)
     private id: number
     private cell_X_Y
+    private item: Item = null
 
     public constructor(rowX:number, colY:number,id:number) {
         super();
@@ -70,5 +71,21 @@ class Cell extends egret.DisplayObjectContainer {
         return this.cell_X_Y
     }
 
+    public getItem(): Item{
+        return this.item
+    }
+
+    public setItem(_item:Item): void{
+        this.item = _item
+    }
+
+    public addItem(_item:Item): void{
+        
+        if (this.contains(this.item)){
+            this.removeChild(this.item)
+        }    
+        this.item = _item
+        this.addChild(this.item)
+    }
    
 }
