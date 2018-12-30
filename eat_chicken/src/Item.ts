@@ -3,6 +3,7 @@ class Item extends egret.DisplayObjectContainer {
 
     //private position: egret.Point = new egret.Point(0,0)
     private itemBitMap: egret.Bitmap
+    private id:number;
 
     public constructor(name:string) {
         super();
@@ -48,5 +49,15 @@ class Item extends egret.DisplayObjectContainer {
         this.y = _position.y
     }
 
-   
+    public getId(){
+        return this.id
+    }
+
+    public setId(_id){
+        this.id = _id
+    }
+
+    public destroy(){
+        this.itemBitMap = null
+    }
 }

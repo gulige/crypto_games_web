@@ -57,6 +57,15 @@
             private backgroundMusic:egret.Sound = new egret.Sound()
             private backgroundMusicChannel:egret.SoundChannel
 
+            private playerInfo:egret.Shape = new egret.Shape();
+            private player_name  = new egret.TextField();
+            private player_hp  = new egret.TextField();
+            private player_attack  = new egret.TextField();
+            private player_defense  = new egret.TextField();
+            private player_eos = new egret.TextField();
+            private player_item = new egret.TextField();
+            private player_weapon = new egret.TextField();
+
             private canvas;
             //临时随机演示
             private townRandomName = ["johny", "kitty", "peter"]
@@ -182,11 +191,11 @@
                 setMapFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.setMap ,this)
             
                 //士兵图标，点击加入游戏，位置为左栏
-                let joinGameFlat = this.createBitmapByName("soilder_png");
+                let joinGameFlat = this.createBitmapByName("cow_boy_png");
                 this.stage.addChild(joinGameFlat);
                 joinGameFlat.x=10
                 joinGameFlat.y=200
-                joinGameFlat.width=55
+                joinGameFlat.width=50
                 joinGameFlat.height=80
                 joinGameFlat.touchEnabled = true;
                 joinGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP,this.joinGame ,this)  
@@ -235,6 +244,7 @@
                 }) 
                 //************************ 
 
+                //***背景音乐设置 */
                 let play_glory = this.createBitmapByName("play_png");
                 this.stage.addChild(play_glory);
                 play_glory.x=1150
@@ -267,6 +277,7 @@
                     }            
 
                 } ,this)
+                /******************** */
                 
                 this.stage.addChild(this.textfield)
                 
@@ -275,34 +286,33 @@
                 this.refreshHouseList()
                 // 建立与合约的定时器，每5秒更新一次数据到每个游戏房间，然后更新正在打开的棋盘玩家，然后渲染战斗（如果有的话）
                 egret.setInterval(()=>{
-                    ScatterUtils.nowseconds().then( seconds=>{
-                        console.log("second", seconds.now)
-                        this.refreshHouseList().then(()=>{
-                        // console.log("selectedHouse",this.selectedHouse.getID())
-                        // console.log("houseList1",this.houseList)
-                            if (this.selectedHouse){  //如果有正在打开的地图棋盘，更新棋盘玩家信息  ***该逻辑需要更多验证
-                                this.houseList.map( async house=>{
-                                    if (house.getID() == this.selectedHouse.getID() ){
-                                        this.selectedHouse = house
-                                        await this.updateObjectsInBoard(house)
-                                        this.checkBattersInHouse(house, seconds.now)
-                                        //创建随机生成的礼炮/烟花动画
-                                        this.animation({json:"firework_json",png:"firework_png", data:"firework",x:500*Math.random(),y:500*Math.random()}).then( animate=>{
-                                            this.board.addChild(animate); 
-                                            animate.play(1)
-                                            setTimeout(()=> {
-                                                this.board.removeChild(animate)                                    
-                                                animate == null
+                   
+                    this.refreshHouseList().then(()=>{
+                    // console.log("selectedHouse",this.selectedHouse.getID())
+                    // console.log("houseList1",this.houseList)
+                        if (this.selectedHouse){  //如果有正在打开的地图棋盘，更新棋盘玩家信息  ***该逻辑需要更多验证
+                            this.houseList.map( async house=>{
+                                if (house.getID() == this.selectedHouse.getID() ){
+                                    this.selectedHouse = house
+                                    await this.updateObjectsInBoard(house)
+                                    this.checkBattersInHouse(house)
+                                    //创建随机生成的礼炮/烟花动画
+                                    this.animation({json:"firework_json",png:"firework_png", data:"firework",x:500*Math.random(),y:500*Math.random()}).then( animate=>{
+                                        this.board.addChild(animate); 
+                                        animate.play(1)
+                                        setTimeout(()=> {
+                                            this.board.removeChild(animate)                                    
+                                            animate == null
 
-                                            }, 4000); //4秒钟后消除烟花效果
-                                        })
-                                    }
-                                    
-                                })
+                                        }, 4000); //4秒钟后消除烟花效果
+                                    })
+                                }
                                 
-                            }
-                        })
+                            })
+                            
+                        }
                     })
+                   
                     
                 }, this, 5000)  //每5秒从合约从取得所有游戏信息并更新
             }
@@ -360,11 +370,12 @@
                    // item.y = cell.y
                     cell.addItem(item)
                     //this.board.putPlayer(item); //将道具物品放入棋盘
-
+                    
                     playerArray.map( playerName=>{
                         house.getPlayerByName(playerName).then( player=>{
                             if (player){
                                 player.setPosition( new egret.Point(cell.x, cell.y ))
+                                player.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)
                                 this.board.putPlayer(player);  //将创建的玩家放入棋盘
                             }
                         })                      
@@ -391,6 +402,7 @@
                         if (this.stage.contains(house)){
                             this.stage.removeChild(house);
                             house.destroy()
+                            house=null
                         }
                         
                     })
@@ -401,7 +413,7 @@
                         await games.rows.map( (gameJson,idx)=>{
                             //console.log(gameJson)
                             this.createHouse({name:"johny", bitmap:"house_png"},gameJson).then( house=>{
-                                console.log(house)
+                               // console.log(house)
                                 house.setPosition(new egret.Point(100*(1+idx),5))
                                 this.stage.addChild(house)
                                 this.houseList.push(house)
@@ -547,7 +559,7 @@
                                // let position = currentPlayer[0].getPosition()
                                 egret.Tween.get(currentPlayer[0]).to( position, 500, egret.Ease.sineIn )
                                // .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
-                                .wait(500).call(this.checkCellItem.bind(this,moveX,moveY));       
+                                .wait(0).call(this.checkCellItem.bind(this,moveX,moveY));       
                             } else {  //如果找不到相应的玩家，直接更新棋盘玩家，没有移动效果
                              //   this.updatePlayersInBoard(gameId).then( ()=>{
                              //       this.checkCell(moveX,moveY)
@@ -569,7 +581,7 @@
              * 根据当前游戏战斗结算，对棋盘进行战斗渲染
              * 
              */
-            private async checkBattersInHouse(house: House, seconds:number){
+            private async checkBattersInHouse(house: House){
                 let board = house.getBoard()  //取得合约返回的棋盘数据
                 let progress = house.getProgress()  //取得当前游戏progress
                 let step = house.getStep()          //取得当前游戏step
@@ -578,20 +590,24 @@
                     if (cell.players.length > 0){ // 如果棋盘格子里面有玩家，则进一步查找是否有战斗发生
                         //console.log("cell.players.length", cell.players.length)
                        let attact_evt = await cell.event_list.filter( event=>{  //返回符合条件的战斗事件: 条件：与游戏progress，step一致，并且属于最新发生的attack事件
-                           return (event.progress==progress && event.step==step && event.evt=="attack" && (seconds - event.when) < 8 )
+                           
+                           return (event.progress==progress && event.step==step && event.evt=="attack" )
                        })
-                       console.log("attact_evt", attact_evt)
+                       //console.log("attact_evt", attact_evt)
                        if (attact_evt.length > 0){  //如果有战斗，则渲染战斗场景
                            this.board.getCellById(cell.cell_id).then( async cell=>{
-                                
-                                let playersInCell = await this.selectedHouse.getPlayerList().filter( player=>{
-                                    return player.getCellId() == cell.getID()
-                                })
-                                console.log("playersInCell",playersInCell)
-                                // if (playersInCell.length > 1){
-                                    this.attackTarget(cell.getPosition(), playersInCell)
-                                // }
-
+                               let time = cell.getBattleTime()
+                               let nowSeconds = new Date().getTime()
+                               //console.log("time", nowSeconds - time)
+                                if (nowSeconds - time > 30000){  //在一个格子里30秒内只会有一次战斗渲染
+                                    cell.setBattleTime(nowSeconds)
+                                    this.attackTarget(cell.getPosition())
+                                // console.log("playersInCell",playersInCell)
+                                    // if (playersInCell.length > 1){
+                                        
+                                        
+                                    // }
+                                }                                
                             })
                        }
                     }
@@ -645,9 +661,23 @@
                 */
                 this.board.getCellByXY(rowX, rowY).then( async cell=>{
                     let item = cell.getItem()
-                    item.setPosition(new egret.Point(0, 0))
-                    let position = {x:0, y:-30}
-                    egret.Tween.get(item).to( position, 500, egret.Ease.sineIn )
+                    //item.setPosition(new egret.Point(0, 0))
+ 
+                    if (item.getId()==1){  //触发地雷/炸弹
+                        this.animation({json:"blow_json",png:"blow_png", data:"blow",x:cell.x-100,y:cell.y-100}).then( animate=>{
+                            this.board.addChild(animate); 
+                            animate.play(1)
+                            cell.removeChild(item)
+                            this.actionSound(RES.getRes("blow_mp3").url)
+                            setTimeout(()=> {
+                                this.board.removeChild(animate)                                    
+                                animate == null
+                            }, 1500); 
+                        })
+                    } else {
+                        let position = {x:0, y:-30}
+                        egret.Tween.get(item).to( position, 300, egret.Ease.sineIn )
+                    }                 
 
                 })   
                   
@@ -704,8 +734,8 @@
              */
             private async createHouse(param, gameJson) {
                 //示例中临时随机指定城市名
-                param.name = this.townRandomName[this.num]
-                this.num = this.num < 2? this.num+1 : this.num-1
+                //param.name = this.townRandomName[this.num]
+                //this.num = this.num < 2? this.num+1 : this.num-1
 
             // this.unmountMovement()        
                 let house = new House(param, gameJson)
@@ -755,6 +785,7 @@
 
 
             /** 
+             *  *******遗弃******
              *  描述：更新棋盘玩家时，生成最新玩家信息
              *  参数：@playerJson 合约返回的player信息，包含账户名acc_name, 所在位置cell_id
              */
@@ -880,8 +911,7 @@
             } 
 
 
-            private async animation(animateJson){
-                //创建攻击动画效果
+            private async animation(animateJson){              
                 let animateFactory = new egret.MovieClipDataFactory(RES.getRes(animateJson.json),RES.getRes(animateJson.png));
                 let animate:egret.MovieClip = new egret.MovieClip(animateFactory.generateMovieClipData(animateJson.data));
                 // role.gotoAndPlay(1, 3);
@@ -890,6 +920,105 @@
                // animate.width = 800;
                // animate.height = 800;               
                 return animate;
+            }
+
+            private showInfo(target: Player){
+                /*
+                let life = target.getLife()
+                let color
+
+                if (life.remain >= life.full*0.6 ) {
+                    color = 0x00EE00   // 绿色生命值 健康
+                } else if (life.remain >= life.full*0.4 && life.remain < life.full*0.6 ){
+                    color = 0xFFFF00   // 黄色生命值 危险
+                } else {
+                    color = 0xFF0000   // 红色生命值 危殆
+                }
+                this._life.graphics.clear()
+                this._life.graphics.lineStyle(4, color);
+                this._life.graphics.moveTo(target.getPosition().x, target.getPosition().y);
+                this._life.graphics.lineTo(target.getPosition().x + life.remain, target.getPosition().y);
+                this.board.addChild(this._life)
+                */
+                //
+                if (this.board.contains(this.playerInfo)){
+                    this.board.removeChild(this.playerInfo)
+                }
+                this.playerInfo.graphics.clear()
+                this.playerInfo.graphics.beginFill(0xEEEEEE);
+                this.playerInfo.graphics.drawRoundRect(0, 0, 120, 160, 15,15);
+                this.playerInfo.graphics.endFill();
+                this.playerInfo.x = target.x + 50
+                this.playerInfo.y = target.y
+                this.board.addChild(this.playerInfo);
+
+                this.player_name.x = this.playerInfo.x
+                this.player_name.y = this.playerInfo.y
+                this.player_name.size = 18
+                this.player_name.textColor = 0x000000
+                this.player_name.text = "玩家:" + target.getName()
+                this.board.addChild(this.player_name);
+
+
+                this.player_hp.x = this.playerInfo.x
+                this.player_hp.y = this.playerInfo.y + 20
+                this.player_hp.size = 18
+                this.player_hp.textColor = 0x000000
+                this.player_hp.text = "HP: " + target.getLife()
+                this.board.addChild(this.player_hp);
+
+                this.player_weapon.x = this.playerInfo.x
+                this.player_weapon.y = this.playerInfo.y + 40
+                this.player_weapon.size = 18
+                this.player_weapon.textColor = 0x000000
+                this.player_weapon.text = "武器: " + ItemUtils.getItemNameById(target.getWeapon())
+                this.board.addChild(this.player_weapon);
+
+                this.player_attack.x = this.playerInfo.x
+                this.player_attack.y = this.playerInfo.y + 60
+                this.player_attack.size = 18
+                this.player_attack.textColor = 0x000000
+                this.player_attack.text = "攻击力: " + target.getAttack()
+                this.board.addChild(this.player_attack);
+
+                this.player_defense.x = this.playerInfo.x
+                this.player_defense.y = this.playerInfo.y + 80
+                this.player_defense.size = 18
+                this.player_defense.textColor = 0x000000
+                this.player_defense.text = "防御力: " + target.getDefense()
+                this.board.addChild(this.player_defense);
+
+                this.player_eos.x = this.playerInfo.x
+                this.player_eos.y = this.playerInfo.y + 100
+                this.player_eos.size = 18
+                this.player_eos.textColor = 0x000000
+                this.player_eos.text = "EOS: " + target.getGold()
+                this.board.addChild(this.player_eos);
+
+                let items = ()=>{
+                    let nameStr = ''
+                    target.getItems().map( id=>{
+                        nameStr = nameStr + ItemUtils.getItemNameById(id)+'\n         '
+                    })
+                    return nameStr
+                }
+                this.player_item.x = this.playerInfo.x
+                this.player_item.y = this.playerInfo.y + 120
+                this.player_item.size = 18
+                this.player_item.textColor = 0x000000              
+                this.player_item.text = "物品: " + items()
+                this.board.addChild(this.player_item);
+
+                setTimeout(()=>{
+                    this.board.removeChild(this.playerInfo)
+                    this.board.removeChild(this.player_name)
+                    this.board.removeChild(this.player_hp)
+                    this.board.removeChild(this.player_weapon);
+                    this.board.removeChild(this.player_attack)
+                    this.board.removeChild(this.player_defense)
+                    this.board.removeChild(this.player_eos)
+                    this.board.removeChild(this.player_item)
+                },8000)
             }
 
         //******************************************************************************************************************* */    
@@ -976,6 +1105,9 @@
              *  参数：@warrior: 点选的士兵对象
              */
             private selectPlayer(player: Player){
+                this.showInfo(player)
+                this.actionSound(RES.getRes("yes_mp3").url)
+                /*
                 this.unmountMovement()
                 //判断当前点选士兵是否为当前城市所有
                 let belonging = player.getHouse() == this.selectedHouse? true : false
@@ -998,7 +1130,8 @@
                 }  
                 setTimeout( ()=> { //恢复移动监听
                         this.mountMovement()
-                    },300)    
+                    },300)  
+                    */  
             }
 
             /** 
@@ -1091,7 +1224,7 @@
                     this.stage.addChild(_actionShow)
                     //如果是攻击，则触发攻击效果图
                     if (action == "attack"){
-                        this.attackTarget(playerOffsetPoint, actionObject).then( ()=>{
+                        this.attackTarget(playerOffsetPoint).then( ()=>{
                             //攻击完毕后，士兵回撤，状重置为idle，等待下一次任务                                  
                             player.setTask({action:"attack", target:null, status:"completed"})
                             this.recall(player)
@@ -1116,11 +1249,13 @@
              *  参数：@warriorOffsetPoint: 攻击执行士兵中心点
              *       @actionObject: 攻击对象
              */
-            private attackTarget(playerOffsetPoint, playersInCell){
+            private attackTarget(playerOffsetPoint){
+               /* 
                 let _actionShow = this.createBitmapByName("sword_png")
                     _actionShow.x = playerOffsetPoint.x
                     _actionShow.y = playerOffsetPoint.y          
                     this.board.addChild(_actionShow)
+                    */
                 //创建攻击动画效果
                 let fightFactory = new egret.MovieClipDataFactory(RES.getRes("fight_json"),RES.getRes("fight_png"));
                 let fighting:egret.MovieClip = new egret.MovieClip(fightFactory.generateMovieClipData("fight"));
@@ -1130,17 +1265,18 @@
                 fighting.width = 50;
                 fighting.height = 50;
                 this.board.addChild(fighting); 
-                fighting.play(4)
-                this.actionSound(RES.getRes("fighting_mp3").url)
+                fighting.play(20)
+
+                this.actionSound(RES.getRes("shooting_mp3").url)
 
                 //显示玩家生命值
-                playersInCell.map(player=>{
+               /* playersInCell.map(player=>{
                     let _life = player.getLife()
                     _life.remain = _life.remain - _life.full*0.2
                     player.setLife(_life)
                     this.showLife(this.board, player)
 
-                })
+                }) */
                 // 生命值减损，默认一次攻击扣减20%
                 
        //         if ( _life.remain <=0){ // 生命值为0，则相关对象被消灭           
@@ -1194,7 +1330,6 @@
                 return new Promise((resolve, reject) =>{
                     setTimeout(()=> {
                         this.board.removeChild(fighting)
-                        this.board.removeChild(_actionShow)
                         if (this.board.contains(this._life)){
                             this.board.removeChild(this._life)
                         }

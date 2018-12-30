@@ -37,18 +37,19 @@ class House extends egret.DisplayObjectContainer {
 
         this.id = this.game.game_id
         this.joinEos = this.game.join_eos
-        this.playerList =[]  //初始化士兵列表
+        this.game_progress - this.game.game_progress
 
+        this.playerList =[]  //初始化士兵列表
         this.createPlayer(this.game.players)
         this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
-        this.game_progress - this.game.game_progress
+        
     }
 
     public createPlayer(playersJson){ 
         playersJson.map( (playerJson, idx)=>{
-            var player = new Player(this)
-            player.setName(playerJson.acc_name)
-            player.setCellId(playerJson.cell_id)
+            let name = this.playerList.length%2 ==0? "cow_boy_png":"cow_girl_png"
+            var player = new Player(name, playerJson)
+            
             //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);
             //warrior.getBitmap().filters = [colorFlilter];
             this.playerList.push(player)
@@ -109,7 +110,10 @@ class House extends egret.DisplayObjectContainer {
 
     public destroy(){
         this.houseBitmap = null
+
         this.playerList = []
+        this.game=null
+        this.clock = null
     }
 
     public getID(){

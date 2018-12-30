@@ -6,6 +6,7 @@ class Cell extends egret.DisplayObjectContainer {
     private id: number
     private cell_X_Y
     private item: Item = null
+    private battleTime:number=0  //seonds
 
     public constructor(rowX:number, colY:number,id:number) {
         super();
@@ -82,10 +83,19 @@ class Cell extends egret.DisplayObjectContainer {
     public addItem(_item:Item): void{
         
         if (this.contains(this.item)){
+            this.item.destroy()
             this.removeChild(this.item)
         }    
         this.item = _item
         this.addChild(this.item)
+    }
+
+    public setBattleTime(time){
+        this.battleTime = time 
+    }
+
+    public getBattleTime(){
+        return this.battleTime
     }
    
 }

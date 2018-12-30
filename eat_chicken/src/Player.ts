@@ -6,29 +6,44 @@ class Player extends egret.DisplayObjectContainer {
     private house: House
     private task = {action:"idle", target:null, status:null}
     private position: egret.Point = new egret.Point(0,0)
-    private life = {full:40, remain:40}
+    
     private uuid 
     private accName  // player eos account name
-    private gold = 5  //warrior 5 gold unit
     private cell_id:number
+    private armor:number
+    private attack:number
+    private hp:number
+    private defense:number
+    private items = []
+    private weapon: number
+    private gold:number
 
-    public constructor(house:House) {
+    public constructor(name:string, playerJson:any) {
         super();
-        this.createPlayer(house);
+        this.createPlayer(name, playerJson);
     }
 
-    private createPlayer(house:House): void {
-        this.playerBitmap = this.createBitmapByName(house.name+"_soilder_png");
-        this.playerBitmap.width = 48;
-        this.playerBitmap.height = 70;
+    private createPlayer(name:string,playerJson:any): void {
+        this.playerBitmap = this.createBitmapByName(name);
+        this.playerBitmap.width = 50;
+        this.playerBitmap.height = 80;
         this.playerBitmap.x = this.position.x //初始化位置
         this.playerBitmap.y = this.position.y
         this.playerBitmap.touchEnabled = true;
         this.addChild(this.playerBitmap)
         this.touchEnabled = true;
 
-        this.house = house
+        //this.house = house
         this.uuid = new Date().getTime() // will use [username + date] or uuid generator later
+        this.setName(playerJson.acc_name)
+        this.setCellId(playerJson.cell_id)
+        this.setArmor(playerJson.armor)
+        this.setAttack(playerJson.attack)
+        this.setLife(playerJson.hp)
+        this.setDefense(playerJson.defense)
+        this.setItems(playerJson.items)
+        this.setWeapon(playerJson.weapon)
+        this.setGold(playerJson.win_eos)
     }
 
     private createBitmapByName(name: string) {
@@ -73,11 +88,11 @@ class Player extends egret.DisplayObjectContainer {
     }
 
     public getLife(){
-        return this.life
+        return this.hp
     }
 
-    public setLife(_life): void{
-        this.life = _life
+    public setLife(hp): void{
+        this.hp = hp
     }
 
     public destroy(){
@@ -102,5 +117,45 @@ class Player extends egret.DisplayObjectContainer {
 
     public setCellId(_cell_id){
         this.cell_id = _cell_id
+    }
+
+    public getArmor(){
+        return this.armor
+    }
+
+    public setArmor(_armor): void{
+        this.armor = _armor
+    }
+
+    public getAttack(){
+        return this.attack
+    }
+
+    public setAttack(_attack): void{
+        this.attack = _attack
+    }
+
+    public getDefense(){
+        return this.defense
+    }
+
+    public setDefense(_defense): void{
+        this.defense = _defense
+    }
+
+    public getWeapon(){
+        return this.weapon
+    }
+
+    public setWeapon(_weapon): void{
+        this.weapon = _weapon
+    }
+
+    public getItems(){
+        return this.items
+    }
+
+    public setItems(_items): void{
+        this.items = _items
     }
 }
