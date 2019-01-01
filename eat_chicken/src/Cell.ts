@@ -1,6 +1,7 @@
 class Cell extends egret.DisplayObjectContainer {
 
     private cellBitmap: egret.Bitmap
+    private cellRect: egret.Shape  = new egret.Shape();
     private task = {action:"idle", target:null, status:null}
     private position: egret.Point = new egret.Point(0,0)
     private id: number
@@ -15,16 +16,24 @@ class Cell extends egret.DisplayObjectContainer {
 
     private createCell(rowX:number,colY:number,_id:number): void {
         this.id = _id
+        /*
         this.cellBitmap = this.createBitmapByName("bg1_jpg");
         this.cellBitmap.width = 80;   //cell的长/宽
         this.cellBitmap.height = 80;
-        this.position = new egret.Point(this.cellBitmap.width*rowX, this.cellBitmap.height*colY);
+        */
+        this.cellRect.graphics.clear()
+        this.cellRect.graphics.lineStyle(1,0x000000,0.3)
+        this.cellRect.graphics.beginFill(0xEEEEEE,0.2);
+        this.cellRect.graphics.drawRect(0, 0, 80, 80);
+        this.cellRect.graphics.endFill();
+        this.addChild(this.cellRect);
+        this.position = new egret.Point(this.cellRect.width*rowX, this.cellRect.height*colY);
         this.x = this.position.x //初始化位置
         this.y = this.position.y
-        this.cellBitmap.touchEnabled = true;
+        //this.cellBitmap.touchEnabled = true;
         this.cell_X_Y = {x:rowX, y:colY}
 
-        this.addChild(this.cellBitmap)
+        //this.addChild(this.cellBitmap)
         this.touchEnabled = true;
        // this.town = _town
        // this.id = new Date().getTime()

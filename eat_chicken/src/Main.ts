@@ -66,6 +66,11 @@
             private player_item = new egret.TextField();
             private player_weapon = new egret.TextField();
 
+            private safeAreaTop:egret.Shape = new egret.Shape();
+            private safeAreaLeft:egret.Shape = new egret.Shape();
+            private safeAreaRight:egret.Shape = new egret.Shape();
+            private safeAreaBottom:egret.Shape = new egret.Shape();
+
             private canvas;
             //临时随机演示
             private townRandomName = ["johny", "kitty", "peter"]
@@ -74,6 +79,7 @@
             public constructor() {
                 super();
                 this.canvas = document.getElementsByTagName("CANVAS")[0]
+                //this.canvas.addEventListener('mousemove',this.onMove.bind(this));
                 this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
             }
 
@@ -294,7 +300,11 @@
                             this.houseList.map( async house=>{
                                 if (house.getID() == this.selectedHouse.getID() ){
                                     this.selectedHouse = house
+                                    //更新棋盘玩家
                                     await this.updateObjectsInBoard(house)
+
+                                    this.createSafeArea(house.getSafeAreaRadius())
+                                    //检查是否生成战斗
                                     this.checkBattersInHouse(house)
                                     //创建随机生成的礼炮/烟花动画
                                     this.animation({json:"firework_json",png:"firework_png", data:"firework",x:500*Math.random(),y:500*Math.random()}).then( animate=>{
@@ -334,12 +344,49 @@
                         
                         let cellXY = cell.getXY()  // cell在棋盘中的 X/Y 轴坐标
                         cell.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{              
-                            this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
-                        
+                            this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标                       
                         }, this)
+
                     })
                 }
                     
+            }
+
+            private createSafeArea(radius:number){
+                //console.log(this.board.width)
+                //console.log(radius)
+                if ( !this.board.contains(this.safeAreaTop)){
+                    this.board.addChild(this.safeAreaTop);
+                    this.board.addChild(this.safeAreaLeft);
+                    this.board.addChild(this.safeAreaRight);
+                    this.board.addChild(this.safeAreaBottom);
+                }
+                this.safeAreaTop.graphics.clear()
+                this.safeAreaTop.graphics.beginFill(0x00FF00, 0.2);            
+                this.safeAreaTop.graphics.drawRect(0, 0, this.board.width, (5-radius)*80);
+                this.safeAreaTop.graphics.endFill();
+
+                this.safeAreaLeft.graphics.clear()
+                this.safeAreaLeft.graphics.beginFill(0x00FF00, 0.2);            
+                this.safeAreaLeft.graphics.drawRect(0, (5-radius)*80, (5-radius)*80, this.board.height-((5-radius)*80*2));
+                this.safeAreaLeft.graphics.endFill();
+
+                this.safeAreaRight.graphics.clear()
+                this.safeAreaRight.graphics.beginFill(0x00FF00, 0.2);            
+                this.safeAreaRight.graphics.drawRect(this.board.width-(5-radius)*80, (5-radius)*80, (5-radius)*80, this.board.height-((5-radius)*80*2));
+                this.safeAreaRight.graphics.endFill();
+
+                this.safeAreaBottom.graphics.clear()
+                this.safeAreaBottom.graphics.beginFill(0x00FF00, 0.2);            
+                this.safeAreaBottom.graphics.drawRect(0, this.board.height-(5-radius)*80, this.board.width, (5-radius)*80);
+                this.safeAreaBottom.graphics.endFill();
+               // this.safeArea.graphics.endFill();
+                //this.safeArea.graphics.beginFill(0x000000, 0.2);
+                //this.safeArea.graphics.drawRect(50, 50, this.board.width-100, this.board.height-100);
+                
+                //this.safeArea.x = target.x + 50
+                //this.playerInfo.y = target.y
+                
             }
 
             /**

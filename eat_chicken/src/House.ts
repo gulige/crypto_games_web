@@ -161,4 +161,8 @@ class House extends egret.DisplayObjectContainer {
     public getStep(){
         return this.game.step
     }
+
+    public getSafeAreaRadius(): number{
+        return this.game.safe_area_radius
+    }
 }
