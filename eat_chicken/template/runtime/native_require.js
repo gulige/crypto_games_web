@@ -31,7 +31,7 @@ egret_native.egretStart = function () {
         //以下为自动修改，请勿修改
         //The following is automatically modified, please do not modify
         //----auto option start----
-		entryClassName: "Main",
+		entryClassName: "GameList",
 		frameRate: 60,
 		scaleMode: "showAll",
 		contentWidth: 1500,

@@ -20,7 +20,7 @@ class House extends egret.DisplayObjectContainer {
     private clock:Clock
     private game_progress:number
 
-    public constructor(param: string, _game:any) {
+    public constructor(param: any, _game:any) {
         super();
         this.game = _game
         this.createHouse(param);
@@ -29,8 +29,8 @@ class House extends egret.DisplayObjectContainer {
     private createHouse(param): void {
         this.name = param.name
         this.houseBitmap = this.createBitmapByName(param.bitmap);
-        this.houseBitmap.width = 80;
-        this.houseBitmap.height = 80;
+        this.houseBitmap.width = 120;
+        this.houseBitmap.height = 180;
         this.houseBitmap.touchEnabled = true;
         this.addChild(this.houseBitmap)
         this.touchEnabled = true;
@@ -40,22 +40,42 @@ class House extends egret.DisplayObjectContainer {
         this.game_progress - this.game.game_progress
 
         this.playerList =[]  //初始化士兵列表
-        this.createPlayer(this.game.players)
+        this.createPlayers(this.game.players)
         this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
         
     }
 
-    public createPlayer(playersJson){ 
-        playersJson.map( (playerJson, idx)=>{
-            let name = this.playerList.length%2 ==0? "cow_boy_png":"cow_girl_png"
-            var player = new Player(name, playerJson)
-            
-            //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);
-            //warrior.getBitmap().filters = [colorFlilter];
-            this.playerList.push(player)
+    public updateHouse(_game:any): void{
+        this.game = _game
+        this.updatePlayers(this.game.players)
+    }
+
+    public async updatePlayers(playersJson){ 
+        await playersJson.map( async playerJson=>{
+            let player = await this.getPlayerByName(playerJson.acc_name)
+            if (player == null) {  // new player
+                this.createPlayer(playerJson)
+            } else {
+                player.updatePlayer(playerJson)
+            }
+        })   
+    }
+
+    public createPlayers(playersJson){ 
+        playersJson.map( playerJson=>{
+            this.createPlayer(playerJson)
             //return player 
         })       
                
+    }
+
+    private createPlayer(playerJson){
+        let name = this.playerList.length%2 ==0? "cow_boy_png":"cow_girl_png"
+        var player = new Player(name, playerJson)
+        
+        //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);
+        //warrior.getBitmap().filters = [colorFlilter];
+        this.playerList.push(player)
     }
 
     private createBitmapByName(name: string) {
@@ -77,9 +97,10 @@ class House extends egret.DisplayObjectContainer {
     }
 
     public async getPlayerListByCellId(cell_id){
-        let players = this.playerList.filter( player=>{
+        let players = await this.playerList.filter( player=>{
             return player.getCellId() == cell_id
         })
+        return players
     }
 
     public getBitmap(){
@@ -164,5 +185,12 @@ class House extends egret.DisplayObjectContainer {
 
     public getSafeAreaRadius(): number{
         return this.game.safe_area_radius
+    }
+
+    public async getFullPlayersJsonByCellId(cell_id){
+        let playersJson = await this.game.players.filter( playerJson=>{
+            return playerJson.cell_id == cell_id
+        })
+        return playersJson
     }
 }

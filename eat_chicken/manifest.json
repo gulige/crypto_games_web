@@ -16,13 +16,23 @@
 		"libs/modules/TronWeb/TronWeb.js"
 	],
 	"game": [
-		"bin-debug/Board.js",
-		"bin-debug/Cell.js",
-		"bin-debug/House.js",
-		"bin-debug/LoadingUI.js",
-		"bin-debug/Main.js",
 		"bin-debug/Platform.js",
+		"bin-debug/Board.js",
+		"bin-debug/Game.js",
+		"bin-debug/GameList.js",
+		"bin-debug/House.js",
+		"bin-debug/Item.js",
+		"bin-debug/ItemUtils.js",
+		"bin-debug/LoadingUI.js",
+		"bin-debug/Main_bak.js",
+		"bin-debug/Cell.js",
 		"bin-debug/Player.js",
-		"bin-debug/ScatterUtils.js"
+		"bin-debug/ScatterUtils.js",
+		"bin-debug/Timer/Clock.js",
+		"bin-debug/Timer/Hour.js",
+		"bin-debug/Timer/Minute.js",
+		"bin-debug/Timer/Pan.js",
+		"bin-debug/Timer/Second.js",
+		"bin-debug/Timer/Timer.js"
 	]
 }

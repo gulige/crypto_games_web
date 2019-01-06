@@ -132,7 +132,7 @@ var ScatterUtils = (function (_super) {
                         e_1 = _a.sent();
                         //console.log("login fail,", e)
                         //没有解锁或没有身份
-                        return [2 /*return*/, { login: false, details: this.message.walletlock }];
+                        return [2 /*return*/, { login: false, details: "未能使用钱包，可能是" + this.message.walletlock + "或者" + this.message.noidentity }];
                     case 5: return [2 /*return*/];
                 }
             });
@@ -442,14 +442,15 @@ var ScatterUtils = (function (_super) {
      */
     ScatterUtils.logout = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var _currentAccountName;
             return __generator(this, function (_a) {
                 //ScatterJS.scatter.forgetIdentity();
                 try {
-                    //ScatterJS.scatter.logout();
+                    _currentAccountName = this.currentAccount.name;
                     ScatterJS.scatter.forgetIdentity();
                     this.currentAccount = null;
                     this.eos = null;
-                    return [2 /*return*/, { logout: true, details: this.message.logout }];
+                    return [2 /*return*/, { logout: true, details: _currentAccountName + this.message.logout }];
                 }
                 catch (e) {
                     console.log(e);
@@ -476,10 +477,36 @@ var ScatterUtils = (function (_super) {
             });
         });
     };
-    ScatterUtils.getIdentiy = function () {
+    /**
+     * descrition: 获取当前钱包用户身份，用于判断登录状态
+     *
+     */
+    ScatterUtils.getIdentity = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, ScatterJS.scatter.identity];
+            });
+        });
+    };
+    ScatterUtils.nowseconds = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch('http://114.115.135.201:52920/api/?a=now', {
+                            method: 'GET'
+                            // body: JSON.stringify({category:[newCategory]})        
+                        })
+                            .then(function (response) {
+                            return response.json();
+                        })
+                            .then(function (myJson) {
+                            return myJson;
+                        })];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, result];
+                }
             });
         });
     };
@@ -490,10 +517,10 @@ var ScatterUtils = (function (_super) {
     ScatterUtils.message = {
         authority: "未授权用户，请先登录",
         walletlock: "钱包已上锁",
-        identity: "钱包还没有身份",
-        nowallet: "还没有安装钱包",
-        login: "已登陆",
-        logout: "已登出"
+        noidentity: "未验证钱包身份",
+        nowallet: "亲，还没有装钱包哟",
+        login: "已登陆游戏",
+        logout: "已登出游戏"
     };
     /**
      * descrition: 设置Scatter钱包 EO主链/测试链值

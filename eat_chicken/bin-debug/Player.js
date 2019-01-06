@@ -10,24 +10,45 @@ r.prototype = e.prototype, t.prototype = new r();
 };
 var Player = (function (_super) {
     __extends(Player, _super);
-    function Player(house) {
+    function Player(name, playerJson) {
         var _this = _super.call(this) || this;
         _this.task = { action: "idle", target: null, status: null };
         _this.position = new egret.Point(0, 0);
-        _this.life = { full: 40, remain: 40 };
-        _this.gold = 5; //warrior 5 gold unit
-        _this.createPlayer(house);
+        _this.items = [];
+        _this.createPlayer(name, playerJson);
         return _this;
     }
-    Player.prototype.createPlayer = function (house) {
-        this.playerBitmap = this.createBitmapByName(house.name + "_soilder_png");
-        this.playerBitmap.width = 48;
-        this.playerBitmap.height = 70;
-        this.playerBitmap.x = this.position.x; //初始化位置
-        this.playerBitmap.y = this.position.y;
+    Player.prototype.createPlayer = function (name, playerJson) {
+        this.playerBitmap = this.createBitmapByName(name);
+        this.playerBitmap.width = 50;
+        this.playerBitmap.height = 80;
+        //this.playerBitmap.x = this.position.x //初始化位置
+        //this.playerBitmap.y = this.position.y
         this.playerBitmap.touchEnabled = true;
-        this.house = house;
-        this.uuid = new Date().getTime(); // will use [username + date] or uuid generator later
+        this.addChild(this.playerBitmap);
+        this.touchEnabled = true;
+        //this.house = house
+        // this.uuid = new Date().getTime() // will use [username + date] or uuid generator later
+        this.setName(playerJson.acc_name);
+        this.setCellId(playerJson.cell_id);
+        this.setArmor(playerJson.armor);
+        this.setAttack(playerJson.attack);
+        this.setLife(playerJson.hp);
+        this.setDefense(playerJson.defense);
+        this.setItems(playerJson.items);
+        this.setWeapon(playerJson.weapon);
+        this.setGold(playerJson.win_eos);
+    };
+    Player.prototype.updatePlayer = function (playerJson) {
+        //this.setName(playerJson.acc_name)
+        this.setCellId(playerJson.cell_id);
+        this.setArmor(playerJson.armor);
+        this.setAttack(playerJson.attack);
+        this.setLife(playerJson.hp);
+        this.setDefense(playerJson.defense);
+        this.setItems(playerJson.items);
+        this.setWeapon(playerJson.weapon);
+        this.setGold(playerJson.win_eos);
     };
     Player.prototype.createBitmapByName = function (name) {
         var result = new egret.Bitmap();
@@ -48,12 +69,12 @@ var Player = (function (_super) {
         return this.house;
     };
     Player.prototype.getPosition = function () {
-        var position = { x: this.playerBitmap.x, y: this.playerBitmap.y };
+        var position = { x: this.x, y: this.y };
         return position;
     };
     Player.prototype.setPosition = function (_position) {
-        this.playerBitmap.x = _position.x;
-        this.playerBitmap.y = _position.y;
+        this.x = _position.x;
+        this.y = _position.y;
     };
     Player.prototype.getName = function () {
         return this.accName;
@@ -62,10 +83,10 @@ var Player = (function (_super) {
         this.accName = __accName;
     };
     Player.prototype.getLife = function () {
-        return this.life;
+        return this.hp;
     };
-    Player.prototype.setLife = function (_life) {
-        this.life = _life;
+    Player.prototype.setLife = function (hp) {
+        this.hp = hp;
     };
     Player.prototype.destroy = function () {
         this.playerBitmap = null;
@@ -84,6 +105,36 @@ var Player = (function (_super) {
     };
     Player.prototype.setCellId = function (_cell_id) {
         this.cell_id = _cell_id;
+    };
+    Player.prototype.getArmor = function () {
+        return this.armor;
+    };
+    Player.prototype.setArmor = function (_armor) {
+        this.armor = _armor;
+    };
+    Player.prototype.getAttack = function () {
+        return this.attack;
+    };
+    Player.prototype.setAttack = function (_attack) {
+        this.attack = _attack;
+    };
+    Player.prototype.getDefense = function () {
+        return this.defense;
+    };
+    Player.prototype.setDefense = function (_defense) {
+        this.defense = _defense;
+    };
+    Player.prototype.getWeapon = function () {
+        return this.weapon;
+    };
+    Player.prototype.setWeapon = function (_weapon) {
+        this.weapon = _weapon;
+    };
+    Player.prototype.getItems = function () {
+        return this.items;
+    };
+    Player.prototype.setItems = function (_items) {
+        this.items = _items;
     };
     return Player;
 }(egret.DisplayObjectContainer));

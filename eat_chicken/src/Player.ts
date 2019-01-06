@@ -27,15 +27,27 @@ class Player extends egret.DisplayObjectContainer {
         this.playerBitmap = this.createBitmapByName(name);
         this.playerBitmap.width = 50;
         this.playerBitmap.height = 80;
-        this.playerBitmap.x = this.position.x //初始化位置
-        this.playerBitmap.y = this.position.y
+        //this.playerBitmap.x = this.position.x //初始化位置
+        //this.playerBitmap.y = this.position.y
         this.playerBitmap.touchEnabled = true;
         this.addChild(this.playerBitmap)
         this.touchEnabled = true;
 
         //this.house = house
-        this.uuid = new Date().getTime() // will use [username + date] or uuid generator later
+       // this.uuid = new Date().getTime() // will use [username + date] or uuid generator later
         this.setName(playerJson.acc_name)
+        this.setCellId(playerJson.cell_id)
+        this.setArmor(playerJson.armor)
+        this.setAttack(playerJson.attack)
+        this.setLife(playerJson.hp)
+        this.setDefense(playerJson.defense)
+        this.setItems(playerJson.items)
+        this.setWeapon(playerJson.weapon)
+        this.setGold(playerJson.win_eos)
+    }
+
+    public updatePlayer(playerJson:any){
+        //this.setName(playerJson.acc_name)
         this.setCellId(playerJson.cell_id)
         this.setArmor(playerJson.armor)
         this.setAttack(playerJson.attack)
