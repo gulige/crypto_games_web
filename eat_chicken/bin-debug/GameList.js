@@ -129,46 +129,15 @@ var GameList = (function (_super) {
      */
     GameList.prototype.runGame = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var self, url, urlLoader;
+            var image;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: 
-                    // await ScatterUtils.login()
-                    //await ScatterUtils.getAccountInfo()
-                    //await  ScatterUtils.getAllGamesInfo()
-                    //await ScatterUtils.getGameInfo(3)
-                    //await ScatterUtils.createGame("1.0000 EOS")
-                    //await ScatterUtils.joinGame(9, "1.0000 EOS", 0, 0)
-                    //await ScatterUtils.kickoff(10)
-                    // let info = await ScatterUtils.move(10, 1 ,2)
-                    // console.log("info",info)
-                    return [4 /*yield*/, this.loadResource()];
-                    case 1:
-                        // await ScatterUtils.login()
-                        //await ScatterUtils.getAccountInfo()
-                        //await  ScatterUtils.getAllGamesInfo()
-                        //await ScatterUtils.getGameInfo(3)
-                        //await ScatterUtils.createGame("1.0000 EOS")
-                        //await ScatterUtils.joinGame(9, "1.0000 EOS", 0, 0)
-                        //await ScatterUtils.kickoff(10)
-                        // let info = await ScatterUtils.move(10, 1 ,2)
-                        // console.log("info",info)
-                        _a.sent();
-                        self = this;
-                        url = "resource/assets/west.jpg";
-                        urlLoader = new egret.URLLoader();
-                        urlLoader.dataFormat = egret.URLLoaderDataFormat.TEXTURE;
-                        //load complete
-                        urlLoader.addEventListener(egret.Event.COMPLETE, function (event) {
-                            var loader = event.target;
-                            var texture = urlLoader.data;
-                            self.addChild(new egret.Bitmap(texture));
-                            self.createGameScene();
-                        }, url);
-                        //this.createGameScene()
-                        urlLoader.load(new egret.URLRequest(url));
-                        return [2 /*return*/];
-                }
+                image = new eui.Image();
+                image.source = "resource/assets/west.jpg";
+                // this.addChild(image);
+                // image.x = 100;
+                // image.y = 100;
+                this.createGameScene();
+                return [2 /*return*/];
             });
         });
     };
@@ -210,69 +179,79 @@ var GameList = (function (_super) {
             var _this = this;
             var createGameFlat, play_glory, play_honor, play_easy, play_stop;
             return __generator(this, function (_a) {
-                createGameFlat = this.createBitmapByName("city_png");
-                this.stage.addChild(createGameFlat);
-                createGameFlat.width = 80;
-                createGameFlat.height = 100;
-                createGameFlat.x = 10;
-                createGameFlat.y = 5;
-                createGameFlat.touchEnabled = true;
-                createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, { name: "johny", bitmap: "house_png" }), this);
-                //******登陆/登出功能******
-                this.login = this.createBitmapByName("login_png");
-                this.login.x = 1150;
-                this.login.y = 10;
-                this.login.touchEnabled = true;
-                this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame, this);
-                this.logout = this.createBitmapByName("logout_png");
-                this.logout.x = 1150;
-                this.logout.y = 10;
-                this.logout.touchEnabled = true;
-                this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame, this);
-                //根据Scatter当前身份状况判断是否已经登陆/登出，并显示相应按钮
-                ScatterUtils.getIdentity().then(function (identiy) {
-                    if (identiy == null) {
-                        _this.stage.addChild(_this.login);
-                    }
-                    else {
-                        ScatterUtils.login();
-                        _this.stage.addChild(_this.logout);
-                    }
-                });
-                play_glory = this.createBitmapByName("play_png");
-                this.stage.addChild(play_glory);
-                play_glory.x = 1150;
-                play_glory.y = 300;
-                play_glory.touchEnabled = true;
-                play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url), this);
-                play_honor = this.createBitmapByName("play_png");
-                this.stage.addChild(play_honor);
-                play_honor.x = 1150;
-                play_honor.y = 350;
-                play_honor.touchEnabled = true;
-                play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url), this);
-                play_easy = this.createBitmapByName("play_png");
-                this.stage.addChild(play_easy);
-                play_easy.x = 1150;
-                play_easy.y = 400;
-                play_easy.touchEnabled = true;
-                play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url), this);
-                play_stop = this.createBitmapByName("stop_png");
-                this.stage.addChild(play_stop);
-                play_stop.x = 1150;
-                play_stop.y = 450;
-                play_stop.touchEnabled = true;
-                play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
-                    if (_this.backgroundMusicChannel) {
-                        _this.backgroundMusicChannel.stop();
-                    }
-                }, this);
-                /******************** */
-                this.stage.addChild(this.textfield);
-                //this.popMessageBox()
-                //更新游戏房间列表，位置为上栏
-                this.refreshHouseList();
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.loadResource()
+                        // let canvas=document.getElementsByTagName("CANVAS")[0];
+                        //console.log(canvas)
+                        //****** 以下为游戏工具栏，位于地图舞台左侧 ******
+                        //城堡图，游戏创建图标，位置为左上栏             
+                    ];
+                    case 1:
+                        _a.sent();
+                        createGameFlat = this.createBitmapByName("city_png");
+                        this.stage.addChild(createGameFlat);
+                        createGameFlat.width = 80;
+                        createGameFlat.height = 100;
+                        createGameFlat.x = 10;
+                        createGameFlat.y = 5;
+                        createGameFlat.touchEnabled = true;
+                        createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, { name: "johny", bitmap: "house_png" }), this);
+                        //******登陆/登出功能******
+                        this.login = this.createBitmapByName("login_png");
+                        this.login.x = 1150;
+                        this.login.y = 10;
+                        this.login.touchEnabled = true;
+                        this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame, this);
+                        this.logout = this.createBitmapByName("logout_png");
+                        this.logout.x = 1150;
+                        this.logout.y = 10;
+                        this.logout.touchEnabled = true;
+                        this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame, this);
+                        //根据Scatter当前身份状况判断是否已经登陆/登出，并显示相应按钮
+                        ScatterUtils.getIdentity().then(function (identiy) {
+                            if (identiy == null) {
+                                _this.stage.addChild(_this.login);
+                            }
+                            else {
+                                ScatterUtils.login();
+                                _this.stage.addChild(_this.logout);
+                            }
+                        });
+                        play_glory = this.createBitmapByName("play_png");
+                        this.stage.addChild(play_glory);
+                        play_glory.x = 1150;
+                        play_glory.y = 300;
+                        play_glory.touchEnabled = true;
+                        play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url), this);
+                        play_honor = this.createBitmapByName("play_png");
+                        this.stage.addChild(play_honor);
+                        play_honor.x = 1150;
+                        play_honor.y = 350;
+                        play_honor.touchEnabled = true;
+                        play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url), this);
+                        play_easy = this.createBitmapByName("play_png");
+                        this.stage.addChild(play_easy);
+                        play_easy.x = 1150;
+                        play_easy.y = 400;
+                        play_easy.touchEnabled = true;
+                        play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url), this);
+                        play_stop = this.createBitmapByName("stop_png");
+                        this.stage.addChild(play_stop);
+                        play_stop.x = 1150;
+                        play_stop.y = 450;
+                        play_stop.touchEnabled = true;
+                        play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                            if (_this.backgroundMusicChannel) {
+                                _this.backgroundMusicChannel.stop();
+                            }
+                        }, this);
+                        /******************** */
+                        this.stage.addChild(this.textfield);
+                        //this.popMessageBox()
+                        //更新游戏房间列表，位置为上栏
+                        this.refreshHouseList();
+                        return [2 /*return*/];
+                }
             });
         });
     };
@@ -346,9 +325,9 @@ var GameList = (function (_super) {
                                         if (!games.rows) return [3 /*break*/, 3];
                                         return [4 /*yield*/, games.rows.map(function (gameJson, idx) {
                                                 //console.log(gameJson)
-                                                _this.createHouse({ name: "johny", bitmap: "house_jpg" }, gameJson).then(function (house) {
+                                                _this.createHouse({ name: "johny", bitmap: "game_png" }, gameJson).then(function (house) {
                                                     // console.log(house)
-                                                    house.setPosition(new egret.Point(150 * (1 + idx), 50));
+                                                    house.setPosition(new egret.Point(170 * (1 + idx), 50));
                                                     _this.stage.addChild(house);
                                                     _this.houseList.push(house);
                                                 });

@@ -12,6 +12,9 @@
     {
       "name": "game"
     },
+   	{
+      "name": "eui"
+    },
     {
       "name": "tween"
     },

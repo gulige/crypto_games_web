@@ -62,8 +62,8 @@ var House = (function (_super) {
     House.prototype.createHouse = function (param) {
         this.name = param.name;
         this.houseBitmap = this.createBitmapByName(param.bitmap);
-        this.houseBitmap.width = 120;
-        this.houseBitmap.height = 180;
+        this.houseBitmap.width = 150;
+        this.houseBitmap.height = 212;
         this.houseBitmap.touchEnabled = true;
         this.addChild(this.houseBitmap);
         this.touchEnabled = true;

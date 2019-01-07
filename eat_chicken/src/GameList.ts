@@ -127,23 +127,34 @@
 
                 
 
-                await this.loadResource()
+               
 
+                
+//this.x=0
+//this.y=150
+                var image = new eui.Image();
+                image.source = "resource/assets/west.jpg";
+               // this.addChild(image);
+               // image.x = 100;
+               // image.y = 100;
+                this.createGameScene()
+/*
                 let self:GameList=this;
                 let url: string = "resource/assets/west.jpg";
                 let urlLoader: egret.URLLoader = new egret.URLLoader();
                 urlLoader.dataFormat = egret.URLLoaderDataFormat.TEXTURE;
                 //load complete
-                urlLoader.addEventListener(egret.Event.COMPLETE, function (event: egret.Event): void {   
+                urlLoader.addEventListener(egret.Event.COMPLETE, async function (event: egret.Event) {   
                     var loader:egret.URLLoader = <egret.URLLoader>event.target;       
                     var texture:egret.Texture = <egret.Texture>urlLoader.data;
                     self.addChild(new egret.Bitmap(texture))
+                    
                     self.createGameScene()
 
                 }, url);
                 //this.createGameScene()
                 urlLoader.load(new egret.URLRequest(url));
-
+*/
             }
 
         
@@ -171,7 +182,7 @@
              * Create a game scene
              */
             private async createGameScene() {
-
+                 await this.loadResource()
             // let canvas=document.getElementsByTagName("CANVAS")[0];
                 //console.log(canvas)
                 //****** 以下为游戏工具栏，位于地图舞台左侧 ******
@@ -187,7 +198,6 @@
                 createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP,this.createGame.bind(this,{name:"johny", bitmap:"house_png"}),this)
 
                 
-
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");           
                 this.login.x=1150
@@ -211,6 +221,7 @@
                     }
                 }) 
                 //************************ 
+                
 
                 //***背景音乐设置 */
                 let play_glory = this.createBitmapByName("play_png");
@@ -257,6 +268,8 @@
                 //egret.setInterval(()=>{                  
                 //    this.refreshHouseList()                                        
                 //}, this, 5000)  //每5秒从合约从取得所有游戏信息并更新
+
+                //this.stage.y=150
             }
             
 
@@ -326,9 +339,9 @@
                     if (games.rows){
                         await games.rows.map( (gameJson,idx)=>{
                             //console.log(gameJson)
-                            this.createHouse({name:"johny", bitmap:"house_jpg"},gameJson).then( house=>{
+                            this.createHouse({name:"johny", bitmap:"game_png"},gameJson).then( house=>{
                                // console.log(house)
-                                house.setPosition(new egret.Point(150*(1+idx),50))
+                                house.setPosition(new egret.Point(170*(1+idx),50))
                                 this.stage.addChild(house)
                                 this.houseList.push(house)
                             })

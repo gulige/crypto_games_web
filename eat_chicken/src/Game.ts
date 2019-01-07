@@ -141,7 +141,7 @@
                     let data: any = egret.XML.parse(event.target.data);
                     this.tmxTileMap = new tiled.TMXTilemap(2000, 2000, data, url);
                     this.tmxTileMap.render();
-                    self.addChild(this.tmxTileMap);
+                   // self.addChild(this.tmxTileMap);
                 // tmxTileMap.touchEnabled = true;
                 // tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_TAP,self.move,self);
                 //this.tmxTileMap.touchEnabled = true;
