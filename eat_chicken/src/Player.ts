@@ -170,4 +170,12 @@ class Player extends egret.DisplayObjectContainer {
     public setItems(_items): void{
         this.items = _items
     }
+
+    public isAlive(): boolean{
+        if (this.getLife()>0){
+            return true
+        } else {
+            return false
+        }
+    }
 }

@@ -72,6 +72,17 @@
             private safeAreaRight:egret.Shape = new egret.Shape();
             private safeAreaBottom:egret.Shape = new egret.Shape();
 
+            private playerProfileListContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+            //** 荣誉榜 */
+            private honorListContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+            private honorListBox:egret.Shape = new egret.Shape();            
+            private honorListText:egret.TextField = new egret.TextField();
+            // 统计看板
+            private summaryContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+            private summaryBox:egret.Shape = new egret.Shape();            
+            private summaryContent:egret.TextField = new egret.TextField();
+
+            // 事件/提示信息栏
             private messageContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             private messageBox:egret.Shape = new egret.Shape();            
             private message:egret.TextField = new egret.TextField();
@@ -82,6 +93,8 @@
             private num = 0
             //
             private interval = null;
+            private messageTimeout = null;
+
 
             public constructor() {
                 super();
@@ -207,6 +220,7 @@
                 setMapFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.setMap ,this)
             
                 //士兵图标，点击加入游戏，位置为左栏
+                /*
                 let joinGameFlat = this.createBitmapByName("cow_boy_png");
                 this.stage.addChild(joinGameFlat);
                 joinGameFlat.x=10
@@ -215,16 +229,80 @@
                 joinGameFlat.height=80
                 joinGameFlat.touchEnabled = true;
                 joinGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP,this.joinGame ,this)  
-
+                */
                 //小旗图标，点击Kick off游戏，位置为左栏
                 let kickOffFlat = this.createBitmapByName("recall_png");
                 this.stage.addChild(kickOffFlat);
                 kickOffFlat.x=10
-                kickOffFlat.y=300
+                kickOffFlat.y=200
                 kickOffFlat.touchEnabled = true;
                 kickOffFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.kickOff ,this)  
 
+                // ***游戏滚动消息看板***
+                this.messageContainer.width = 300
+                this.messageContainer.height = 200
+
+                this.messageBox.graphics.clear()
+                this.messageBox.graphics.beginFill(0xEEEEEE);
+                this.messageBox.graphics.drawRoundRect(0, 0, 300, 200, 15,15);
+                this.messageBox.graphics.endFill();
+                this.messageContainer.addChild(this.messageBox);
+
+                this.message.width = 300
+                this.message.height = 200
+                this.message.size = 18
+                this.message.textColor = 0x000000                  
+                this.message.$setWordWrap(true)
+                this.message.type = egret.TextFieldType.INPUT
+                this.message.$setMultiline(true)
+                this.messageContainer.addChild(this.message);
+                // ***********
+
+                // ***统计看板***
+                this.summaryContainer.x = 1300
+                this.summaryContainer.y = 30 
+                this.summaryContainer.width = 200
+                this.summaryContainer.height = 300
+                this.stage.addChild(this.summaryContainer)
+
+                this.summaryBox.graphics.clear()
+                this.summaryBox.graphics.beginFill(0xEEEEEE);
+                this.summaryBox.graphics.drawRoundRect(0, 0, 300, 200, 15,15);
+                this.summaryBox.graphics.endFill();
+                this.summaryContainer.addChild(this.summaryBox);
+
+                this.summaryContent.width = 200
+                this.summaryContent.height = 300
+                this.summaryContent.size = 18
+                this.summaryContent.textColor = 0x000000                  
+                this.summaryContent.$setWordWrap(true)
+                this.summaryContent.type = egret.TextFieldType.INPUT
+                this.summaryContent.$setMultiline(true)
+                this.summaryContainer.addChild(this.summaryContent);
+                
+
+                // ***创建游戏荣誉榜***
+                this.honorListContainer.width = 880
+                this.honorListContainer.height = 880
+
+                this.honorListBox.graphics.clear()
+                this.honorListBox.graphics.beginFill(0x444444, 0.8);
+                this.honorListBox.graphics.drawRoundRect(0, 0, 880, 880, 15,15);
+                this.honorListBox.graphics.endFill();
+                this.honorListContainer.addChild(this.honorListBox);
+
+                this.honorListText.width = 880
+                this.honorListText.height = 880
+                this.honorListText.size = 22
+                this.honorListText.textColor = 0x000000                  
+                this.honorListText.$setWordWrap(true)
+                this.honorListText.type = egret.TextFieldType.INPUT
+                this.honorListText.$setMultiline(true)
+                this.honorListContainer.addChild(this.honorListText);
+                // ***********
+
                 //开炮动画实现
+                /*
                 this.animation( {json:"pao_json",png:"pao_png", data:"pao",x:0,y:800} ).then( animate=>{
                     this.stage.addChild(animate)
                     animate.play(-1)
@@ -235,7 +313,7 @@
                     this.stage.addChild(animate)
                     animate.play(-1)
                 }) 
-
+                */
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");           
                 this.login.x=1150
@@ -305,9 +383,18 @@
                     this.interval = egret.setInterval( async ()=>{
                     
                         await this.refreshHouse(gameId)
+                        //this.popHonorList()
+                        //游戏全局看板
+                        this.updateSummaryBoard()
 
                         let game_progress = this.currentHouse.getProgress()
+                        //游戏结束不再更新
                         if (game_progress==3){
+                            //弹出游戏结束荣誉榜
+                            egret.setTimeout( ()=>{
+                                this.popHonorList()
+                            },this, 5000)
+                            
                             if (this.interval){
                                 egret.clearInterval(this.interval)
                             }
@@ -320,7 +407,7 @@
             }
             
             /**
-             * 初始化棋盘，生成里面cell元素并定位，生成点击cell触发移动事件
+             * 初始化棋盘，生成里面cell元素并定位，生成点击cell触发移动事件或玩家加入游戏
              * 
              */
             private async initBoard(){  //棋盘为静态物体
@@ -335,8 +422,19 @@
                     cells.map( cell=>{
                         
                         let cellXY = cell.getXY()  // cell在棋盘中的 X/Y 轴坐标
-                        cell.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{              
-                            this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标                       
+                        // 监听格子点击事件并根据游戏状态行动
+                        cell.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{  
+                            if (this.currentHouse == null) {return}    
+                            let game_progress = this.currentHouse.getProgress()
+                            //
+                            if (game_progress==0){  //游戏未开始
+                                
+                            } else if (game_progress==1) { // 棋盘地图已经设定
+                                this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
+                            } else if (game_progress==2) { // 游戏开始中
+                                this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
+                            }      
+                                                   
                         }, this)
 
                     })
@@ -344,44 +442,52 @@
                     
             }
 
+            /**
+             * 游戏滚动消息看板 
+             * 
+             */
             private popMessageBox(msgText){
                 if ( !this.stage.contains(this.messageContainer)){
-                    this.stage.addChild(this.messageContainer)
-                }
-                this.messageContainer.x = this.stage.width/2 - 100
-                this.messageContainer.y = 50
-                this.messageContainer.width = 300
-                this.messageContainer.height = 200
-
-                this.messageBox.graphics.clear()
-                this.messageBox.graphics.beginFill(0xEEEEEE);
-                this.messageBox.graphics.drawRoundRect(0, 0, 300, 200, 15,15);
-                this.messageBox.graphics.endFill();
-                //this.messageBox.x = this.stage.width/2 - 100
-                //this.messageBox.y = 50
-                this.messageContainer.addChild(this.messageBox);
-
-                //this.message.x = this.messageBox.x+10
-                //this.message.y = this.messageBox.y+10
-                this.message.width = 300
-                this.message.height = 200
-                this.message.size = 18
-                this.message.textColor = 0x000000
-                this.message.text = msgText
-                this.message.$setWordWrap(true)
-                this.message.type = egret.TextFieldType.INPUT
-                this.message.$setMultiline(true)
-                this.messageContainer.addChild(this.message);
-
-                setTimeout(()=>{
+                    this.messageContainer.x = this.stage.width/2 - 100
+                    this.messageContainer.y = 50
+                    this.stage.addChild(this.messageContainer)               
+                }               
+              
+                //重置计时器
+                egret.clearTimeout(this.messageTimeout)
+                this.messageTimeout = egret.setTimeout(()=>{
                    // this.stage.removeChild(this.messageBox)
                    // this.stage.removeChild(this.message)
                     this.stage.removeChild(this.messageContainer)
-                },4000)
+                   //this.message.text=""
+                },this, 4000)
 
+                this.message.text = msgText
             }
 
-            private createSafeArea(radius:number){
+            private popHonorList(){
+
+                this.board.addChild(this.honorListContainer)               
+                            
+                //this.honorListText.text = msgText
+            }
+
+            /**
+             * 游戏全局统计数据看板 
+             * 
+             */
+            private updateSummaryBoard(){
+                let playerJsonArray = this.currentHouse.getPlayerJsonList()     
+                this.summaryContent.text = `总玩家数: ${this.currentHouse.getTotalJoinPlayers()}\n`
+                                           + `总EOS数:  ${this.currentHouse.getEOSInHouse() }\n`
+                                           + `Alive: ${this.currentHouse.getAlivePlayers() }`
+            }
+
+            /**
+             * 生成毒气/安全区域 
+             * 
+             */
+            private createSafeAreaInBoard(radius:number){
                 //console.log(this.board.width)
                 //console.log(radius)
                 if ( !this.board.contains(this.safeAreaTop)){
@@ -433,43 +539,60 @@
                 await cellList.map( async (cell, idx)=>{
 
                     let cellElement = board[idx]  //取得合约棋盘每个格子最新数据集
+                    let prvItem = await cell.getItem()
+                    let newItemId = cellElement.item                   
+                    let newItem = await ItemUtils.createItemById(newItemId)
                     //let playerArray = cellElement.players
-                    let playerJsonArray = await house.getFullPlayersJsonByCellId(cell.getID())
-                   
-                    let itemId = cellElement.item 
-                   // let item = ItemUtils.createBitmapById(itemId)
-                   // console.log("item",item)
-                    let newItem = await ItemUtils.createItemById(itemId)
-                    //item.x = cell.x
-                   // item.y = cell.y
-                    
+                    let playerJsonInCell = await house.getFullPlayersJsonByCellId(cell.getID())
+                                       
                     //this.board.putPlayer(item); //将道具物品放入棋盘
-                    if (playerJsonArray.length > 0){
-                        await playerJsonArray.map( playerJson=>{
+                    //使用playerJsonArray而不是cellElement.players的原因是，如果玩家被炸弹炸死，合约返回来的格子是没有该玩家的，从而无法判断渲染结果
+                    if (playerJsonInCell.length > 0){
+                        
+                        let latestMoveInPlayer = async ()=>{
+                            let evtList = await cellElement.event_list.filter( event=>{
+                                return (event.evt == "move" || event.evt == "join")
+                            })
+                            if (evtList.length > 0){
+                                let playerName = evtList[evtList.length-1].who
+                                return playerName
+                            } else {
+                                return null
+                            }
+                            
+                        }
+                        let latestPlayerName = await latestMoveInPlayer()
+                        //该格子内所有玩家产生的移动效果
+                        await playerJsonInCell.map( playerJson=>{
                             house.getPlayerByName(playerJson.acc_name).then( player=>{
-                                if (player.getLife()!=0 ){
+                                if (player.isAlive() ){  //有生命值的玩家才显示
                                 
-                                    if (player.x == 0 && player.y == 0){
+                                    if (player.x == 0 && player.y == 0){  //第一次进入棋盘的玩家
                                         
                                         player.setPosition( new egret.Point(cell.x + 15*Math.random(), cell.y + 15*Math.random() ))
                                     }
                                     this.board.putPlayer(player);  //将创建的玩家放入棋盘
+                                   // 获取最后进入格子的玩家，将会显示在最顶层
+                                    if ( player.getName()==latestPlayerName ){
+                                        this.board.setIndex(player, 1)
+                                    } else {
+                                        this.board.setIndex(player, 0)
+                                    }
                                     egret.Tween.get(player).to( {x:cell.x + 20*Math.random() , y:cell.y+ 10*Math.random() }, 500, egret.Ease.sineIn )
                                     // .wait(0).call(this.checkCellItem.bind(this,cell))
                                     // .wait(0).call(this.checkBattersInHouse.bind(this, this.currentHouse)) //检查是否生成战斗
                                     
-                                    player.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)
-                                    
-                            
+                                    //player.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)                          
                                 }
                             })                      
                         })
-
+                        //检查物品触发事件渲染效果
                         if (progress == 2){  
-                            this.checkCellItem(cell)
+                            this.checkCellItemEffect(cell,prvItem,newItem) 
                         }
                         
-                        if (progress == 3){                          
+                        //检查格子战斗渲染
+                        if (progress == 3){ //该逻辑检查游戏进度为3时，是否发生最后一次战斗并渲染效果                         
                             let centerCellElementEvtList = board[60].event_list
                             let last_evt = centerCellElementEvtList[centerCellElementEvtList.length-1]
                             this.checkBattersInCell(last_evt.progress, last_evt.step, cellElement.event_list, cell)
@@ -478,22 +601,70 @@
                         }    
                     }
                     
-
-
-                    cell.addItem(newItem)
-                   // this.checkBattersInCell(this.currentHouse)
+                    
+                    // 将物品放入格子内
+                    await cell.addItem(newItem)
+                    //检查是否产生物品降落效果
+                    if (prvItem == null && (newItemId == 2 || newItemId == 13)){                        
+                        //降落效果
+                        newItem.y = -200
+                        egret.Tween.get(newItem).to( {x:0, y:0}, 1500, egret.Ease.sineIn )
+                            .wait(0).call( ()=>{   //添加物品在地图触地音效                               
+                                this.actionSound(RES.getRes("item_fall_mp3").url)                                                             
+                            });
+                    } 
                 })
+            }
+
+            /**
+             * 更新游戏玩家头像列表，有生命值的玩家可以点击查看，无生命值玩家变灰色
+             * @list: 玩家列表 
+             * 
+             */
+            private updatePlayerProfileInStage(list){
+                if ( !this.stage.contains(this.playerProfileListContainer)){
+                    this.stage.addChild(this.playerProfileListContainer)
+                    this.playerProfileListContainer.x =1200
+                    this.playerProfileListContainer.y =100
+                    //this.playerProfileListContainer.$setWidth(80)
+                    //this.playerProfileListContainer.$setHeight(100)
+                }               
+                this.playerProfileListContainer.removeChildren()
+                list.map( (player, idx)=>{
+                   
+                    let texture = player.getBitmap().texture
+                    let profileBitMap = new egret.Bitmap(texture)
+                    profileBitMap.$setX(0)
+                    profileBitMap.$setY(100*idx)
+                    profileBitMap.$setWidth(62)
+                    profileBitMap.$setHeight(100)
+                    
+                    this.playerProfileListContainer.addChild(profileBitMap)
+                    if (player.isAlive()){
+                        profileBitMap.touchEnabled = true
+                        profileBitMap.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)
+                    } else {  // 如果玩家生命值为0，玩家变灰色
+                         var colorFlilter = new egret.ColorMatrixFilter([
+                                            0.3,0.6,0,0,0,
+                                            0.3,0.6,0,0,0,
+                                            0.3,0.6,0,0,0,
+                                            0,0,0,1,0
+                                        ]);
+                        profileBitMap.filters = [colorFlilter];
+                    }                          
+                })
+                
             }
             
             /**
-             * 更新顶部栏的游戏房间列表 
+             * 从合约取得最新游戏信息并更新游戏房间，数据分拆
              * 
              */
             private async refreshHouse(id){           
                 
                 await ScatterUtils.getGameInfo(parseInt(id)).then( async game=>{
                    
-                    // 重新添加游戏房间
+                    // 重新添加/更新游戏房间
                     console.log(game)
                     if (game.rows.length>0){
                         let gameJson = game.rows[0]
@@ -506,9 +677,12 @@
 
                         await this.updateObjectsInBoard(this.currentHouse)
 
-                        this.createSafeArea(this.currentHouse.getSafeAreaRadius())
+                        this.createSafeAreaInBoard(this.currentHouse.getSafeAreaRadius())
+
+                        this.updatePlayerProfileInStage(this.currentHouse.getPlayerList())
                         
                         //创建随机生成的礼炮/烟花动画
+                        /*
                         this.animation({json:"firework_json",png:"firework_png", data:"firework",x:500*Math.random(),y:500*Math.random()}).then( animate=>{
                             this.board.addChild(animate); 
                             animate.play(1)
@@ -518,6 +692,7 @@
 
                             }, 4000); //4秒钟后消除烟花效果
                         })
+                        */
                     //    })
                     }else {
                         //alert("无游戏信息")
@@ -542,7 +717,7 @@
              * 加入游戏(房间) 
              * 
              */
-            private joinGame(){
+            private joinGame(joinX:number, joinY:number, position:any){
 
                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
@@ -558,7 +733,8 @@
                         return
                     }
                     */
-                    ScatterUtils.joinGame(this.currentHouse.getID(), this.currentHouse.getJoinEos(), 4, 4).then( transaction=>{
+                    console.log(joinX, joinY)
+                    ScatterUtils.joinGame(this.currentHouse.getID(), this.currentHouse.getJoinEos(), joinX, joinY).then( transaction=>{
                         console.log("transaction", transaction)        
                         
                         if ( !transaction.processed ){  //交易失败
@@ -568,6 +744,14 @@
                         } else {
                             //alert("加入游戏！")
                             this.popMessageBox("加入游戏！")
+                            //添加玩家降落地图效果
+                            let tmpPlayer = new Player('jump_png', {})
+                            this.board.putPlayer(tmpPlayer)
+                            tmpPlayer.setPosition( new egret.Point(position.x, position.y - 300 ))
+                            egret.Tween.get(tmpPlayer).to( position, 300, egret.Ease.sineIn )
+                                .wait(0).call( ()=>{  //添加玩家加入游戏时调入地图触地音效                                
+                                    this.actionSound(RES.getRes("player_fall_mp3").url)                                                             
+                                });
                         }
                     }).catch((e) => {
                         console.error(e);
@@ -692,21 +876,22 @@
             }
 
             /**
-             * Description: 
-             * @rowX 
-             * @rowY
+             * Description: 检查物品触发事件渲染效果，例如炸弹爆炸
+             * @cell: 检查的Cell
+             * @prvItem: Cell的上一个item状态
+             * @newItem: Cell的最新item状态
              */
-            private async checkCellItem(cell: Cell){
+            private async checkCellItemEffect(cell: Cell, prvItem: Item, newItem: Item){
                
-                let item = cell.getItem()
+                //let item = cell.getItem()
                 //item.setPosition(new egret.Point(0, 0))
 
-                if (item.getId()==1){  //触发地雷/炸弹
+                if (prvItem.getId()==1 && newItem.getId()==0){  //触发地雷/炸弹
                     this.animation({json:"blow_json",png:"blow_png", data:"blow",x:cell.x-100,y:cell.y-100}).then( animate=>{
                         this.board.addChild(animate); 
                         animate.play(1)
-                        if (cell.contains(item)){
-                            cell.removeChild(item)
+                        if (cell.contains(prvItem)){
+                            cell.removeChild(prvItem)
                         }
                         
                         this.actionSound(RES.getRes("blow_mp3").url)
@@ -716,8 +901,8 @@
                         }, 1500); 
                     })
                 } else {
-                    let position = {x:0, y:-30}
-                    egret.Tween.get(item).to( position, 300, egret.Ease.sineIn )
+                   // let position = {x:0, y:-30}
+                   // egret.Tween.get(prvItem).to( position, 300, egret.Ease.sineIn )
                    // .wait(0).call( ()=>{
                    //     cell.addItem(newItem)
                    // })
@@ -830,7 +1015,10 @@
                 })
             } 
 
-
+            /**
+             * 游戏动画方式实现
+             * 
+             */
             private async animation(animateJson){              
                 let animateFactory = new egret.MovieClipDataFactory(RES.getRes(animateJson.json),RES.getRes(animateJson.png));
                 let animate:egret.MovieClip = new egret.MovieClip(animateFactory.generateMovieClipData(animateJson.data));
@@ -842,7 +1030,11 @@
                 return animate;
             }
 
-            private showInfo(target: Player){
+            /**
+             * 显示玩家信息
+             * 
+             */
+            private showPlayerInfo(target: Player){
                 /*
                 let life = target.getLife()
                 let color
@@ -1025,7 +1217,8 @@
              *  参数：@warrior: 点选的士兵对象
              */
             private selectPlayer(player: Player){
-                this.showInfo(player)
+                this.board.setIndex(player, 1)
+                this.showPlayerInfo(player)
                 this.actionSound(RES.getRes("yes_mp3").url)
                 /*
                 this.unmountMovement()

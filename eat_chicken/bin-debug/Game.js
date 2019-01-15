@@ -97,6 +97,16 @@ var Game = (function (_super) {
         _this.safeAreaLeft = new egret.Shape();
         _this.safeAreaRight = new egret.Shape();
         _this.safeAreaBottom = new egret.Shape();
+        _this.playerProfileListContainer = new egret.DisplayObjectContainer();
+        //** 荣誉榜 */
+        _this.honorListContainer = new egret.DisplayObjectContainer();
+        _this.honorListBox = new egret.Shape();
+        _this.honorListText = new egret.TextField();
+        // 统计看板
+        _this.summaryContainer = new egret.DisplayObjectContainer();
+        _this.summaryBox = new egret.Shape();
+        _this.summaryContent = new egret.TextField();
+        // 事件/提示信息栏
         _this.messageContainer = new egret.DisplayObjectContainer();
         _this.messageBox = new egret.Shape();
         _this.message = new egret.TextField();
@@ -105,6 +115,7 @@ var Game = (function (_super) {
         _this.num = 0;
         //
         _this.interval = null;
+        _this.messageTimeout = null;
         _this.canvas = document.getElementsByTagName("CANVAS")[0];
         //this.canvas.addEventListener('mousemove',this.onMove.bind(this));
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
@@ -207,7 +218,7 @@ var Game = (function (_super) {
     Game.prototype.createGameScene = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var createGameFlat, setMapFlat, joinGameFlat, kickOffFlat, play_glory, play_honor, play_easy, play_stop, gameId;
+            var createGameFlat, setMapFlat, kickOffFlat, play_glory, play_honor, play_easy, play_stop, gameId;
             return __generator(this, function (_a) {
                 createGameFlat = this.createBitmapByName("exit_png");
                 this.stage.addChild(createGameFlat);
@@ -225,30 +236,78 @@ var Game = (function (_super) {
                 setMapFlat.y = 115;
                 setMapFlat.touchEnabled = true;
                 setMapFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.setMap, this);
-                joinGameFlat = this.createBitmapByName("cow_boy_png");
-                this.stage.addChild(joinGameFlat);
-                joinGameFlat.x = 10;
-                joinGameFlat.y = 200;
-                joinGameFlat.width = 50;
-                joinGameFlat.height = 80;
-                joinGameFlat.touchEnabled = true;
-                joinGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.joinGame, this);
                 kickOffFlat = this.createBitmapByName("recall_png");
                 this.stage.addChild(kickOffFlat);
                 kickOffFlat.x = 10;
-                kickOffFlat.y = 300;
+                kickOffFlat.y = 200;
                 kickOffFlat.touchEnabled = true;
                 kickOffFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.kickOff, this);
+                // ***游戏滚动消息看板***
+                this.messageContainer.width = 300;
+                this.messageContainer.height = 200;
+                this.messageBox.graphics.clear();
+                this.messageBox.graphics.beginFill(0xEEEEEE);
+                this.messageBox.graphics.drawRoundRect(0, 0, 300, 200, 15, 15);
+                this.messageBox.graphics.endFill();
+                this.messageContainer.addChild(this.messageBox);
+                this.message.width = 300;
+                this.message.height = 200;
+                this.message.size = 18;
+                this.message.textColor = 0x000000;
+                this.message.$setWordWrap(true);
+                this.message.type = egret.TextFieldType.INPUT;
+                this.message.$setMultiline(true);
+                this.messageContainer.addChild(this.message);
+                // ***********
+                // ***统计看板***
+                this.summaryContainer.x = 1300;
+                this.summaryContainer.y = 30;
+                this.summaryContainer.width = 200;
+                this.summaryContainer.height = 300;
+                this.stage.addChild(this.summaryContainer);
+                this.summaryBox.graphics.clear();
+                this.summaryBox.graphics.beginFill(0xEEEEEE);
+                this.summaryBox.graphics.drawRoundRect(0, 0, 300, 200, 15, 15);
+                this.summaryBox.graphics.endFill();
+                this.summaryContainer.addChild(this.summaryBox);
+                this.summaryContent.width = 200;
+                this.summaryContent.height = 300;
+                this.summaryContent.size = 18;
+                this.summaryContent.textColor = 0x000000;
+                this.summaryContent.$setWordWrap(true);
+                this.summaryContent.type = egret.TextFieldType.INPUT;
+                this.summaryContent.$setMultiline(true);
+                this.summaryContainer.addChild(this.summaryContent);
+                // ***创建游戏荣誉榜***
+                this.honorListContainer.width = 880;
+                this.honorListContainer.height = 880;
+                this.honorListBox.graphics.clear();
+                this.honorListBox.graphics.beginFill(0x444444, 0.8);
+                this.honorListBox.graphics.drawRoundRect(0, 0, 880, 880, 15, 15);
+                this.honorListBox.graphics.endFill();
+                this.honorListContainer.addChild(this.honorListBox);
+                this.honorListText.width = 880;
+                this.honorListText.height = 880;
+                this.honorListText.size = 22;
+                this.honorListText.textColor = 0x000000;
+                this.honorListText.$setWordWrap(true);
+                this.honorListText.type = egret.TextFieldType.INPUT;
+                this.honorListText.$setMultiline(true);
+                this.honorListContainer.addChild(this.honorListText);
+                // ***********
                 //开炮动画实现
-                this.animation({ json: "pao_json", png: "pao_png", data: "pao", x: 0, y: 800 }).then(function (animate) {
-                    _this.stage.addChild(animate);
-                    animate.play(-1);
-                });
+                /*
+                this.animation( {json:"pao_json",png:"pao_png", data:"pao",x:0,y:800} ).then( animate=>{
+                    this.stage.addChild(animate)
+                    animate.play(-1)
+                })
+
                 //青蛙动画实现
-                this.animation({ json: "frog_json", png: "frog_png", data: "frog", x: 1130, y: 830 }).then(function (animate) {
-                    _this.stage.addChild(animate);
-                    animate.play(-1);
-                });
+                this.animation( {json:"frog_json",png:"frog_png", data:"frog",x:1130,y:830} ).then( animate=>{
+                    this.stage.addChild(animate)
+                    animate.play(-1)
+                })
+                */
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");
                 this.login.x = 1150;
@@ -305,14 +364,26 @@ var Game = (function (_super) {
                     _this.refreshHouse(gameId);
                     // 建立与合约的定时器，每5秒更新一次数据到每个游戏房间，然后更新正在打开的棋盘玩家，然后渲染战斗（如果有的话）
                     _this.interval = egret.setInterval(function () { return __awaiter(_this, void 0, void 0, function () {
+                        var _this = this;
                         var game_progress;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4 /*yield*/, this.refreshHouse(gameId)];
+                                case 0: return [4 /*yield*/, this.refreshHouse(gameId)
+                                    //this.popHonorList()
+                                    //游戏全局看板
+                                ];
                                 case 1:
                                     _a.sent();
+                                    //this.popHonorList()
+                                    //游戏全局看板
+                                    this.updateSummaryBoard();
                                     game_progress = this.currentHouse.getProgress();
+                                    //游戏结束不再更新
                                     if (game_progress == 3) {
+                                        //弹出游戏结束荣誉榜
+                                        egret.setTimeout(function () {
+                                            _this.popHonorList();
+                                        }, this, 5000);
                                         if (this.interval) {
                                             egret.clearInterval(this.interval);
                                         }
@@ -327,7 +398,7 @@ var Game = (function (_super) {
         });
     };
     /**
-     * 初始化棋盘，生成里面cell元素并定位，生成点击cell触发移动事件
+     * 初始化棋盘，生成里面cell元素并定位，生成点击cell触发移动事件或玩家加入游戏
      *
      */
     Game.prototype.initBoard = function () {
@@ -343,8 +414,21 @@ var Game = (function (_super) {
                     cells = this.board.getCellList();
                     cells.map(function (cell) {
                         var cellXY = cell.getXY(); // cell在棋盘中的 X/Y 轴坐标
+                        // 监听格子点击事件并根据游戏状态行动
                         cell.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
-                            _this.move(cellXY.x, cellXY.y, cell.getPosition()); //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标                       
+                            if (_this.currentHouse == null) {
+                                return;
+                            }
+                            var game_progress = _this.currentHouse.getProgress();
+                            //
+                            if (game_progress == 0) {
+                            }
+                            else if (game_progress == 1) {
+                                _this.joinGame(cellXY.x, cellXY.y, cell.getPosition());
+                            }
+                            else if (game_progress == 2) {
+                                _this.move(cellXY.x, cellXY.y, cell.getPosition()); //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
+                            }
                         }, _this);
                     });
                 }
@@ -352,40 +436,46 @@ var Game = (function (_super) {
             });
         });
     };
+    /**
+     * 游戏滚动消息看板
+     *
+     */
     Game.prototype.popMessageBox = function (msgText) {
         var _this = this;
         if (!this.stage.contains(this.messageContainer)) {
+            this.messageContainer.x = this.stage.width / 2 - 100;
+            this.messageContainer.y = 50;
             this.stage.addChild(this.messageContainer);
         }
-        this.messageContainer.x = this.stage.width / 2 - 100;
-        this.messageContainer.y = 50;
-        this.messageContainer.width = 300;
-        this.messageContainer.height = 200;
-        this.messageBox.graphics.clear();
-        this.messageBox.graphics.beginFill(0xEEEEEE);
-        this.messageBox.graphics.drawRoundRect(0, 0, 300, 200, 15, 15);
-        this.messageBox.graphics.endFill();
-        //this.messageBox.x = this.stage.width/2 - 100
-        //this.messageBox.y = 50
-        this.messageContainer.addChild(this.messageBox);
-        //this.message.x = this.messageBox.x+10
-        //this.message.y = this.messageBox.y+10
-        this.message.width = 300;
-        this.message.height = 200;
-        this.message.size = 18;
-        this.message.textColor = 0x000000;
-        this.message.text = msgText;
-        this.message.$setWordWrap(true);
-        this.message.type = egret.TextFieldType.INPUT;
-        this.message.$setMultiline(true);
-        this.messageContainer.addChild(this.message);
-        setTimeout(function () {
+        //重置计时器
+        egret.clearTimeout(this.messageTimeout);
+        this.messageTimeout = egret.setTimeout(function () {
             // this.stage.removeChild(this.messageBox)
             // this.stage.removeChild(this.message)
             _this.stage.removeChild(_this.messageContainer);
-        }, 4000);
+            //this.message.text=""
+        }, this, 4000);
+        this.message.text = msgText;
     };
-    Game.prototype.createSafeArea = function (radius) {
+    Game.prototype.popHonorList = function () {
+        this.board.addChild(this.honorListContainer);
+        //this.honorListText.text = msgText
+    };
+    /**
+     * 游戏全局统计数据看板
+     *
+     */
+    Game.prototype.updateSummaryBoard = function () {
+        var playerJsonArray = this.currentHouse.getPlayerJsonList();
+        this.summaryContent.text = "\u603B\u73A9\u5BB6\u6570: " + this.currentHouse.getTotalJoinPlayers() + "\n"
+            + ("\u603BEOS\u6570:  " + this.currentHouse.getEOSInHouse() + "\n")
+            + ("Alive: " + this.currentHouse.getAlivePlayers());
+    };
+    /**
+     * 生成毒气/安全区域
+     *
+     */
+    Game.prototype.createSafeAreaInBoard = function (radius) {
         //console.log(this.board.width)
         //console.log(radius)
         if (!this.board.contains(this.safeAreaTop)) {
@@ -438,43 +528,85 @@ var Game = (function (_super) {
                         ;
                         return [4 /*yield*/, cellList.map(function (cell, idx) { return __awaiter(_this, void 0, void 0, function () {
                                 var _this = this;
-                                var cellElement, playerJsonArray, itemId, newItem, centerCellElementEvtList, last_evt;
+                                var cellElement, prvItem, newItemId, newItem, playerJsonInCell, latestMoveInPlayer, latestPlayerName_1, centerCellElementEvtList, last_evt;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
                                             cellElement = board[idx] //取得合约棋盘每个格子最新数据集
                                             ;
-                                            return [4 /*yield*/, house.getFullPlayersJsonByCellId(cell.getID())];
+                                            return [4 /*yield*/, cell.getItem()];
                                         case 1:
-                                            playerJsonArray = _a.sent();
-                                            itemId = cellElement.item;
-                                            return [4 /*yield*/, ItemUtils.createItemById(itemId)
-                                                //item.x = cell.x
-                                                // item.y = cell.y
-                                                //this.board.putPlayer(item); //将道具物品放入棋盘
+                                            prvItem = _a.sent();
+                                            newItemId = cellElement.item;
+                                            return [4 /*yield*/, ItemUtils.createItemById(newItemId)
+                                                //let playerArray = cellElement.players
                                             ];
                                         case 2:
                                             newItem = _a.sent();
-                                            if (!(playerJsonArray.length > 0)) return [3 /*break*/, 4];
-                                            return [4 /*yield*/, playerJsonArray.map(function (playerJson) {
+                                            return [4 /*yield*/, house.getFullPlayersJsonByCellId(cell.getID())
+                                                //this.board.putPlayer(item); //将道具物品放入棋盘
+                                                //使用playerJsonArray而不是cellElement.players的原因是，如果玩家被炸弹炸死，合约返回来的格子是没有该玩家的，从而无法判断渲染结果
+                                            ];
+                                        case 3:
+                                            playerJsonInCell = _a.sent();
+                                            if (!(playerJsonInCell.length > 0)) return [3 /*break*/, 6];
+                                            latestMoveInPlayer = function () { return __awaiter(_this, void 0, void 0, function () {
+                                                var evtList, playerName;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0: return [4 /*yield*/, cellElement.event_list.filter(function (event) {
+                                                                return (event.evt == "move" || event.evt == "join");
+                                                            })];
+                                                        case 1:
+                                                            evtList = _a.sent();
+                                                            if (evtList.length > 0) {
+                                                                playerName = evtList[evtList.length - 1].who;
+                                                                return [2 /*return*/, playerName];
+                                                            }
+                                                            else {
+                                                                return [2 /*return*/, null];
+                                                            }
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); };
+                                            return [4 /*yield*/, latestMoveInPlayer()
+                                                //该格子内所有玩家产生的移动效果
+                                            ];
+                                        case 4:
+                                            latestPlayerName_1 = _a.sent();
+                                            //该格子内所有玩家产生的移动效果
+                                            return [4 /*yield*/, playerJsonInCell.map(function (playerJson) {
                                                     house.getPlayerByName(playerJson.acc_name).then(function (player) {
-                                                        if (player.getLife() != 0) {
+                                                        if (player.isAlive()) {
                                                             if (player.x == 0 && player.y == 0) {
                                                                 player.setPosition(new egret.Point(cell.x + 15 * Math.random(), cell.y + 15 * Math.random()));
                                                             }
                                                             _this.board.putPlayer(player); //将创建的玩家放入棋盘
+                                                            // 获取最后进入格子的玩家，将会显示在最顶层
+                                                            if (player.getName() == latestPlayerName_1) {
+                                                                _this.board.setIndex(player, 1);
+                                                            }
+                                                            else {
+                                                                _this.board.setIndex(player, 0);
+                                                            }
                                                             egret.Tween.get(player).to({ x: cell.x + 20 * Math.random(), y: cell.y + 10 * Math.random() }, 500, egret.Ease.sineIn);
                                                             // .wait(0).call(this.checkCellItem.bind(this,cell))
                                                             // .wait(0).call(this.checkBattersInHouse.bind(this, this.currentHouse)) //检查是否生成战斗
-                                                            player.addEventListener(egret.TouchEvent.TOUCH_TAP, _this.selectPlayer.bind(_this, player), _this);
+                                                            //player.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)                          
                                                         }
                                                     });
-                                                })];
-                                        case 3:
+                                                })
+                                                //检查物品触发事件渲染效果
+                                            ];
+                                        case 5:
+                                            //该格子内所有玩家产生的移动效果
                                             _a.sent();
+                                            //检查物品触发事件渲染效果
                                             if (progress == 2) {
-                                                this.checkCellItem(cell);
+                                                this.checkCellItemEffect(cell, prvItem, newItem);
                                             }
+                                            //检查格子战斗渲染
                                             if (progress == 3) {
                                                 centerCellElementEvtList = board[60].event_list;
                                                 last_evt = centerCellElementEvtList[centerCellElementEvtList.length - 1];
@@ -483,9 +615,24 @@ var Game = (function (_super) {
                                             else {
                                                 this.checkBattersInCell(progress, step, cellElement.event_list, cell);
                                             }
-                                            _a.label = 4;
-                                        case 4:
-                                            cell.addItem(newItem);
+                                            _a.label = 6;
+                                        case 6: 
+                                        // 将物品放入格子内
+                                        return [4 /*yield*/, cell.addItem(newItem)
+                                            //检查是否产生物品降落效果
+                                        ];
+                                        case 7:
+                                            // 将物品放入格子内
+                                            _a.sent();
+                                            //检查是否产生物品降落效果
+                                            if (prvItem == null && (newItemId == 2 || newItemId == 13)) {
+                                                //降落效果
+                                                newItem.y = -200;
+                                                egret.Tween.get(newItem).to({ x: 0, y: 0 }, 1500, egret.Ease.sineIn)
+                                                    .wait(0).call(function () {
+                                                    _this.actionSound(RES.getRes("item_fall_mp3").url);
+                                                });
+                                            }
                                             return [2 /*return*/];
                                     }
                                 });
@@ -498,7 +645,45 @@ var Game = (function (_super) {
         });
     };
     /**
-     * 更新顶部栏的游戏房间列表
+     * 更新游戏玩家头像列表，有生命值的玩家可以点击查看，无生命值玩家变灰色
+     * @list: 玩家列表
+     *
+     */
+    Game.prototype.updatePlayerProfileInStage = function (list) {
+        var _this = this;
+        if (!this.stage.contains(this.playerProfileListContainer)) {
+            this.stage.addChild(this.playerProfileListContainer);
+            this.playerProfileListContainer.x = 1200;
+            this.playerProfileListContainer.y = 100;
+            //this.playerProfileListContainer.$setWidth(80)
+            //this.playerProfileListContainer.$setHeight(100)
+        }
+        this.playerProfileListContainer.removeChildren();
+        list.map(function (player, idx) {
+            var texture = player.getBitmap().texture;
+            var profileBitMap = new egret.Bitmap(texture);
+            profileBitMap.$setX(0);
+            profileBitMap.$setY(100 * idx);
+            profileBitMap.$setWidth(62);
+            profileBitMap.$setHeight(100);
+            _this.playerProfileListContainer.addChild(profileBitMap);
+            if (player.isAlive()) {
+                profileBitMap.touchEnabled = true;
+                profileBitMap.addEventListener(egret.TouchEvent.TOUCH_TAP, _this.selectPlayer.bind(_this, player), _this);
+            }
+            else {
+                var colorFlilter = new egret.ColorMatrixFilter([
+                    0.3, 0.6, 0, 0, 0,
+                    0.3, 0.6, 0, 0, 0,
+                    0.3, 0.6, 0, 0, 0,
+                    0, 0, 0, 1, 0
+                ]);
+                profileBitMap.filters = [colorFlilter];
+            }
+        });
+    };
+    /**
+     * 从合约取得最新游戏信息并更新游戏房间，数据分拆
      *
      */
     Game.prototype.refreshHouse = function (id) {
@@ -507,12 +692,11 @@ var Game = (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, ScatterUtils.getGameInfo(parseInt(id)).then(function (game) { return __awaiter(_this, void 0, void 0, function () {
-                            var _this = this;
                             var gameJson;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        // 重新添加游戏房间
+                                        // 重新添加/更新游戏房间
                                         console.log(game);
                                         if (!(game.rows.length > 0)) return [3 /*break*/, 5];
                                         gameJson = game.rows[0];
@@ -526,16 +710,8 @@ var Game = (function (_super) {
                                     case 3: return [4 /*yield*/, this.updateObjectsInBoard(this.currentHouse)];
                                     case 4:
                                         _a.sent();
-                                        this.createSafeArea(this.currentHouse.getSafeAreaRadius());
-                                        //创建随机生成的礼炮/烟花动画
-                                        this.animation({ json: "firework_json", png: "firework_png", data: "firework", x: 500 * Math.random(), y: 500 * Math.random() }).then(function (animate) {
-                                            _this.board.addChild(animate);
-                                            animate.play(1);
-                                            setTimeout(function () {
-                                                _this.board.removeChild(animate);
-                                                animate == null;
-                                            }, 4000); //4秒钟后消除烟花效果
-                                        });
+                                        this.createSafeAreaInBoard(this.currentHouse.getSafeAreaRadius());
+                                        this.updatePlayerProfileInStage(this.currentHouse.getPlayerList());
                                         return [3 /*break*/, 6];
                                     case 5:
                                         //alert("无游戏信息")
@@ -562,7 +738,7 @@ var Game = (function (_super) {
      * 加入游戏(房间)
      *
      */
-    Game.prototype.joinGame = function () {
+    Game.prototype.joinGame = function (joinX, joinY, position) {
         var _this = this;
         ScatterUtils.getIdentity().then(function (identity) {
             if (identity == null) {
@@ -578,7 +754,8 @@ var Game = (function (_super) {
                 return
             }
             */
-            ScatterUtils.joinGame(_this.currentHouse.getID(), _this.currentHouse.getJoinEos(), 4, 4).then(function (transaction) {
+            console.log(joinX, joinY);
+            ScatterUtils.joinGame(_this.currentHouse.getID(), _this.currentHouse.getJoinEos(), joinX, joinY).then(function (transaction) {
                 console.log("transaction", transaction);
                 if (!transaction.processed) {
                     transaction = JSON.parse(transaction);
@@ -588,6 +765,14 @@ var Game = (function (_super) {
                 else {
                     //alert("加入游戏！")
                     _this.popMessageBox("加入游戏！");
+                    //添加玩家降落地图效果
+                    var tmpPlayer = new Player('jump_png', {});
+                    _this.board.putPlayer(tmpPlayer);
+                    tmpPlayer.setPosition(new egret.Point(position.x, position.y - 300));
+                    egret.Tween.get(tmpPlayer).to(position, 300, egret.Ease.sineIn)
+                        .wait(0).call(function () {
+                        _this.actionSound(RES.getRes("player_fall_mp3").url);
+                    });
                 }
             }).catch(function (e) {
                 console.error(e);
@@ -730,23 +915,23 @@ var Game = (function (_super) {
         });
     };
     /**
-     * Description:
-     * @rowX
-     * @rowY
+     * Description: 检查物品触发事件渲染效果，例如炸弹爆炸
+     * @cell: 检查的Cell
+     * @prvItem: Cell的上一个item状态
+     * @newItem: Cell的最新item状态
      */
-    Game.prototype.checkCellItem = function (cell) {
+    Game.prototype.checkCellItemEffect = function (cell, prvItem, newItem) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var item, position;
             return __generator(this, function (_a) {
-                item = cell.getItem();
+                //let item = cell.getItem()
                 //item.setPosition(new egret.Point(0, 0))
-                if (item.getId() == 1) {
+                if (prvItem.getId() == 1 && newItem.getId() == 0) {
                     this.animation({ json: "blow_json", png: "blow_png", data: "blow", x: cell.x - 100, y: cell.y - 100 }).then(function (animate) {
                         _this.board.addChild(animate);
                         animate.play(1);
-                        if (cell.contains(item)) {
-                            cell.removeChild(item);
+                        if (cell.contains(prvItem)) {
+                            cell.removeChild(prvItem);
                         }
                         _this.actionSound(RES.getRes("blow_mp3").url);
                         setTimeout(function () {
@@ -756,8 +941,8 @@ var Game = (function (_super) {
                     });
                 }
                 else {
-                    position = { x: 0, y: -30 };
-                    egret.Tween.get(item).to(position, 300, egret.Ease.sineIn);
+                    // let position = {x:0, y:-30}
+                    // egret.Tween.get(prvItem).to( position, 300, egret.Ease.sineIn )
                     // .wait(0).call( ()=>{
                     //     cell.addItem(newItem)
                     // })
@@ -874,6 +1059,10 @@ var Game = (function (_super) {
             });
         });
     };
+    /**
+     * 游戏动画方式实现
+     *
+     */
     Game.prototype.animation = function (animateJson) {
         return __awaiter(this, void 0, void 0, function () {
             var animateFactory, animate;
@@ -889,7 +1078,11 @@ var Game = (function (_super) {
             });
         });
     };
-    Game.prototype.showInfo = function (target) {
+    /**
+     * 显示玩家信息
+     *
+     */
+    Game.prototype.showPlayerInfo = function (target) {
         var _this = this;
         /*
         let life = target.getLife()
@@ -1061,7 +1254,8 @@ var Game = (function (_super) {
      *  参数：@warrior: 点选的士兵对象
      */
     Game.prototype.selectPlayer = function (player) {
-        this.showInfo(player);
+        this.board.setIndex(player, 1);
+        this.showPlayerInfo(player);
         this.actionSound(RES.getRes("yes_mp3").url);
         /*
         this.unmountMovement()

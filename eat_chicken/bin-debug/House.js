@@ -76,6 +76,7 @@ var House = (function (_super) {
     };
     House.prototype.updateHouse = function (_game) {
         this.game = _game;
+        this.game_progress - this.game.game_progress;
         this.updatePlayers(this.game.players);
     };
     House.prototype.updatePlayers = function (playersJson) {
@@ -239,6 +240,21 @@ var House = (function (_super) {
                 }
             });
         });
+    };
+    House.prototype.getPlayerJsonList = function () {
+        return this.game.players;
+    };
+    House.prototype.getTotalJoinPlayers = function () {
+        return this.game.total_join_players;
+    };
+    House.prototype.getDeadPlayers = function () {
+        return this.game.dead_players;
+    };
+    House.prototype.getAlivePlayers = function () {
+        return (this.game.total_join_players - this.game.dead_players);
+    };
+    House.prototype.getEOSInHouse = function () {
+        return this.getTotalJoinPlayers() * parseFloat(this.getJoinEos().substr(0, 6));
     };
     return House;
 }(egret.DisplayObjectContainer));

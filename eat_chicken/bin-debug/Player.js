@@ -136,6 +136,14 @@ var Player = (function (_super) {
     Player.prototype.setItems = function (_items) {
         this.items = _items;
     };
+    Player.prototype.isAlive = function () {
+        if (this.getLife() > 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
     return Player;
 }(egret.DisplayObjectContainer));
 __reflect(Player.prototype, "Player");

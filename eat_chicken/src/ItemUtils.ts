@@ -4,7 +4,7 @@ class ItemUtils extends egret.HashObject {
     private static items = {
         id_0:{name:'', png:'empty_png'},   //无物体
         id_1:{name:'炸弹', png:'bomb_png'},   //地雷（触发）玩家进入本格子掉4生命。
-        id_2:{name:'', png:'empty_png'},  //武器空投（触发），当有玩家进入本格，两分钟后有超级步枪或者三级防具投入本格。
+        id_2:{name:'', png:'supergun_png'},  //武器空投（触发），当有玩家进入本格，两分钟后有超级步枪或者三级防具投入本格。
         id_3:{name:'手枪', png:'handgun_png'},  //手枪+3攻击。（普通枪械）
         id_4:{name:'步枪', png:'rifle_png'},  //步枪+4攻击。（普通枪械）
         id_5:{name:'超级步枪', png:'supergun_png'},  //超级步枪+6攻击。（高级枪械）
@@ -15,7 +15,7 @@ class ItemUtils extends egret.HashObject {
         id_10:{name:'复活卡', png:'life_png'},  //复活卡（特殊道具），如果死亡自动触发，所有物品消失4血复活。
         id_11:{name:'药箱', png:'aid_png'},  //药箱（资源）+2生命。
         id_12:{name:'急救箱', png:'first_aid_png'},  //急救箱（资源）+4生命。
-        id_13:{name:'', png:'empty_png'},  //空投的eos
+        id_13:{name:'', png:'supergun_png'},  //空投的eos
         id_14:{name:'黄金矿点', png:'gold_mine_png'},  //黄金矿点
         
     }

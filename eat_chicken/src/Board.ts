@@ -37,6 +37,7 @@ class Board extends egret.DisplayObjectContainer {
         }
         //将玩家容器加入棋盘，用于不同游戏房间的玩家重置
         this.addChild(this.playerContainer)
+       // this.addChild(this.playerContainer.stage)
 
     }
 
@@ -87,5 +88,7 @@ class Board extends egret.DisplayObjectContainer {
         this.playerContainer.removeChild(player)
     }
 
-
+    public setIndex(object, zIndex){
+        this.playerContainer.setChildIndex(object, zIndex)
+    }
 }

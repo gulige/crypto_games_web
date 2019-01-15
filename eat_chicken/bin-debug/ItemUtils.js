@@ -34,7 +34,7 @@ var ItemUtils = (function (_super) {
     ItemUtils.items = {
         id_0: { name: '', png: 'empty_png' },
         id_1: { name: '炸弹', png: 'bomb_png' },
-        id_2: { name: '', png: 'empty_png' },
+        id_2: { name: '', png: 'supergun_png' },
         id_3: { name: '手枪', png: 'handgun_png' },
         id_4: { name: '步枪', png: 'rifle_png' },
         id_5: { name: '超级步枪', png: 'supergun_png' },
@@ -45,7 +45,7 @@ var ItemUtils = (function (_super) {
         id_10: { name: '复活卡', png: 'life_png' },
         id_11: { name: '药箱', png: 'aid_png' },
         id_12: { name: '急救箱', png: 'first_aid_png' },
-        id_13: { name: '', png: 'empty_png' },
+        id_13: { name: '', png: 'supergun_png' },
         id_14: { name: '黄金矿点', png: 'gold_mine_png' },
     };
     return ItemUtils;

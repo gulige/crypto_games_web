@@ -75,6 +75,7 @@ var Board = (function (_super) {
         }
         //将玩家容器加入棋盘，用于不同游戏房间的玩家重置
         this.addChild(this.playerContainer);
+        // this.addChild(this.playerContainer.stage)
     };
     Board.prototype.createCell = function (x, y, id) {
         var cell = new Cell(x, y, id);
@@ -131,6 +132,9 @@ var Board = (function (_super) {
     };
     Board.prototype.removePlayer = function (player) {
         this.playerContainer.removeChild(player);
+    };
+    Board.prototype.setIndex = function (object, zIndex) {
+        this.playerContainer.setChildIndex(object, zIndex);
     };
     return Board;
 }(egret.DisplayObjectContainer));

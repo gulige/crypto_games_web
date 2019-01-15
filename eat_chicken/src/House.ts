@@ -47,6 +47,7 @@ class House extends egret.DisplayObjectContainer {
 
     public updateHouse(_game:any): void{
         this.game = _game
+        this.game_progress - this.game.game_progress
         this.updatePlayers(this.game.players)
     }
 
@@ -192,5 +193,25 @@ class House extends egret.DisplayObjectContainer {
             return playerJson.cell_id == cell_id
         })
         return playersJson
+    }
+
+    public getPlayerJsonList(){
+        return this.game.players
+    }
+
+    public getTotalJoinPlayers(){
+        return this.game.total_join_players
+    }
+
+    public getDeadPlayers(){
+        return this.game.dead_players
+    }
+
+    public getAlivePlayers(){
+        return (this.game.total_join_players - this.game.dead_players)
+    }
+
+    public getEOSInHouse(){
+        return this.getTotalJoinPlayers() * parseFloat(this.getJoinEos().substr(0,6))
     }
 }
