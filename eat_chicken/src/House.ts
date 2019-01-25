@@ -71,7 +71,7 @@ class House extends egret.DisplayObjectContainer {
     }
 
     private createPlayer(playerJson){
-        let name = this.playerList.length%2 ==0? "cow_boy_png":"cow_girl_png"
+        let name = this.playerList.length%2 ==0? "avtar_male_png":"avtar_female_png"
         var player = new Player(name, playerJson)
         
         //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);

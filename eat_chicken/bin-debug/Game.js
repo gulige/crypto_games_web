@@ -116,6 +116,7 @@ var Game = (function (_super) {
         //
         _this.interval = null;
         _this.messageTimeout = null;
+        _this.poisons = [];
         _this.canvas = document.getElementsByTagName("CANVAS")[0];
         //this.canvas.addEventListener('mousemove',this.onMove.bind(this));
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
@@ -142,7 +143,6 @@ var Game = (function (_super) {
      */
     Game.prototype.runGame = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var self, url, urlLoader;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -156,27 +156,70 @@ var Game = (function (_super) {
                         // let info = await ScatterUtils.move(10, 1 ,2)
                         // console.log("info",info)
                         console.log("url", window.location.href);
+                        /*
+                                        let self:Game=this;
+                                        let url: string = "resource/desert.tmx";
+                                        let urlLoader: egret.URLLoader = new egret.URLLoader();
+                                        urlLoader.dataFormat = egret.URLLoaderDataFormat.TEXT;
+                                        //load complete
+                                        urlLoader.addEventListener(egret.Event.COMPLETE, function (event: egret.Event): void {
+                                            let data: any = egret.XML.parse(event.target.data);
+                                            this.tmxTileMap = new tiled.TMXTilemap(2000, 2000, data, url);
+                                            this.tmxTileMap.render();
+                                           // self.addChild(this.tmxTileMap);
+                                        // tmxTileMap.touchEnabled = true;
+                                        // tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_TAP,self.move,self);
+                                        //this.tmxTileMap.touchEnabled = true;
+                                        //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_BEGIN, self.mouseDown, self);
+                                        //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_END, self.mouseUp, self);
+                        
+                                            var image = new eui.Image();
+                                        image.source = "resource/assets/bg.png";
+                                        self.addChild(image);
+                                            self.createGameScene()
+                        
+                                        }, url);
+                                        urlLoader.load(new egret.URLRequest(url));
+                                            var image = new eui.Image();
+                                        image.source = "resource/assets/bg.png";
+                                        image.width=this.width
+                                        this.addChild(image);
+                        
+                                        */
                         return [4 /*yield*/, this.loadResource()];
                     case 1:
+                        /*
+                                        let self:Game=this;
+                                        let url: string = "resource/desert.tmx";
+                                        let urlLoader: egret.URLLoader = new egret.URLLoader();
+                                        urlLoader.dataFormat = egret.URLLoaderDataFormat.TEXT;
+                                        //load complete
+                                        urlLoader.addEventListener(egret.Event.COMPLETE, function (event: egret.Event): void {
+                                            let data: any = egret.XML.parse(event.target.data);
+                                            this.tmxTileMap = new tiled.TMXTilemap(2000, 2000, data, url);
+                                            this.tmxTileMap.render();
+                                           // self.addChild(this.tmxTileMap);
+                                        // tmxTileMap.touchEnabled = true;
+                                        // tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_TAP,self.move,self);
+                                        //this.tmxTileMap.touchEnabled = true;
+                                        //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_BEGIN, self.mouseDown, self);
+                                        //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_END, self.mouseUp, self);
+                        
+                                            var image = new eui.Image();
+                                        image.source = "resource/assets/bg.png";
+                                        self.addChild(image);
+                                            self.createGameScene()
+                        
+                                        }, url);
+                                        urlLoader.load(new egret.URLRequest(url));
+                                            var image = new eui.Image();
+                                        image.source = "resource/assets/bg.png";
+                                        image.width=this.width
+                                        this.addChild(image);
+                        
+                                        */
                         _a.sent();
-                        self = this;
-                        url = "resource/desert.tmx";
-                        urlLoader = new egret.URLLoader();
-                        urlLoader.dataFormat = egret.URLLoaderDataFormat.TEXT;
-                        //load complete
-                        urlLoader.addEventListener(egret.Event.COMPLETE, function (event) {
-                            var data = egret.XML.parse(event.target.data);
-                            this.tmxTileMap = new tiled.TMXTilemap(2000, 2000, data, url);
-                            this.tmxTileMap.render();
-                            // self.addChild(this.tmxTileMap);
-                            // tmxTileMap.touchEnabled = true;
-                            // tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_TAP,self.move,self);
-                            //this.tmxTileMap.touchEnabled = true;
-                            //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_BEGIN, self.mouseDown, self);
-                            //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_END, self.mouseUp, self);           
-                            self.createGameScene();
-                        }, url);
-                        urlLoader.load(new egret.URLRequest(url));
+                        this.createGameScene();
                         return [2 /*return*/];
                 }
             });
@@ -310,12 +353,12 @@ var Game = (function (_super) {
                 */
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");
-                this.login.x = 1150;
+                this.login.x = 1200;
                 this.login.y = 10;
                 this.login.touchEnabled = true;
                 this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame, this);
                 this.logout = this.createBitmapByName("logout_png");
-                this.logout.x = 1150;
+                this.logout.x = 1200;
                 this.logout.y = 10;
                 this.logout.touchEnabled = true;
                 this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame, this);
@@ -331,25 +374,25 @@ var Game = (function (_super) {
                 });
                 play_glory = this.createBitmapByName("play_png");
                 this.stage.addChild(play_glory);
-                play_glory.x = 1150;
+                play_glory.x = 1250;
                 play_glory.y = 300;
                 play_glory.touchEnabled = true;
                 play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url), this);
                 play_honor = this.createBitmapByName("play_png");
                 this.stage.addChild(play_honor);
-                play_honor.x = 1150;
+                play_honor.x = 1250;
                 play_honor.y = 350;
                 play_honor.touchEnabled = true;
                 play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url), this);
                 play_easy = this.createBitmapByName("play_png");
                 this.stage.addChild(play_easy);
-                play_easy.x = 1150;
+                play_easy.x = 1250;
                 play_easy.y = 400;
                 play_easy.touchEnabled = true;
                 play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url), this);
                 play_stop = this.createBitmapByName("stop_png");
                 this.stage.addChild(play_stop);
-                play_stop.x = 1150;
+                play_stop.x = 1250;
                 play_stop.y = 450;
                 play_stop.touchEnabled = true;
                 play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
@@ -408,8 +451,8 @@ var Game = (function (_super) {
             return __generator(this, function (_a) {
                 if (this.board == null) {
                     this.board = new Board(11, 11); // 构建棋盘 11 x 11
-                    this.board.x = 200; //定位棋盘在stage中的位置
-                    this.board.y = 110;
+                    this.board.x = 300; //定位棋盘在stage中的位置
+                    this.board.y = 50;
                     this.stage.addChild(this.board);
                     cells = this.board.getCellList();
                     cells.map(function (cell) {
@@ -476,6 +519,7 @@ var Game = (function (_super) {
      *
      */
     Game.prototype.createSafeAreaInBoard = function (radius) {
+        var _this = this;
         //console.log(this.board.width)
         //console.log(radius)
         if (!this.board.contains(this.safeAreaTop)) {
@@ -503,8 +547,68 @@ var Game = (function (_super) {
         // this.safeArea.graphics.endFill();
         //this.safeArea.graphics.beginFill(0x000000, 0.2);
         //this.safeArea.graphics.drawRect(50, 50, this.board.width-100, this.board.height-100);
+        var n = 5 - radius;
+        if (this.poisons.length < n * 4) {
+            var _loop_1 = function (idx) {
+                var start, end;
+                if (idx % 4 == 0) {
+                    start = { x: 0, y: (n - 1) * 80 };
+                    end = { x: 800, y: (n - 1) * 80 };
+                }
+                else if (idx % 4 == 1) {
+                    start = { x: (n - 1) * 80, y: 0 };
+                    end = { x: (n - 1) * 80, y: 800 };
+                }
+                else if (idx % 4 == 2) {
+                    start = { x: (800 - (n - 1) * 80), y: 800 };
+                    end = { x: (800 - (n - 1) * 80), y: 0 };
+                }
+                else if (idx % 4 == 3) {
+                    start = { x: 800, y: (800 - (n - 1) * 80) };
+                    end = { x: 0, y: (800 - (n - 1) * 80) };
+                }
+                this_1.animation({ json: "poison_json", png: "poison_png", data: "poison", x: start.x, y: start.y }).then(function (animate) {
+                    animate.$setScaleX(0.6);
+                    animate.$setScaleY(0.6);
+                    animate.$alpha = 0.5;
+                    animate.play(-1);
+                    //cell.addPoison(animate);
+                    //cell.setIndex(animate, 2)  
+                    _this.board.addChild(animate);
+                    _this.poisons.push(animate);
+                    tween(animate, start, end);
+                    //egret.Tween.get(animate).to( {x:0 , y:800 }, 5000, egret.Ease.sineIn )                    
+                });
+            };
+            var this_1 = this;
+            for (var idx = this.poisons.length; idx < n * 4; idx++) {
+                _loop_1(idx);
+            }
+        }
         //this.safeArea.x = target.x + 50
         //this.playerInfo.y = target.y
+        /*
+        let cells = this.board.getCellList()
+        cells.map( cell=>{
+            let hasPoison = cell.getPoison()
+            if (!hasPoison){
+                this.animation({json:"poison_json",png:"poison_png", data:"poison",x:0,y:0}).then( animate=>{
+                    animate.$setScaleX(0.6);
+                    animate.$setScaleY(0.6);
+                    animate.$alpha = 0.5;
+                    animate.play(-1);
+                    cell.addPoison(animate);
+                    //cell.setIndex(animate, 2)
+                    this.board.addChild(animate);
+                    egret.Tween.get(animate).to( {x:0 , y:800 }, 5000, egret.Ease.sineIn )
+                })
+                
+            }
+        })
+        */
+        var tween = function (obj, start, end) {
+            egret.Tween.get(obj).to(end, 5000, egret.Ease.sineIn).wait(0).call(tween.bind(_this, obj, end, start));
+        };
     };
     /**
      * 棋盘中玩家状态更新。从合约获取玩家信息，清空棋盘上玩家/物品对象，重新生成最新玩家对象和物品并加入棋盘
@@ -528,7 +632,7 @@ var Game = (function (_super) {
                         ;
                         return [4 /*yield*/, cellList.map(function (cell, idx) { return __awaiter(_this, void 0, void 0, function () {
                                 var _this = this;
-                                var cellElement, prvItem, newItemId, newItem, playerJsonInCell, latestMoveInPlayer, latestPlayerName_1, centerCellElementEvtList, last_evt;
+                                var cellElement, prvItem, newItemId, newItem, playerJsonInCell, latestMoveInPlayer, latestPlayerName_1, centerCellElementEvtList, last_evt, tick, trigger;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
@@ -580,7 +684,7 @@ var Game = (function (_super) {
                                                     house.getPlayerByName(playerJson.acc_name).then(function (player) {
                                                         if (player.isAlive()) {
                                                             if (player.x == 0 && player.y == 0) {
-                                                                player.setPosition(new egret.Point(cell.x + 15 * Math.random(), cell.y + 15 * Math.random()));
+                                                                player.setPosition(new egret.Point(cell.x + 10 * Math.random(), cell.y + 10 * Math.random()));
                                                             }
                                                             _this.board.putPlayer(player); //将创建的玩家放入棋盘
                                                             // 获取最后进入格子的玩家，将会显示在最顶层
@@ -590,7 +694,7 @@ var Game = (function (_super) {
                                                             else {
                                                                 _this.board.setIndex(player, 0);
                                                             }
-                                                            egret.Tween.get(player).to({ x: cell.x + 20 * Math.random(), y: cell.y + 10 * Math.random() }, 500, egret.Ease.sineIn);
+                                                            egret.Tween.get(player).to({ x: cell.x + 10 * Math.random(), y: cell.y + 10 * Math.random() }, 500, egret.Ease.sineIn);
                                                             // .wait(0).call(this.checkCellItem.bind(this,cell))
                                                             // .wait(0).call(this.checkBattersInHouse.bind(this, this.currentHouse)) //检查是否生成战斗
                                                             //player.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)                          
@@ -604,7 +708,9 @@ var Game = (function (_super) {
                                             _a.sent();
                                             //检查物品触发事件渲染效果
                                             if (progress == 2) {
-                                                this.checkCellItemEffect(cell, prvItem, newItem);
+                                                if (prvItem != null && newItem != null) {
+                                                    this.checkCellItemEffect(cell, prvItem, newItem);
+                                                }
                                             }
                                             //检查格子战斗渲染
                                             if (progress == 3) {
@@ -616,24 +722,36 @@ var Game = (function (_super) {
                                                 this.checkBattersInCell(progress, step, cellElement.event_list, cell);
                                             }
                                             _a.label = 6;
-                                        case 6: 
-                                        // 将物品放入格子内
-                                        return [4 /*yield*/, cell.addItem(newItem)
-                                            //检查是否产生物品降落效果
-                                        ];
-                                        case 7:
+                                        case 6:
+                                            tick = cellElement.item_drop_ticks;
+                                            if (!(tick == 0)) return [3 /*break*/, 8];
                                             // 将物品放入格子内
+                                            newItem.x = 15;
+                                            newItem.y = 15;
+                                            return [4 /*yield*/, cell.addItem(newItem)
+                                                //检查是否产生物品降落效果
+                                                //武器空投的过程是：
+                                                //1. 进入某个格子后，触发武器空投倒计时，item_drop_triggered 从0变1
+                                                //2. item_drop_ticks减少
+                                                //3. item_drop_ticks=0时，空投发生，就可以捡了
+                                                // 首先item_drop_triggered从0变1，然后item_drop_ticks开始倒计时，当值为0时就是空降武器。 Eos直接从-1变0，没有triggered和倒计时
+                                            ];
+                                        case 7:
                                             _a.sent();
-                                            //检查是否产生物品降落效果
-                                            if (prvItem == null && (newItemId == 2 || newItemId == 13)) {
+                                            trigger = cellElement.item_drop_triggered;
+                                            //console.log(trigger,prvItem, newItemId)
+                                            if (trigger == 1 && prvItem == null && (newItemId == 5 || newItemId == 8 || newItemId == 13)) {
                                                 //降落效果
-                                                newItem.y = -200;
+                                                console.log("prvItem", prvItem);
+                                                newItem.y = -300;
                                                 egret.Tween.get(newItem).to({ x: 0, y: 0 }, 1500, egret.Ease.sineIn)
                                                     .wait(0).call(function () {
+                                                    console.log("item_fall_mp3");
                                                     _this.actionSound(RES.getRes("item_fall_mp3").url);
                                                 });
                                             }
-                                            return [2 /*return*/];
+                                            _a.label = 8;
+                                        case 8: return [2 /*return*/];
                                     }
                                 });
                             }); })];
@@ -660,12 +778,18 @@ var Game = (function (_super) {
         }
         this.playerProfileListContainer.removeChildren();
         list.map(function (player, idx) {
-            var texture = player.getBitmap().texture;
+            var portraitFrame = _this.createBitmapByName("portraitFrame_png");
+            portraitFrame.$setX(4);
+            portraitFrame.$setY(80 * idx + 5);
+            portraitFrame.$setWidth(72);
+            portraitFrame.$setHeight(68);
+            var texture = player.getPlayerProfile().texture;
             var profileBitMap = new egret.Bitmap(texture);
             profileBitMap.$setX(0);
-            profileBitMap.$setY(100 * idx);
-            profileBitMap.$setWidth(62);
-            profileBitMap.$setHeight(100);
+            profileBitMap.$setY(80 * idx);
+            profileBitMap.$setWidth(80);
+            profileBitMap.$setHeight(72);
+            _this.playerProfileListContainer.addChild(portraitFrame);
             _this.playerProfileListContainer.addChild(profileBitMap);
             if (player.isAlive()) {
                 profileBitMap.touchEnabled = true;
@@ -927,17 +1051,18 @@ var Game = (function (_super) {
                 //let item = cell.getItem()
                 //item.setPosition(new egret.Point(0, 0))
                 if (prvItem.getId() == 1 && newItem.getId() == 0) {
-                    this.animation({ json: "blow_json", png: "blow_png", data: "blow", x: cell.x - 100, y: cell.y - 100 }).then(function (animate) {
+                    this.animation({ json: "explosion_json", png: "explosion_png", data: "explosion", x: cell.x - 20, y: cell.y - 30 }).then(function (animate) {
                         _this.board.addChild(animate);
                         animate.play(1);
                         if (cell.contains(prvItem)) {
                             cell.removeChild(prvItem);
                         }
                         _this.actionSound(RES.getRes("blow_mp3").url);
+                        _this.actionSound(RES.getRes("destroyhuman_wav").url);
                         setTimeout(function () {
                             _this.board.removeChild(animate);
                             animate == null;
-                        }, 1500);
+                        }, 1000);
                     });
                 }
                 else {
@@ -1394,15 +1519,15 @@ var Game = (function (_super) {
              this.board.addChild(_actionShow)
              */
         //创建攻击动画效果
-        var fightFactory = new egret.MovieClipDataFactory(RES.getRes("fight_json"), RES.getRes("fight_png"));
-        var fighting = new egret.MovieClip(fightFactory.generateMovieClipData("fight"));
+        var fightFactory = new egret.MovieClipDataFactory(RES.getRes("fighting_json"), RES.getRes("fighting_png"));
+        var fighting = new egret.MovieClip(fightFactory.generateMovieClipData("fighting"));
         // role.gotoAndPlay(1, 3);
-        fighting.x = playerOffsetPoint.x;
-        fighting.y = playerOffsetPoint.y;
-        fighting.width = 50;
-        fighting.height = 50;
+        fighting.x = playerOffsetPoint.x - 20;
+        fighting.y = playerOffsetPoint.y - 25;
+        //fighting.width = 50;
+        //fighting.height = 50;
         this.board.addChild(fighting);
-        fighting.play(20);
+        fighting.play(5);
         this.actionSound(RES.getRes("shooting_mp3").url);
         //显示玩家生命值
         /* playersInCell.map(player=>{
@@ -1466,7 +1591,7 @@ var Game = (function (_super) {
                 }
                 fighting == null;
                 resolve();
-            }, 1000);
+            }, 7000);
         });
     };
     /**

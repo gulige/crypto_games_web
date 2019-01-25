@@ -116,7 +116,7 @@ var House = (function (_super) {
         });
     };
     House.prototype.createPlayer = function (playerJson) {
-        var name = this.playerList.length % 2 == 0 ? "cow_boy_png" : "cow_girl_png";
+        var name = this.playerList.length % 2 == 0 ? "avtar_male_png" : "avtar_female_png";
         var player = new Player(name, playerJson);
         //var colorFlilter = new egret.ColorMatrixFilter(this.colorMatrix);
         //warrior.getBitmap().filters = [colorFlilter];

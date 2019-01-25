@@ -3,6 +3,7 @@
 class Player extends egret.DisplayObjectContainer {
 
     private playerBitmap: egret.Bitmap
+    private playerProfile: egret.Bitmap
     private house: House
     private task = {action:"idle", target:null, status:null}
     private position: egret.Point = new egret.Point(0,0)
@@ -25,8 +26,9 @@ class Player extends egret.DisplayObjectContainer {
 
     private createPlayer(name:string,playerJson:any): void {
         this.playerBitmap = this.createBitmapByName(name);
-        this.playerBitmap.width = 50;
-        this.playerBitmap.height = 80;
+        this.playerBitmap.width = 70;
+        this.playerBitmap.height = 70;
+        this.playerProfile = this.createBitmapByName("profile_"+name);
         //this.playerBitmap.x = this.position.x //初始化位置
         //this.playerBitmap.y = this.position.y
         this.playerBitmap.touchEnabled = true;
@@ -65,8 +67,12 @@ class Player extends egret.DisplayObjectContainer {
         return result;
     }
 
-    public getBitmap(){
+    public getBitmap(): egret.Bitmap{
         return this.playerBitmap
+    }
+
+    public getPlayerProfile(): egret.Bitmap{
+        return this.playerProfile
     }
 
     public setTask(_task): void{

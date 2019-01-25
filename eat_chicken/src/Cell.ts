@@ -7,6 +7,7 @@ class Cell extends egret.DisplayObjectContainer {
     private id: number
     private cell_X_Y
     private item: Item = null
+    private hasPoison = false
     private battleTime:number=0  //seonds
 
     public constructor(rowX:number, colY:number,id:number) {
@@ -17,17 +18,19 @@ class Cell extends egret.DisplayObjectContainer {
     private createCell(rowX:number,colY:number,_id:number): void {
         this.id = _id
         /*
-        this.cellBitmap = this.createBitmapByName("bg1_jpg");
+        this.cellBitmap = this.createBitmapByName("frame_png");
         this.cellBitmap.width = 80;   //cell的长/宽
         this.cellBitmap.height = 80;
+        this.addChild(this.cellBitmap);
         */
         this.cellRect.graphics.clear()
-        this.cellRect.graphics.lineStyle(1,0x000000,0.3)
-        this.cellRect.graphics.beginFill(0xEEEEEE,0.2);
+        this.cellRect.graphics.lineStyle(1,0x000000,0.2)
+        this.cellRect.graphics.beginFill(0xF7CDA4,0.5);
         this.cellRect.graphics.drawRect(0, 0, 80, 80);
         this.cellRect.graphics.endFill();
         this.addChild(this.cellRect);
-        this.position = new egret.Point(this.cellRect.width*rowX, this.cellRect.height*colY);
+
+        this.position = new egret.Point(80*rowX, 80*colY);
         this.x = this.position.x //初始化位置
         this.y = this.position.y
         //this.cellBitmap.touchEnabled = true;
@@ -99,12 +102,25 @@ class Cell extends egret.DisplayObjectContainer {
         this.addChild(this.item)
     }
 
+    public addPoison(_poison:egret.MovieClip): void{
+        this.hasPoison = true
+        this.addChild(_poison)
+    }
+
+    public getPoison(): boolean{
+        return this.hasPoison
+    }
+
     public setBattleTime(time){
         this.battleTime = time 
     }
 
     public getBattleTime(){
         return this.battleTime
+    }
+
+    public setIndex(object, zIndex){
+        this.setChildIndex(object, zIndex)
     }
    
 }

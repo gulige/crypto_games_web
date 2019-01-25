@@ -16,6 +16,7 @@ var Cell = (function (_super) {
         _this.task = { action: "idle", target: null, status: null };
         _this.position = new egret.Point(0, 0);
         _this.item = null;
+        _this.hasPoison = false;
         _this.battleTime = 0; //seonds
         _this.createCell(rowX, colY, id);
         return _this;
@@ -23,17 +24,18 @@ var Cell = (function (_super) {
     Cell.prototype.createCell = function (rowX, colY, _id) {
         this.id = _id;
         /*
-        this.cellBitmap = this.createBitmapByName("bg1_jpg");
+        this.cellBitmap = this.createBitmapByName("frame_png");
         this.cellBitmap.width = 80;   //cell的长/宽
         this.cellBitmap.height = 80;
+        this.addChild(this.cellBitmap);
         */
         this.cellRect.graphics.clear();
-        this.cellRect.graphics.lineStyle(1, 0x000000, 0.3);
-        this.cellRect.graphics.beginFill(0xEEEEEE, 0.2);
+        this.cellRect.graphics.lineStyle(1, 0x000000, 0.2);
+        this.cellRect.graphics.beginFill(0xF7CDA4, 0.5);
         this.cellRect.graphics.drawRect(0, 0, 80, 80);
         this.cellRect.graphics.endFill();
         this.addChild(this.cellRect);
-        this.position = new egret.Point(this.cellRect.width * rowX, this.cellRect.height * colY);
+        this.position = new egret.Point(80 * rowX, 80 * colY);
         this.x = this.position.x; //初始化位置
         this.y = this.position.y;
         //this.cellBitmap.touchEnabled = true;
@@ -89,11 +91,21 @@ var Cell = (function (_super) {
         this.item = _item;
         this.addChild(this.item);
     };
+    Cell.prototype.addPoison = function (_poison) {
+        this.hasPoison = true;
+        this.addChild(_poison);
+    };
+    Cell.prototype.getPoison = function () {
+        return this.hasPoison;
+    };
     Cell.prototype.setBattleTime = function (time) {
         this.battleTime = time;
     };
     Cell.prototype.getBattleTime = function () {
         return this.battleTime;
+    };
+    Cell.prototype.setIndex = function (object, zIndex) {
+        this.setChildIndex(object, zIndex);
     };
     return Cell;
 }(egret.DisplayObjectContainer));

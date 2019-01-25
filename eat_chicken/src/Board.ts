@@ -4,8 +4,8 @@ class Board extends egret.DisplayObjectContainer {
 
     //private townBitmap: egret.Bitmap
     private uuid
-    private life = {full:100, remain:100}
-    private gold = 100  //city 100 gold unit
+    //private life = {full:100, remain:100}
+    //private gold = 100  //city 100 gold unit
     //private position: egret.Point
     private cellList: Array<Cell>
     private playerContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()

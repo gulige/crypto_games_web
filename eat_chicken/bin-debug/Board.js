@@ -47,8 +47,6 @@ var Board = (function (_super) {
     __extends(Board, _super);
     function Board(x, y) {
         var _this = _super.call(this) || this;
-        _this.life = { full: 100, remain: 100 };
-        _this.gold = 100; //city 100 gold unit
         _this.playerContainer = new egret.DisplayObjectContainer();
         _this.colorMatrix = [
             0.3, 0.6, 0, 0, 0,

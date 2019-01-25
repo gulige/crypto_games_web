@@ -95,6 +95,8 @@
             private interval = null;
             private messageTimeout = null;
 
+            private poisons = []
+
 
             public constructor() {
                 super();
@@ -143,8 +145,8 @@
                 console.log("url", window.location.href)
                 
 
-                await this.loadResource()
-
+                
+/*
                 let self:Game=this;
                 let url: string = "resource/desert.tmx";
                 let urlLoader: egret.URLLoader = new egret.URLLoader();
@@ -161,10 +163,21 @@
                 //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_BEGIN, self.mouseDown, self);
                 //  this.tmxTileMap.addEventListener(egret.TouchEvent.TOUCH_END, self.mouseUp, self);           
 
+                    var image = new eui.Image();
+                image.source = "resource/assets/bg.png";
+                self.addChild(image);
                     self.createGameScene()
 
                 }, url);
                 urlLoader.load(new egret.URLRequest(url));
+                    var image = new eui.Image();
+                image.source = "resource/assets/bg.png";
+                image.width=this.width
+                this.addChild(image);
+
+                */
+                    await this.loadResource()
+                    this.createGameScene()
 
             }
 
@@ -316,13 +329,13 @@
                 */
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");           
-                this.login.x=1150
+                this.login.x=1200
                 this.login.y=10
                 this.login.touchEnabled = true;
                 this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame ,this) 
              
                 this.logout = this.createBitmapByName("logout_png");     
-                this.logout.x=1150
+                this.logout.x=1200
                 this.logout.y=10
                 this.logout.touchEnabled = true;
                 this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame ,this) 
@@ -341,28 +354,28 @@
                 //***背景音乐设置 */
                 let play_glory = this.createBitmapByName("play_png");
                 this.stage.addChild(play_glory);
-                play_glory.x=1150
+                play_glory.x=1250
                 play_glory.y=300
                 play_glory.touchEnabled = true;
                 play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url) ,this) 
 
                 let play_honor = this.createBitmapByName("play_png");
                 this.stage.addChild(play_honor);
-                play_honor.x=1150
+                play_honor.x=1250
                 play_honor.y=350
                 play_honor.touchEnabled = true;
                 play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url) ,this)
 
                 let play_easy = this.createBitmapByName("play_png");
                 this.stage.addChild(play_easy);
-                play_easy.x=1150
+                play_easy.x=1250
                 play_easy.y=400
                 play_easy.touchEnabled = true;
                 play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url) ,this)
 
                 let play_stop = this.createBitmapByName("stop_png");
                 this.stage.addChild(play_stop);
-                play_stop.x=1150
+                play_stop.x=1250
                 play_stop.y=450
                 play_stop.touchEnabled = true;
                 play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
@@ -413,8 +426,8 @@
             private async initBoard(){  //棋盘为静态物体
                 if (this.board == null) {
                     this.board = new Board(11,11)   // 构建棋盘 11 x 11
-                    this.board.x = 200  //定位棋盘在stage中的位置
-                    this.board.y = 110 
+                    this.board.x = 300  //定位棋盘在stage中的位置
+                    this.board.y = 50 
                     this.stage.addChild(this.board);
 
                     //cell添加点击移动事件
@@ -518,14 +531,46 @@
                // this.safeArea.graphics.endFill();
                 //this.safeArea.graphics.beginFill(0x000000, 0.2);
                 //this.safeArea.graphics.drawRect(50, 50, this.board.width-100, this.board.height-100);
-                
-                //this.safeArea.x = target.x + 50
-                //this.playerInfo.y = target.y
-                
+                //一下为产生毒气及移动效果
+                let n = 5-radius  //先判断毒气区的格数
+                if (this.poisons.length < n*4){  //当前毒气数小于应该产生毒气数，就生成新毒气
+                    for (let idx=this.poisons.length; idx < n*4; idx++){
+                        let start, end
+                        if (idx%4==0){  //左 --> 右   每行由左移到右的毒气
+                            start = {x:0, y:(n-1)*80}
+                            end = {x:800, y:(n-1)*80}
+                        } else if(idx%4==1){ // 上 --> 下   每列由上移到下的毒气
+                            start = {x:(n-1)*80, y:0}
+                            end = {x:(n-1)*80, y:800}
+                        } else if(idx%4==2){ // 下 --> 上   每列由下移到上的毒气
+                            start = {x:(800 - (n-1)*80), y:800}
+                            end = {x:(800 - (n-1)*80), y:0}
+                        } else if (idx%4==3){  //右 --> 左    每行由右移到左的毒气
+                            start = {x:800, y:(800 - (n-1)*80)}
+                            end = {x:0, y:(800 - (n-1)*80)}
+                        }
+                         this.animation({json:"poison_json",png:"poison_png", data:"poison",x:start.x, y:start.y}).then( animate=>{
+                            animate.$setScaleX(0.6);
+                            animate.$setScaleY(0.6);
+                            animate.$alpha = 0.5;
+                            animate.play(-1);   
+                            //cell.addPoison(animate);
+                            //cell.setIndex(animate, 2)  
+                            this.board.addChild(animate);
+                            this.poisons.push(animate)  
+                            tween(animate, start, end)                  
+                        })
+                    }
+
+                }
+
+                let tween =(obj, start, end)=>{
+                    egret.Tween.get(obj).to( end, 5000, egret.Ease.sineIn ).wait(0).call( tween.bind(this,obj, end, start) )
+                } 
             }
 
             /**
-             * 棋盘中玩家状态更新。从合约获取玩家信息，清空棋盘上玩家/物品对象，重新生成最新玩家对象和物品并加入棋盘 
+             * 棋盘中玩家状态更新。从合约获取玩家信息，清空棋盘上玩家/物品对象，重新生成最新玩家对象和物品并加入棋盘  
              * 
              */
             private async updateObjectsInBoard(house: House){
@@ -569,7 +614,7 @@
                                 
                                     if (player.x == 0 && player.y == 0){  //第一次进入棋盘的玩家
                                         
-                                        player.setPosition( new egret.Point(cell.x + 15*Math.random(), cell.y + 15*Math.random() ))
+                                        player.setPosition( new egret.Point(cell.x + 10*Math.random(), cell.y + 10*Math.random() ))
                                     }
                                     this.board.putPlayer(player);  //将创建的玩家放入棋盘
                                    // 获取最后进入格子的玩家，将会显示在最顶层
@@ -578,7 +623,7 @@
                                     } else {
                                         this.board.setIndex(player, 0)
                                     }
-                                    egret.Tween.get(player).to( {x:cell.x + 20*Math.random() , y:cell.y+ 10*Math.random() }, 500, egret.Ease.sineIn )
+                                    egret.Tween.get(player).to( {x:cell.x + 10*Math.random() , y:cell.y+ 10*Math.random() }, 500, egret.Ease.sineIn )
                                     // .wait(0).call(this.checkCellItem.bind(this,cell))
                                     // .wait(0).call(this.checkBattersInHouse.bind(this, this.currentHouse)) //检查是否生成战斗
                                     
@@ -588,9 +633,12 @@
                         })
                         //检查物品触发事件渲染效果
                         if (progress == 2){  
-                            this.checkCellItemEffect(cell,prvItem,newItem) 
+                            if (prvItem!=null && newItem!=null){
+                                this.checkCellItemEffect(cell,prvItem,newItem)
+                            }
+                             
                         }
-                        
+
                         //检查格子战斗渲染
                         if (progress == 3){ //该逻辑检查游戏进度为3时，是否发生最后一次战斗并渲染效果                         
                             let centerCellElementEvtList = board[60].event_list
@@ -601,18 +649,33 @@
                         }    
                     }
                     
-                    
-                    // 将物品放入格子内
-                    await cell.addItem(newItem)
-                    //检查是否产生物品降落效果
-                    if (prvItem == null && (newItemId == 2 || newItemId == 13)){                        
-                        //降落效果
-                        newItem.y = -200
-                        egret.Tween.get(newItem).to( {x:0, y:0}, 1500, egret.Ease.sineIn )
-                            .wait(0).call( ()=>{   //添加物品在地图触地音效                               
-                                this.actionSound(RES.getRes("item_fall_mp3").url)                                                             
-                            });
+                    // 当物品ID不为0 以及 tick为0 时，物品可见可捡
+                    let tick = cellElement.item_drop_ticks
+                    if(tick == 0){
+                        // 将物品放入格子内
+                        newItem.x = 15
+                        newItem.y = 15
+                        await cell.addItem(newItem)
+                        //检查是否产生物品降落效果
+                        //武器空投的过程是：
+                        //1. 进入某个格子后，触发武器空投倒计时，item_drop_triggered 从0变1
+                        //2. item_drop_ticks减少
+                        //3. item_drop_ticks=0时，空投发生，就可以捡了
+                        // 首先item_drop_triggered从0变1，然后item_drop_ticks开始倒计时，当值为0时就是空降武器。 Eos直接从-1变0，没有triggered和倒计时
+                        let trigger = cellElement.item_drop_triggered
+                        //console.log(trigger,prvItem, newItemId)
+                        if (trigger == 1 && prvItem==null && (newItemId == 5 || newItemId == 8 || newItemId == 13)){                        
+                            //降落效果
+                            console.log("prvItem", prvItem)
+                            newItem.y = -300
+                            egret.Tween.get(newItem).to( {x:0, y:0}, 1500, egret.Ease.sineIn )
+                                .wait(0).call( ()=>{   //添加物品在地图触地音效   
+                                    console.log("item_fall_mp3")                            
+                                    this.actionSound(RES.getRes("item_fall_mp3").url)                                                             
+                                });
+                        }
                     } 
+                         
                 })
             }
 
@@ -632,13 +695,19 @@
                 this.playerProfileListContainer.removeChildren()
                 list.map( (player, idx)=>{
                    
-                    let texture = player.getBitmap().texture
+                    let portraitFrame = this.createBitmapByName("portraitFrame_png");
+                    portraitFrame.$setX(4)
+                    portraitFrame.$setY(80*idx+5)
+                    portraitFrame.$setWidth(72)
+                    portraitFrame.$setHeight(68)
+                    let texture = player.getPlayerProfile().texture
                     let profileBitMap = new egret.Bitmap(texture)
                     profileBitMap.$setX(0)
-                    profileBitMap.$setY(100*idx)
-                    profileBitMap.$setWidth(62)
-                    profileBitMap.$setHeight(100)
+                    profileBitMap.$setY(80*idx)
+                    profileBitMap.$setWidth(80)
+                    profileBitMap.$setHeight(72)
                     
+                    this.playerProfileListContainer.addChild(portraitFrame)
                     this.playerProfileListContainer.addChild(profileBitMap)
                     if (player.isAlive()){
                         profileBitMap.touchEnabled = true
@@ -887,7 +956,7 @@
                 //item.setPosition(new egret.Point(0, 0))
 
                 if (prvItem.getId()==1 && newItem.getId()==0){  //触发地雷/炸弹
-                    this.animation({json:"blow_json",png:"blow_png", data:"blow",x:cell.x-100,y:cell.y-100}).then( animate=>{
+                    this.animation({json:"explosion_json",png:"explosion_png", data:"explosion",x:cell.x-20,y:cell.y-30}).then( animate=>{
                         this.board.addChild(animate); 
                         animate.play(1)
                         if (cell.contains(prvItem)){
@@ -895,10 +964,11 @@
                         }
                         
                         this.actionSound(RES.getRes("blow_mp3").url)
+                        this.actionSound(RES.getRes("destroyhuman_wav").url)
                         setTimeout(()=> {
                             this.board.removeChild(animate)                                    
                             animate == null
-                        }, 1500); 
+                        }, 1000); 
                     })
                 } else {
                    // let position = {x:0, y:-30}
@@ -1370,15 +1440,15 @@
                     this.board.addChild(_actionShow)
                     */
                 //创建攻击动画效果
-                let fightFactory = new egret.MovieClipDataFactory(RES.getRes("fight_json"),RES.getRes("fight_png"));
-                let fighting:egret.MovieClip = new egret.MovieClip(fightFactory.generateMovieClipData("fight"));
+                let fightFactory = new egret.MovieClipDataFactory(RES.getRes("fighting_json"),RES.getRes("fighting_png"));
+                let fighting:egret.MovieClip = new egret.MovieClip(fightFactory.generateMovieClipData("fighting"));
                 // role.gotoAndPlay(1, 3);
-                fighting.x = playerOffsetPoint.x;
-                fighting.y = playerOffsetPoint.y;
-                fighting.width = 50;
-                fighting.height = 50;
+                fighting.x = playerOffsetPoint.x-20;
+                fighting.y = playerOffsetPoint.y-25;
+                //fighting.width = 50;
+                //fighting.height = 50;
                 this.board.addChild(fighting); 
-                fighting.play(20)
+                fighting.play(5)
 
                 this.actionSound(RES.getRes("shooting_mp3").url)
 
@@ -1449,7 +1519,7 @@
                         
                         fighting == null
                         resolve()
-                    }, 1000);
+                    }, 7000);
                 })
             }
 

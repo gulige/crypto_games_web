@@ -20,8 +20,9 @@ var Player = (function (_super) {
     }
     Player.prototype.createPlayer = function (name, playerJson) {
         this.playerBitmap = this.createBitmapByName(name);
-        this.playerBitmap.width = 50;
-        this.playerBitmap.height = 80;
+        this.playerBitmap.width = 70;
+        this.playerBitmap.height = 70;
+        this.playerProfile = this.createBitmapByName("profile_" + name);
         //this.playerBitmap.x = this.position.x //初始化位置
         //this.playerBitmap.y = this.position.y
         this.playerBitmap.touchEnabled = true;
@@ -58,6 +59,9 @@ var Player = (function (_super) {
     };
     Player.prototype.getBitmap = function () {
         return this.playerBitmap;
+    };
+    Player.prototype.getPlayerProfile = function () {
+        return this.playerProfile;
     };
     Player.prototype.setTask = function (_task) {
         this.task = _task;

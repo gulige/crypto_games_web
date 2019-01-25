@@ -13,8 +13,8 @@ class Item extends egret.DisplayObjectContainer {
     private createItem(name:string): void {
         //this.id = _id
         this.itemBitMap = this.createBitmapByName(name);
-        this.itemBitMap.width = 70;   //cell的长/宽
-        this.itemBitMap.height = 70;
+        this.itemBitMap.width = 50;   //cell的长/宽
+        this.itemBitMap.height = 50;
         //this.position = new egret.Point(this.cellBitmap.width*rowX, this.cellBitmap.height*colY);
         //this.x = this.position.x //初始化位置
         //this.y = this.position.y

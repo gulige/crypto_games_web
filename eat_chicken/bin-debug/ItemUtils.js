@@ -33,20 +33,20 @@ var ItemUtils = (function (_super) {
     };
     ItemUtils.items = {
         id_0: { name: '', png: 'empty_png' },
-        id_1: { name: '炸弹', png: 'bomb_png' },
-        id_2: { name: '', png: 'supergun_png' },
-        id_3: { name: '手枪', png: 'handgun_png' },
-        id_4: { name: '步枪', png: 'rifle_png' },
-        id_5: { name: '超级步枪', png: 'supergun_png' },
-        id_6: { name: '一级防具', png: 'shield_L1_png' },
-        id_7: { name: '二级防具', png: 'shield_L2_png' },
-        id_8: { name: '三级防具', png: 'shield_L3_png' },
+        id_1: { name: '炸弹', png: 'explosive_png' },
+        id_2: { name: '', png: 'gun4_png' },
+        id_3: { name: '手枪', png: 'gun1_png' },
+        id_4: { name: '步枪', png: 'gun2_png' },
+        id_5: { name: '超级步枪', png: 'gun4_png' },
+        id_6: { name: '一级防具', png: 'shield1_png' },
+        id_7: { name: '二级防具', png: 'shield2_png' },
+        id_8: { name: '三级防具', png: 'shield3_png' },
         id_9: { name: '决斗卡', png: 'battle_png' },
         id_10: { name: '复活卡', png: 'life_png' },
         id_11: { name: '药箱', png: 'aid_png' },
         id_12: { name: '急救箱', png: 'first_aid_png' },
-        id_13: { name: '', png: 'supergun_png' },
-        id_14: { name: '黄金矿点', png: 'gold_mine_png' },
+        id_13: { name: '', png: 'money_png' },
+        id_14: { name: '黄金矿点', png: 'gold_png' },
     };
     return ItemUtils;
 }(egret.HashObject));
