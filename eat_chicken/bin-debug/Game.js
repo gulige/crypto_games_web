@@ -273,16 +273,18 @@ var Game = (function (_super) {
                 createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
                     document.location.href = '/index.html';
                 }, this);
-                setMapFlat = this.createBitmapByName("bg1_jpg");
+                setMapFlat = this.createBitmapByName("setmap_png");
                 this.stage.addChild(setMapFlat);
+                setMapFlat.width = 80;
+                setMapFlat.height = 80;
                 setMapFlat.x = 10;
                 setMapFlat.y = 115;
                 setMapFlat.touchEnabled = true;
                 setMapFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.setMap, this);
-                kickOffFlat = this.createBitmapByName("recall_png");
+                kickOffFlat = this.createBitmapByName("kickoff_png");
                 this.stage.addChild(kickOffFlat);
                 kickOffFlat.x = 10;
-                kickOffFlat.y = 200;
+                kickOffFlat.y = 220;
                 kickOffFlat.touchEnabled = true;
                 kickOffFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.kickOff, this);
                 // ***游戏滚动消息看板***
@@ -305,16 +307,16 @@ var Game = (function (_super) {
                 // ***统计看板***
                 this.summaryContainer.x = 1300;
                 this.summaryContainer.y = 30;
-                this.summaryContainer.width = 200;
-                this.summaryContainer.height = 300;
+                this.summaryContainer.width = 150;
+                this.summaryContainer.height = 200;
                 this.stage.addChild(this.summaryContainer);
                 this.summaryBox.graphics.clear();
-                this.summaryBox.graphics.beginFill(0xEEEEEE);
-                this.summaryBox.graphics.drawRoundRect(0, 0, 300, 200, 15, 15);
+                this.summaryBox.graphics.beginFill(0xF7CDA4, 0.8);
+                this.summaryBox.graphics.drawRoundRect(0, 0, 150, 200, 15, 15);
                 this.summaryBox.graphics.endFill();
                 this.summaryContainer.addChild(this.summaryBox);
-                this.summaryContent.width = 200;
-                this.summaryContent.height = 300;
+                this.summaryContent.width = 150;
+                this.summaryContent.height = 200;
                 this.summaryContent.size = 18;
                 this.summaryContent.textColor = 0x000000;
                 this.summaryContent.$setWordWrap(true);
@@ -338,19 +340,6 @@ var Game = (function (_super) {
                 this.honorListText.$setMultiline(true);
                 this.honorListContainer.addChild(this.honorListText);
                 // ***********
-                //开炮动画实现
-                /*
-                this.animation( {json:"pao_json",png:"pao_png", data:"pao",x:0,y:800} ).then( animate=>{
-                    this.stage.addChild(animate)
-                    animate.play(-1)
-                })
-
-                //青蛙动画实现
-                this.animation( {json:"frog_json",png:"frog_png", data:"frog",x:1130,y:830} ).then( animate=>{
-                    this.stage.addChild(animate)
-                    animate.play(-1)
-                })
-                */
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");
                 this.login.x = 1200;
@@ -374,25 +363,25 @@ var Game = (function (_super) {
                 });
                 play_glory = this.createBitmapByName("play_png");
                 this.stage.addChild(play_glory);
-                play_glory.x = 1250;
+                play_glory.x = 1400;
                 play_glory.y = 300;
                 play_glory.touchEnabled = true;
                 play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url), this);
                 play_honor = this.createBitmapByName("play_png");
                 this.stage.addChild(play_honor);
-                play_honor.x = 1250;
+                play_honor.x = 1400;
                 play_honor.y = 350;
                 play_honor.touchEnabled = true;
                 play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url), this);
                 play_easy = this.createBitmapByName("play_png");
                 this.stage.addChild(play_easy);
-                play_easy.x = 1250;
+                play_easy.x = 1400;
                 play_easy.y = 400;
                 play_easy.touchEnabled = true;
                 play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url), this);
                 play_stop = this.createBitmapByName("stop_png");
                 this.stage.addChild(play_stop);
-                play_stop.x = 1250;
+                play_stop.x = 1400;
                 play_stop.y = 450;
                 play_stop.touchEnabled = true;
                 play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
@@ -470,6 +459,7 @@ var Game = (function (_super) {
                                 _this.joinGame(cellXY.x, cellXY.y, cell.getPosition());
                             }
                             else if (game_progress == 2) {
+                                console.log("move triger");
                                 _this.move(cellXY.x, cellXY.y, cell.getPosition()); //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
                             }
                         }, _this);
@@ -547,67 +537,48 @@ var Game = (function (_super) {
         // this.safeArea.graphics.endFill();
         //this.safeArea.graphics.beginFill(0x000000, 0.2);
         //this.safeArea.graphics.drawRect(50, 50, this.board.width-100, this.board.height-100);
-        var n = 5 - radius;
+        //一下为产生毒气及移动效果
+        var n = 5 - radius; //先判断毒气区的格数
         if (this.poisons.length < n * 4) {
-            var _loop_1 = function (idx) {
-                var start, end;
-                if (idx % 4 == 0) {
-                    start = { x: 0, y: (n - 1) * 80 };
-                    end = { x: 800, y: (n - 1) * 80 };
+            for (var idx = this.poisons.length / 4; idx < n; idx++) {
+                var _loop_1 = function (a) {
+                    var start, end;
+                    if (a == 0) {
+                        start = { x: 0, y: idx * 80 };
+                        end = { x: 800, y: idx * 80 };
+                    }
+                    else if (a == 1) {
+                        start = { x: idx * 80, y: 0 };
+                        end = { x: idx * 80, y: 800 };
+                    }
+                    else if (a == 2) {
+                        start = { x: (800 - idx * 80), y: 800 };
+                        end = { x: (800 - idx * 80), y: 0 };
+                    }
+                    else if (a == 3) {
+                        start = { x: 800, y: (800 - idx * 80) };
+                        end = { x: 0, y: (800 - idx * 80) };
+                    }
+                    this_1.animation({ json: "poison_json", png: "poison_png", data: "poison", x: start.x, y: start.y }).then(function (animate) {
+                        animate.$setScaleX(0.6);
+                        animate.$setScaleY(0.6);
+                        animate.$alpha = 0.5;
+                        animate.play(-1);
+                        //cell.addPoison(animate);
+                        //cell.setIndex(animate, 2)  
+                        _this.board.addChild(animate);
+                        _this.poisons.push(animate);
+                        tween(animate, start, end);
+                    });
+                };
+                var this_1 = this;
+                for (var a = 0; a < 4; a++) {
+                    _loop_1(a);
                 }
-                else if (idx % 4 == 1) {
-                    start = { x: (n - 1) * 80, y: 0 };
-                    end = { x: (n - 1) * 80, y: 800 };
-                }
-                else if (idx % 4 == 2) {
-                    start = { x: (800 - (n - 1) * 80), y: 800 };
-                    end = { x: (800 - (n - 1) * 80), y: 0 };
-                }
-                else if (idx % 4 == 3) {
-                    start = { x: 800, y: (800 - (n - 1) * 80) };
-                    end = { x: 0, y: (800 - (n - 1) * 80) };
-                }
-                this_1.animation({ json: "poison_json", png: "poison_png", data: "poison", x: start.x, y: start.y }).then(function (animate) {
-                    animate.$setScaleX(0.6);
-                    animate.$setScaleY(0.6);
-                    animate.$alpha = 0.5;
-                    animate.play(-1);
-                    //cell.addPoison(animate);
-                    //cell.setIndex(animate, 2)  
-                    _this.board.addChild(animate);
-                    _this.poisons.push(animate);
-                    tween(animate, start, end);
-                    //egret.Tween.get(animate).to( {x:0 , y:800 }, 5000, egret.Ease.sineIn )                    
-                });
-            };
-            var this_1 = this;
-            for (var idx = this.poisons.length; idx < n * 4; idx++) {
-                _loop_1(idx);
             }
         }
-        //this.safeArea.x = target.x + 50
-        //this.playerInfo.y = target.y
-        /*
-        let cells = this.board.getCellList()
-        cells.map( cell=>{
-            let hasPoison = cell.getPoison()
-            if (!hasPoison){
-                this.animation({json:"poison_json",png:"poison_png", data:"poison",x:0,y:0}).then( animate=>{
-                    animate.$setScaleX(0.6);
-                    animate.$setScaleY(0.6);
-                    animate.$alpha = 0.5;
-                    animate.play(-1);
-                    cell.addPoison(animate);
-                    //cell.setIndex(animate, 2)
-                    this.board.addChild(animate);
-                    egret.Tween.get(animate).to( {x:0 , y:800 }, 5000, egret.Ease.sineIn )
-                })
-                
-            }
-        })
-        */
         var tween = function (obj, start, end) {
-            egret.Tween.get(obj).to(end, 5000, egret.Ease.sineIn).wait(0).call(tween.bind(_this, obj, end, start));
+            egret.Tween.get(obj).to(end, (6000 + 4000 * Math.random()), egret.Ease.sineIn).wait(0).call(tween.bind(_this, obj, end, start));
         };
     };
     /**
@@ -878,7 +849,6 @@ var Game = (function (_super) {
                 return
             }
             */
-            console.log(joinX, joinY);
             ScatterUtils.joinGame(_this.currentHouse.getID(), _this.currentHouse.getJoinEos(), joinX, joinY).then(function (transaction) {
                 console.log("transaction", transaction);
                 if (!transaction.processed) {

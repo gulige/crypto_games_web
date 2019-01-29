@@ -18,11 +18,11 @@ class Item extends egret.DisplayObjectContainer {
         //this.position = new egret.Point(this.cellBitmap.width*rowX, this.cellBitmap.height*colY);
         //this.x = this.position.x //初始化位置
         //this.y = this.position.y
-        this.itemBitMap.touchEnabled = true;
+        //this.itemBitMap.touchEnabled = true;
         //this.cell_X_Y = {x:rowX, y:colY}
 
         this.addChild(this.itemBitMap)
-        this.touchEnabled = true;
+        //this.touchEnabled = true;
        // this.town = _town
        // this.id = new Date().getTime()
     }

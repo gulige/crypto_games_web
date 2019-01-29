@@ -225,8 +225,10 @@
                 }  ,this)
 
                 //地图图标，点击设置棋盘地图，位置为左栏
-                let setMapFlat = this.createBitmapByName("bg1_jpg");
+                let setMapFlat = this.createBitmapByName("setmap_png");
                 this.stage.addChild(setMapFlat);
+                setMapFlat.width=80
+                setMapFlat.height=80
                 setMapFlat.x=10
                 setMapFlat.y=115
                 setMapFlat.touchEnabled = true;
@@ -244,10 +246,10 @@
                 joinGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP,this.joinGame ,this)  
                 */
                 //小旗图标，点击Kick off游戏，位置为左栏
-                let kickOffFlat = this.createBitmapByName("recall_png");
+                let kickOffFlat = this.createBitmapByName("kickoff_png");
                 this.stage.addChild(kickOffFlat);
                 kickOffFlat.x=10
-                kickOffFlat.y=200
+                kickOffFlat.y=220
                 kickOffFlat.touchEnabled = true;
                 kickOffFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.kickOff ,this)  
 
@@ -274,18 +276,18 @@
                 // ***统计看板***
                 this.summaryContainer.x = 1300
                 this.summaryContainer.y = 30 
-                this.summaryContainer.width = 200
-                this.summaryContainer.height = 300
+                this.summaryContainer.width = 150
+                this.summaryContainer.height = 200
                 this.stage.addChild(this.summaryContainer)
 
                 this.summaryBox.graphics.clear()
-                this.summaryBox.graphics.beginFill(0xEEEEEE);
-                this.summaryBox.graphics.drawRoundRect(0, 0, 300, 200, 15,15);
+                this.summaryBox.graphics.beginFill(0xF7CDA4,0.8);
+                this.summaryBox.graphics.drawRoundRect(0, 0, 150, 200, 15,15);
                 this.summaryBox.graphics.endFill();
                 this.summaryContainer.addChild(this.summaryBox);
 
-                this.summaryContent.width = 200
-                this.summaryContent.height = 300
+                this.summaryContent.width = 150
+                this.summaryContent.height = 200
                 this.summaryContent.size = 18
                 this.summaryContent.textColor = 0x000000                  
                 this.summaryContent.$setWordWrap(true)
@@ -314,19 +316,6 @@
                 this.honorListContainer.addChild(this.honorListText);
                 // ***********
 
-                //开炮动画实现
-                /*
-                this.animation( {json:"pao_json",png:"pao_png", data:"pao",x:0,y:800} ).then( animate=>{
-                    this.stage.addChild(animate)
-                    animate.play(-1)
-                }) 
-
-                //青蛙动画实现
-                this.animation( {json:"frog_json",png:"frog_png", data:"frog",x:1130,y:830} ).then( animate=>{
-                    this.stage.addChild(animate)
-                    animate.play(-1)
-                }) 
-                */
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");           
                 this.login.x=1200
@@ -354,28 +343,28 @@
                 //***背景音乐设置 */
                 let play_glory = this.createBitmapByName("play_png");
                 this.stage.addChild(play_glory);
-                play_glory.x=1250
+                play_glory.x=1400
                 play_glory.y=300
                 play_glory.touchEnabled = true;
                 play_glory.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("glory_1_mp3").url) ,this) 
 
                 let play_honor = this.createBitmapByName("play_png");
                 this.stage.addChild(play_honor);
-                play_honor.x=1250
+                play_honor.x=1400
                 play_honor.y=350
                 play_honor.touchEnabled = true;
                 play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url) ,this)
 
                 let play_easy = this.createBitmapByName("play_png");
                 this.stage.addChild(play_easy);
-                play_easy.x=1250
+                play_easy.x=1400
                 play_easy.y=400
                 play_easy.touchEnabled = true;
                 play_easy.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("easy_1_mp3").url) ,this)
 
                 let play_stop = this.createBitmapByName("stop_png");
                 this.stage.addChild(play_stop);
-                play_stop.x=1250
+                play_stop.x=1400
                 play_stop.y=450
                 play_stop.touchEnabled = true;
                 play_stop.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
@@ -445,6 +434,7 @@
                             } else if (game_progress==1) { // 棋盘地图已经设定
                                 this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
                             } else if (game_progress==2) { // 游戏开始中
+                                console.log("move triger")
                                 this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
                             }      
                                                    
@@ -534,38 +524,41 @@
                 //一下为产生毒气及移动效果
                 let n = 5-radius  //先判断毒气区的格数
                 if (this.poisons.length < n*4){  //当前毒气数小于应该产生毒气数，就生成新毒气
-                    for (let idx=this.poisons.length; idx < n*4; idx++){
-                        let start, end
-                        if (idx%4==0){  //左 --> 右   每行由左移到右的毒气
-                            start = {x:0, y:(n-1)*80}
-                            end = {x:800, y:(n-1)*80}
-                        } else if(idx%4==1){ // 上 --> 下   每列由上移到下的毒气
-                            start = {x:(n-1)*80, y:0}
-                            end = {x:(n-1)*80, y:800}
-                        } else if(idx%4==2){ // 下 --> 上   每列由下移到上的毒气
-                            start = {x:(800 - (n-1)*80), y:800}
-                            end = {x:(800 - (n-1)*80), y:0}
-                        } else if (idx%4==3){  //右 --> 左    每行由右移到左的毒气
-                            start = {x:800, y:(800 - (n-1)*80)}
-                            end = {x:0, y:(800 - (n-1)*80)}
-                        }
-                         this.animation({json:"poison_json",png:"poison_png", data:"poison",x:start.x, y:start.y}).then( animate=>{
-                            animate.$setScaleX(0.6);
-                            animate.$setScaleY(0.6);
-                            animate.$alpha = 0.5;
-                            animate.play(-1);   
-                            //cell.addPoison(animate);
-                            //cell.setIndex(animate, 2)  
-                            this.board.addChild(animate);
-                            this.poisons.push(animate)  
-                            tween(animate, start, end)                  
-                        })
+                    for (let idx=this.poisons.length/4; idx < n; idx++){
+                        for (let a=0; a < 4; a++){  //每轮有四个毒气排列
+                            let start, end
+                            if (a==0){  //左 --> 右   每行由左移到右的毒气
+                                start = {x:0, y:idx*80}
+                                end = {x:800, y:idx*80}
+                            } else if(a==1){ // 上 --> 下   每列由上移到下的毒气
+                                start = {x:idx*80, y:0}
+                                end = {x:idx*80, y:800}
+                            } else if(a==2){ // 下 --> 上   每列由下移到上的毒气
+                                start = {x:(800 - idx*80), y:800}
+                                end = {x:(800 - idx*80), y:0}
+                            } else if (a==3){  //右 --> 左    每行由右移到左的毒气
+                                start = {x:800, y:(800 - idx*80)}
+                                end = {x:0, y:(800 - idx*80)}
+                            }
+                            this.animation({json:"poison_json",png:"poison_png", data:"poison",x:start.x, y:start.y}).then( animate=>{
+                                animate.$setScaleX(0.6);
+                                animate.$setScaleY(0.6);
+                                animate.$alpha = 0.5;
+                                animate.play(-1);   
+                                //cell.addPoison(animate);
+                                //cell.setIndex(animate, 2)  
+                                this.board.addChild(animate);
+                                this.poisons.push(animate)  
+                                tween(animate, start, end)                  
+                            })
+
+                        }                      
                     }
 
                 }
 
                 let tween =(obj, start, end)=>{
-                    egret.Tween.get(obj).to( end, 5000, egret.Ease.sineIn ).wait(0).call( tween.bind(this,obj, end, start) )
+                    egret.Tween.get(obj).to( end, (6000+4000*Math.random()), egret.Ease.sineIn ).wait(0).call( tween.bind(this,obj, end, start) )
                 } 
             }
 
@@ -749,21 +742,8 @@
                         this.createSafeAreaInBoard(this.currentHouse.getSafeAreaRadius())
 
                         this.updatePlayerProfileInStage(this.currentHouse.getPlayerList())
-                        
-                        //创建随机生成的礼炮/烟花动画
-                        /*
-                        this.animation({json:"firework_json",png:"firework_png", data:"firework",x:500*Math.random(),y:500*Math.random()}).then( animate=>{
-                            this.board.addChild(animate); 
-                            animate.play(1)
-                            setTimeout(()=> {
-                                this.board.removeChild(animate)                                    
-                                animate == null
 
-                            }, 4000); //4秒钟后消除烟花效果
-                        })
-                        */
-                    //    })
-                    }else {
+                    } else {
                         //alert("无游戏信息")
                         this.currentHouse = null
                         this.popMessageBox("无游戏信息")
@@ -802,7 +782,6 @@
                         return
                     }
                     */
-                    console.log(joinX, joinY)
                     ScatterUtils.joinGame(this.currentHouse.getID(), this.currentHouse.getJoinEos(), joinX, joinY).then( transaction=>{
                         console.log("transaction", transaction)        
                         

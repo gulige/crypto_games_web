@@ -31,9 +31,9 @@ class Player extends egret.DisplayObjectContainer {
         this.playerProfile = this.createBitmapByName("profile_"+name);
         //this.playerBitmap.x = this.position.x //初始化位置
         //this.playerBitmap.y = this.position.y
-        this.playerBitmap.touchEnabled = true;
+        //this.playerBitmap.touchEnabled = true;
         this.addChild(this.playerBitmap)
-        this.touchEnabled = true;
+        //this.touchEnabled = true;
 
         //this.house = house
        // this.uuid = new Date().getTime() // will use [username + date] or uuid generator later
