@@ -12,9 +12,6 @@
     {
       "name": "game"
     },
-   	{
-      "name": "eui"
-    },
     {
       "name": "tween"
     },
@@ -56,5 +53,11 @@
       "name": "TronWeb",
       "path": "../libsrc/TronWeb"
     }
-  ]
+  ],
+  "targets": {
+    "android": {
+      "appname": "AAAA",
+      "packagename": "com.companyname"
+    }
+  }
 }

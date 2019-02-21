@@ -1,6 +1,7 @@
 class Cell extends egret.DisplayObjectContainer {
 
     private cellBitmap: egret.Bitmap
+    private detailBitmap: egret.Bitmap
     private cellRect: egret.Shape  = new egret.Shape();
     private task = {action:"idle", target:null, status:null}
     private position: egret.Point = new egret.Point(0,0)
@@ -17,15 +18,16 @@ class Cell extends egret.DisplayObjectContainer {
 
     private createCell(rowX:number,colY:number,_id:number): void {
         this.id = _id
-        /*
-        this.cellBitmap = this.createBitmapByName("frame_png");
-        this.cellBitmap.width = 80;   //cell的长/宽
-        this.cellBitmap.height = 80;
-        this.addChild(this.cellBitmap);
-        */
+        
+        this.detailBitmap = this.createBitmapByName("show_png");
+        //this.showBitmap.width = 80;   //cell的长/宽
+       // this.showBitmap.height = 80;
+        this.detailBitmap.$setVisible(false)
+        this.addChild(this.detailBitmap);
+    
         this.cellRect.graphics.clear()
-        this.cellRect.graphics.lineStyle(1,0x000000,0.2)
-        this.cellRect.graphics.beginFill(0xF7CDA4,0.5);
+        this.cellRect.graphics.lineStyle(1,0x000000,0.3)
+        this.cellRect.graphics.beginFill(0xF7CDA4,0.2);
         this.cellRect.graphics.drawRect(0, 0, 80, 80);
         this.cellRect.graphics.endFill();
         this.addChild(this.cellRect);
@@ -121,6 +123,18 @@ class Cell extends egret.DisplayObjectContainer {
 
     public setIndex(object, zIndex){
         this.setChildIndex(object, zIndex)
+    }
+
+    public hideDetailMode(){
+        this.detailBitmap.$setVisible(false)
+    }
+
+    public showDetailMode(detailMode:boolean){
+        this.detailBitmap.$setVisible(detailMode)
+    }
+
+    public onDetailMode(){
+        return this.detailBitmap.visible
     }
    
 }

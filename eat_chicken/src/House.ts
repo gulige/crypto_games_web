@@ -6,9 +6,11 @@ class House extends egret.DisplayObjectContainer {
     private houseBitmap: egret.Bitmap
     private id: number
     private joinEos: string
+    private isNewStep: boolean;
+    private owner: string
 
-    private life = {full:100, remain:100}
-    private gold = 100  //city 100 gold unit
+   // private life = {full:100, remain:100}
+   // private gold = 100  //city 100 gold unit
     //private position: egret.Point
     private playerList: Array<Player>
     private colorMatrix = [
@@ -17,8 +19,8 @@ class House extends egret.DisplayObjectContainer {
         0.3,0.6,0,0,0,
         0,0,0,1,0
     ];
-    private clock:Clock
-    private game_progress:number
+    //private clock:Clock
+    //private game_progress:number
 
     public constructor(param: any, _game:any) {
         super();
@@ -37,17 +39,17 @@ class House extends egret.DisplayObjectContainer {
 
         this.id = this.game.game_id
         this.joinEos = this.game.join_eos
-        this.game_progress - this.game.game_progress
+        this.owner = this.game.creator
 
         this.playerList =[]  //初始化士兵列表
         this.createPlayers(this.game.players)
-        this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
+       // this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
         
     }
 
     public updateHouse(_game:any): void{
+        this.isNewStep = (this.game.game_progress !== _game.game_progress || this.game.step !== _game.step)
         this.game = _game
-        this.game_progress - this.game.game_progress
         this.updatePlayers(this.game.players)
     }
 
@@ -58,6 +60,9 @@ class House extends egret.DisplayObjectContainer {
                 this.createPlayer(playerJson)
             } else {
                 player.updatePlayer(playerJson)
+                if (this.game.game_progress==2  && this.isNewStep){
+                    player.setMoveable(true)
+                }
             }
         })   
     }
@@ -86,12 +91,12 @@ class House extends egret.DisplayObjectContainer {
         return result;
     }
 
-    public async getPlayerByName(name:string){
-        let player = await this.playerList.filter( _player=>{
+    public async getPlayerByName(name:string): Promise<Player> {
+        let players = await this.playerList.filter( _player=>{
             return _player.getName() == name
         })
-        if (player.length > 0){
-            return player[0];  //一个游戏房间中玩家名字是唯一
+        if (players.length > 0){
+            return players[0];  //一个游戏房间中玩家名字是唯一
         } else {
             return null;
         }
@@ -122,20 +127,13 @@ class House extends egret.DisplayObjectContainer {
         this.y = _position.y
     }
 
-    public getLife(){
-        return this.life
-    }
-
-    public setLife(_life): void{
-        this.life = _life
-    }
 
     public destroy(){
         this.houseBitmap = null
 
         this.playerList = []
         this.game=null
-        this.clock = null
+     //   this.clock = null
     }
 
     public getID(){
@@ -151,15 +149,6 @@ class House extends egret.DisplayObjectContainer {
     }
 
 
-
-    public getGold(){
-        return this.gold
-    }
-
-    public setGold(_gold): void{
-        this.gold = _gold
-    }
-
     public getHouseName(){
         return this.name
     }
@@ -167,11 +156,11 @@ class House extends egret.DisplayObjectContainer {
     public clearPlayerList(){
         this.playerList=[]
     }
-
+/*
     public getClock(){
         return this.clock;
     }
-
+*/
     public getBoard(){
         return this.game.board
     }
@@ -213,5 +202,31 @@ class House extends egret.DisplayObjectContainer {
 
     public getEOSInHouse(){
         return this.getTotalJoinPlayers() * parseFloat(this.getJoinEos().substr(0,6))
+    }
+
+    public getWinner(){
+        return this.game.winner
+    }
+
+    public getBestKiller(){
+        this.playerList.sort( (a, b)=>{
+            return b.getKills() - a.getKills()
+        })
+        return this.playerList[0].getName()
+    }
+
+    public getBestEOSWin(){
+        this.playerList.sort( (a, b)=>{
+            return b.getGold() - a.getGold()
+        })
+        return this.playerList[0].getName()
+    }
+
+    public getOwner(): string {
+        return this.owner
+    }
+
+    public setPlayersMoveable(){
+        
     }
 }

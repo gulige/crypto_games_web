@@ -18,7 +18,7 @@ class ScatterUtils extends Object {
      */
     private static chain = {
         main: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // main network
-        jungle: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca', // jungle testnet
+        jungle: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473', // jungle testnet
         dev: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f' // local developer
     }
 
@@ -31,6 +31,10 @@ class ScatterUtils extends Object {
         Tron:'trx'       // TRON
     };
 
+    private static contact = {
+        jungle: 'eat1chicken2'
+    }
+
     /**
      * descrition: 设置Scatter钱包连接参数
      */
@@ -38,9 +42,11 @@ class ScatterUtils extends Object {
         EOS:{
             blockchain:'eos',
             protocol:'http',
-            host:'114.115.135.201',
+            //host:'jungle2.cryptolions.io',
+            host:'121.168.149.101',
+            //port:443,
             port:8888,
-            chainId: ScatterUtils.chain.dev 
+            chainId: ScatterUtils.chain.jungle 
         },
         ETH:{
             blockchain:'eth',
@@ -66,8 +72,11 @@ class ScatterUtils extends Object {
         keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3', // eosio
                     '5KRF8dr2fvHx9dVQyBqWwYhs7KvT8UdCb8Fy6hpWqHp6yZ1K6T3' // player1, player2
                     ], // 配置私钥字符串
-        httpEndpoint: 'http://114.115.135.201:8888', // EOS开发链url与端口
-        chainId: ScatterUtils.chain.dev, // 通过cleos get info可以获取chainId
+       // httpEndpoint: 'http://114.115.135.201:8888', // EOS开发链url与端口
+       // httpEndpoint: 'https://jungle2.cryptolions.io:443',
+        httpEndpoint: 'http://121.168.149.101:8888',
+        //chainId: ScatterUtils.chain.dev, // 通过cleos get info可以获取chainId
+        chainId: ScatterUtils.chain.jungle,
         expireInSeconds: 60,
         broadcast: true,
         debug: false,
@@ -175,8 +184,8 @@ class ScatterUtils extends Object {
         let games_info = await this.eos.getTableRows(
             {
                 json: true,
-                scope: "eat.chicken",
-                code: "eat.chicken",
+                scope: this.contact.jungle,
+                code: this.contact.jungle,
                 table: "games"
             }
         ).then((data) => {
@@ -202,8 +211,8 @@ class ScatterUtils extends Object {
         let game_info = await this.eos.getTableRows(
             {
                 json: true,
-                    scope: "eat.chicken",
-                    code: "eat.chicken",
+                    scope: this.contact.jungle,
+                    code: this.contact.jungle,
                     table: "games",
                     limit:1,
                     lower_bound: id,
@@ -238,7 +247,7 @@ class ScatterUtils extends Object {
                         }],
                         data: {
                             from: this.currentAccount.name,
-                            to: 'eat.chicken',
+                            to: this.contact.jungle,
                             quantity: joinEOS,
                             memo: ''
                         }
@@ -277,7 +286,7 @@ class ScatterUtils extends Object {
                         }],
                         data: {
                             from: this.currentAccount.name,
-                            to: 'eat.chicken',
+                            to: this.contact.jungle,
                             quantity: transferEOS,
                             memo: gameId + ',' + joinX + ',' + joinY
                         }
@@ -325,7 +334,7 @@ class ScatterUtils extends Object {
             {
                 actions: [
                     {
-                        account: 'eat.chicken',
+                        account: this.contact.jungle,
                         name: 'kickoff',
                         authorization: [{
                             actor: this.currentAccount.name,
@@ -360,7 +369,7 @@ class ScatterUtils extends Object {
             {
                 actions: [
                     {
-                        account: 'eat.chicken',
+                        account: this.contact.jungle,
                         name: 'move',
                         authorization: [{
                             actor: this.currentAccount.name,
@@ -410,7 +419,7 @@ class ScatterUtils extends Object {
      * descrition: 获取当前钱包用户名
      * 
      */
-    public static async getCurrentAccountName(){
+    public static getCurrentAccountName(){
         if (this.currentAccount != null) {
             return this.currentAccount.name;
         }else {

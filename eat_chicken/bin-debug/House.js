@@ -45,10 +45,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var House = (function (_super) {
     __extends(House, _super);
+    //private clock:Clock
+    //private game_progress:number
     function House(param, _game) {
         var _this = _super.call(this) || this;
-        _this.life = { full: 100, remain: 100 };
-        _this.gold = 100; //city 100 gold unit
         _this.colorMatrix = [
             0.3, 0.6, 0, 0, 0,
             0.3, 0.6, 0, 0, 0,
@@ -69,14 +69,14 @@ var House = (function (_super) {
         this.touchEnabled = true;
         this.id = this.game.game_id;
         this.joinEos = this.game.join_eos;
-        this.game_progress - this.game.game_progress;
+        this.owner = this.game.creator;
         this.playerList = []; //初始化士兵列表
         this.createPlayers(this.game.players);
-        this.clock = new Clock(); //初始化时分秒为0：0：0的时钟
+        // this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
     };
     House.prototype.updateHouse = function (_game) {
+        this.isNewStep = (this.game.game_progress !== _game.game_progress || this.game.step !== _game.step);
         this.game = _game;
-        this.game_progress - this.game.game_progress;
         this.updatePlayers(this.game.players);
     };
     House.prototype.updatePlayers = function (playersJson) {
@@ -96,6 +96,9 @@ var House = (function (_super) {
                                         }
                                         else {
                                             player.updatePlayer(playerJson);
+                                            if (this.game.game_progress == 2 && this.isNewStep) {
+                                                player.setMoveable(true);
+                                            }
                                         }
                                         return [2 /*return*/];
                                 }
@@ -130,16 +133,16 @@ var House = (function (_super) {
     };
     House.prototype.getPlayerByName = function (name) {
         return __awaiter(this, void 0, void 0, function () {
-            var player;
+            var players;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.playerList.filter(function (_player) {
                             return _player.getName() == name;
                         })];
                     case 1:
-                        player = _a.sent();
-                        if (player.length > 0) {
-                            return [2 /*return*/, player[0]]; //一个游戏房间中玩家名字是唯一
+                        players = _a.sent();
+                        if (players.length > 0) {
+                            return [2 /*return*/, players[0]]; //一个游戏房间中玩家名字是唯一
                         }
                         else {
                             return [2 /*return*/, null];
@@ -178,17 +181,11 @@ var House = (function (_super) {
         this.x = _position.x;
         this.y = _position.y;
     };
-    House.prototype.getLife = function () {
-        return this.life;
-    };
-    House.prototype.setLife = function (_life) {
-        this.life = _life;
-    };
     House.prototype.destroy = function () {
         this.houseBitmap = null;
         this.playerList = [];
         this.game = null;
-        this.clock = null;
+        //   this.clock = null
     };
     House.prototype.getID = function () {
         return this.id;
@@ -199,21 +196,17 @@ var House = (function (_super) {
     House.prototype.getJoinEos = function () {
         return this.joinEos;
     };
-    House.prototype.getGold = function () {
-        return this.gold;
-    };
-    House.prototype.setGold = function (_gold) {
-        this.gold = _gold;
-    };
     House.prototype.getHouseName = function () {
         return this.name;
     };
     House.prototype.clearPlayerList = function () {
         this.playerList = [];
     };
-    House.prototype.getClock = function () {
-        return this.clock;
-    };
+    /*
+        public getClock(){
+            return this.clock;
+        }
+    */
     House.prototype.getBoard = function () {
         return this.game.board;
     };
@@ -255,6 +248,26 @@ var House = (function (_super) {
     };
     House.prototype.getEOSInHouse = function () {
         return this.getTotalJoinPlayers() * parseFloat(this.getJoinEos().substr(0, 6));
+    };
+    House.prototype.getWinner = function () {
+        return this.game.winner;
+    };
+    House.prototype.getBestKiller = function () {
+        this.playerList.sort(function (a, b) {
+            return b.getKills() - a.getKills();
+        });
+        return this.playerList[0].getName();
+    };
+    House.prototype.getBestEOSWin = function () {
+        this.playerList.sort(function (a, b) {
+            return b.getGold() - a.getGold();
+        });
+        return this.playerList[0].getName();
+    };
+    House.prototype.getOwner = function () {
+        return this.owner;
+    };
+    House.prototype.setPlayersMoveable = function () {
     };
     return House;
 }(egret.DisplayObjectContainer));

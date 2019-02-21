@@ -39,6 +39,7 @@ var Player = (function (_super) {
         this.setItems(playerJson.items);
         this.setWeapon(playerJson.weapon);
         this.setGold(playerJson.win_eos);
+        this.setKills(playerJson.kill_count);
     };
     Player.prototype.updatePlayer = function (playerJson) {
         //this.setName(playerJson.acc_name)
@@ -50,6 +51,7 @@ var Player = (function (_super) {
         this.setItems(playerJson.items);
         this.setWeapon(playerJson.weapon);
         this.setGold(playerJson.win_eos);
+        this.setKills(playerJson.kill_count);
     };
     Player.prototype.createBitmapByName = function (name) {
         var result = new egret.Bitmap();
@@ -147,6 +149,18 @@ var Player = (function (_super) {
         else {
             return false;
         }
+    };
+    Player.prototype.getKills = function () {
+        return this.kills;
+    };
+    Player.prototype.setKills = function (_kills) {
+        this.kills = _kills;
+    };
+    Player.prototype.setMoveable = function (_moveable) {
+        this.moveable = _moveable;
+    };
+    Player.prototype.isMoveable = function () {
+        return this.moveable;
     };
     return Player;
 }(egret.DisplayObjectContainer));

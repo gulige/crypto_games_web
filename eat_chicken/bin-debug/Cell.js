@@ -23,15 +23,14 @@ var Cell = (function (_super) {
     }
     Cell.prototype.createCell = function (rowX, colY, _id) {
         this.id = _id;
-        /*
-        this.cellBitmap = this.createBitmapByName("frame_png");
-        this.cellBitmap.width = 80;   //cell的长/宽
-        this.cellBitmap.height = 80;
-        this.addChild(this.cellBitmap);
-        */
+        this.detailBitmap = this.createBitmapByName("show_png");
+        //this.showBitmap.width = 80;   //cell的长/宽
+        // this.showBitmap.height = 80;
+        this.detailBitmap.$setVisible(false);
+        this.addChild(this.detailBitmap);
         this.cellRect.graphics.clear();
-        this.cellRect.graphics.lineStyle(1, 0x000000, 0.2);
-        this.cellRect.graphics.beginFill(0xF7CDA4, 0.5);
+        this.cellRect.graphics.lineStyle(1, 0x000000, 0.3);
+        this.cellRect.graphics.beginFill(0xF7CDA4, 0.2);
         this.cellRect.graphics.drawRect(0, 0, 80, 80);
         this.cellRect.graphics.endFill();
         this.addChild(this.cellRect);
@@ -106,6 +105,15 @@ var Cell = (function (_super) {
     };
     Cell.prototype.setIndex = function (object, zIndex) {
         this.setChildIndex(object, zIndex);
+    };
+    Cell.prototype.hideDetailMode = function () {
+        this.detailBitmap.$setVisible(false);
+    };
+    Cell.prototype.showDetailMode = function (detailMode) {
+        this.detailBitmap.$setVisible(detailMode);
+    };
+    Cell.prototype.onDetailMode = function () {
+        return this.detailBitmap.visible;
     };
     return Cell;
 }(egret.DisplayObjectContainer));

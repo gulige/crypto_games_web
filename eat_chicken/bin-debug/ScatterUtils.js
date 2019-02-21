@@ -186,8 +186,8 @@ var ScatterUtils = (function (_super) {
                         _b.label = 2;
                     case 2: return [4 /*yield*/, this.eos.getTableRows({
                             json: true,
-                            scope: "eat.chicken",
-                            code: "eat.chicken",
+                            scope: this.contact.jungle,
+                            code: this.contact.jungle,
                             table: "games"
                         }).then(function (data) {
                             console.log(data);
@@ -222,8 +222,8 @@ var ScatterUtils = (function (_super) {
                         _b.label = 2;
                     case 2: return [4 /*yield*/, this.eos.getTableRows({
                             json: true,
-                            scope: "eat.chicken",
-                            code: "eat.chicken",
+                            scope: this.contact.jungle,
+                            code: this.contact.jungle,
                             table: "games",
                             limit: 1,
                             lower_bound: id,
@@ -263,7 +263,7 @@ var ScatterUtils = (function (_super) {
                                         }],
                                     data: {
                                         from: this.currentAccount.name,
-                                        to: 'eat.chicken',
+                                        to: this.contact.jungle,
                                         quantity: joinEOS,
                                         memo: ''
                                     }
@@ -307,7 +307,7 @@ var ScatterUtils = (function (_super) {
                                         }],
                                     data: {
                                         from: this.currentAccount.name,
-                                        to: 'eat.chicken',
+                                        to: this.contact.jungle,
                                         quantity: transferEOS,
                                         memo: gameId + ',' + joinX + ',' + joinY
                                     }
@@ -368,7 +368,7 @@ var ScatterUtils = (function (_super) {
                     case 0: return [4 /*yield*/, this.eos.transaction({
                             actions: [
                                 {
-                                    account: 'eat.chicken',
+                                    account: this.contact.jungle,
                                     name: 'kickoff',
                                     authorization: [{
                                             actor: this.currentAccount.name,
@@ -408,7 +408,7 @@ var ScatterUtils = (function (_super) {
                     case 0: return [4 /*yield*/, this.eos.transaction({
                             actions: [
                                 {
-                                    account: 'eat.chicken',
+                                    account: this.contact.jungle,
                                     name: 'move',
                                     authorization: [{
                                             actor: this.currentAccount.name,
@@ -465,17 +465,12 @@ var ScatterUtils = (function (_super) {
      *
      */
     ScatterUtils.getCurrentAccountName = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (this.currentAccount != null) {
-                    return [2 /*return*/, this.currentAccount.name];
-                }
-                else {
-                    return [2 /*return*/, null];
-                }
-                return [2 /*return*/];
-            });
-        });
+        if (this.currentAccount != null) {
+            return this.currentAccount.name;
+        }
+        else {
+            return null;
+        }
     };
     /**
      * descrition: 获取当前钱包用户身份，用于判断登录状态
@@ -527,7 +522,7 @@ var ScatterUtils = (function (_super) {
      */
     ScatterUtils.chain = {
         main: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
-        jungle: '038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca',
+        jungle: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
         dev: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f' // local developer
     };
     /**
@@ -538,6 +533,9 @@ var ScatterUtils = (function (_super) {
         Ethereum: 'eth',
         Tron: 'trx' // TRON
     };
+    ScatterUtils.contact = {
+        jungle: 'eat1chicken2'
+    };
     /**
      * descrition: 设置Scatter钱包连接参数
      */
@@ -545,9 +543,11 @@ var ScatterUtils = (function (_super) {
         EOS: {
             blockchain: 'eos',
             protocol: 'http',
-            host: '114.115.135.201',
+            //host:'jungle2.cryptolions.io',
+            host: '121.168.149.101',
+            //port:443,
             port: 8888,
-            chainId: ScatterUtils.chain.dev
+            chainId: ScatterUtils.chain.jungle
         },
         ETH: {
             blockchain: 'eth',
@@ -571,8 +571,11 @@ var ScatterUtils = (function (_super) {
         keyProvider: ['5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3',
             '5KRF8dr2fvHx9dVQyBqWwYhs7KvT8UdCb8Fy6hpWqHp6yZ1K6T3' // player1, player2
         ],
-        httpEndpoint: 'http://114.115.135.201:8888',
-        chainId: ScatterUtils.chain.dev,
+        // httpEndpoint: 'http://114.115.135.201:8888', // EOS开发链url与端口
+        // httpEndpoint: 'https://jungle2.cryptolions.io:443',
+        httpEndpoint: 'http://121.168.149.101:8888',
+        //chainId: ScatterUtils.chain.dev, // 通过cleos get info可以获取chainId
+        chainId: ScatterUtils.chain.jungle,
         expireInSeconds: 60,
         broadcast: true,
         debug: false,

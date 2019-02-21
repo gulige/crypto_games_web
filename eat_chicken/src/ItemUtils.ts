@@ -11,9 +11,9 @@ class ItemUtils extends egret.HashObject {
         id_6:{name:'一级防具', png:'shield1_png'},  //一级防具+2生命。（普通防具）
         id_7:{name:'二级防具', png:'shield2_png'},  //二级防具+4生命。（普通防具）
         id_8:{name:'三级防具', png:'shield3_png'},  //三级防具+6生命。（高级防具）
-        id_9:{name:'决斗卡', png:'battle_png'},  //决斗卡（特殊道具），发生战斗时自动使用，决斗直到一方死亡。
-        id_10:{name:'复活卡', png:'life_png'},  //复活卡（特殊道具），如果死亡自动触发，所有物品消失4血复活。
-        id_11:{name:'药箱', png:'aid_png'},  //药箱（资源）+2生命。
+        id_9:{name:'决斗卡', png:'combat_png'},  //决斗卡（特殊道具），发生战斗时自动使用，决斗直到一方死亡。
+        id_10:{name:'复活卡', png:'rebirth_png'},  //复活卡（特殊道具），如果死亡自动触发，所有物品消失4血复活。
+        id_11:{name:'药箱', png:'medicine_png'},  //药箱（资源）+2生命。
         id_12:{name:'急救箱', png:'first_aid_png'},  //急救箱（资源）+4生命。
         id_13:{name:'', png:'money_png'},  //空投的eos
         id_14:{name:'黄金矿点', png:'gold_png'},  //黄金矿点

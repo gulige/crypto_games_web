@@ -18,6 +18,8 @@ class Player extends egret.DisplayObjectContainer {
     private items = []
     private weapon: number
     private gold:number
+    private kills: number
+    private moveable: boolean
 
     public constructor(name:string, playerJson:any) {
         super();
@@ -46,6 +48,7 @@ class Player extends egret.DisplayObjectContainer {
         this.setItems(playerJson.items)
         this.setWeapon(playerJson.weapon)
         this.setGold(playerJson.win_eos)
+        this.setKills(playerJson.kill_count)
     }
 
     public updatePlayer(playerJson:any){
@@ -58,6 +61,7 @@ class Player extends egret.DisplayObjectContainer {
         this.setItems(playerJson.items)
         this.setWeapon(playerJson.weapon)
         this.setGold(playerJson.win_eos)
+        this.setKills(playerJson.kill_count)
     }
 
     private createBitmapByName(name: string) {
@@ -183,5 +187,21 @@ class Player extends egret.DisplayObjectContainer {
         } else {
             return false
         }
+    }
+
+    public getKills(){
+        return this.kills
+    } 
+
+    public setKills(_kills){
+        this.kills = _kills
+    }
+
+    public setMoveable(_moveable:boolean){
+        this.moveable = _moveable
+    }
+
+    public isMoveable(){
+        return this.moveable
     }
 }
