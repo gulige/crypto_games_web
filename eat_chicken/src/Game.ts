@@ -896,6 +896,19 @@
                     
                     // 当物品ID不为0 以及 tick为0 时，物品可见可捡
                     let tick = cellElement.item_drop_ticks
+                    let trigger = cellElement.item_drop_triggered
+                    //预告空降信息
+                    if (trigger===1 && tick===3){
+                        this.animation({json:"arrow-down_json",png:"arrow-down_png", data:"arrow-down",x:30, y:30}).then( animate=>{
+                                animate.play(-1);    
+                                cell.addChild(animate);  
+                                egret.setTimeout( ()=>{                                      
+                                    cell.removeChild(animate); 
+                                }, this, 10000)
+                                             
+                            })
+                        this.popMessageBox(ItemUtils.getItemNameById(newItem.getId()) + "即将降落")      
+                    }
                     if(tick == 0){
                         // 将物品放入格子内
                         newItem.x = 15
@@ -907,15 +920,14 @@
                         //2. item_drop_ticks减少
                         //3. item_drop_ticks=0时，空投发生，就可以捡了
                         // 首先item_drop_triggered从0变1，然后item_drop_ticks开始倒计时，当值为0时就是空降武器。 Eos直接从-1变0，没有triggered和倒计时
-                        let trigger = cellElement.item_drop_triggered
+                        
                         //console.log(trigger,prvItem, newItemId)
                         if (trigger == 1 && prvItem==null && (newItemId == 5 || newItemId == 8 || newItemId == 13)){                        
                             //降落效果
-                            console.log("prvItem", prvItem)
                             newItem.y = -300
                             egret.Tween.get(newItem).to( {x:0, y:0}, 1500, egret.Ease.sineIn )
                                 .wait(0).call( ()=>{   //添加物品在地图触地音效   
-                                    console.log("item_fall_mp3")                            
+                                    //console.log("item_fall_mp3")                                                          
                                     this.actionSound(RES.getRes("item_fall_mp3").url)                                                             
                                 });
                         }

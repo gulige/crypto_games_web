@@ -952,6 +952,18 @@ var Game = (function (_super) {
                                             _a.label = 6;
                                         case 6:
                                             tick = cellElement.item_drop_ticks;
+                                            trigger = cellElement.item_drop_triggered;
+                                            //预告空降信息
+                                            if (trigger === 1 && tick === 3) {
+                                                this.animation({ json: "arrow-down_json", png: "arrow-down_png", data: "arrow-down", x: 30, y: 30 }).then(function (animate) {
+                                                    animate.play(-1);
+                                                    cell.addChild(animate);
+                                                    egret.setTimeout(function () {
+                                                        cell.removeChild(animate);
+                                                    }, _this, 10000);
+                                                });
+                                                this.popMessageBox(ItemUtils.getItemNameById(newItem.getId()) + "即将降落");
+                                            }
                                             if (!(tick == 0)) return [3 /*break*/, 8];
                                             // 将物品放入格子内
                                             newItem.x = 15;
@@ -963,18 +975,23 @@ var Game = (function (_super) {
                                                 //2. item_drop_ticks减少
                                                 //3. item_drop_ticks=0时，空投发生，就可以捡了
                                                 // 首先item_drop_triggered从0变1，然后item_drop_ticks开始倒计时，当值为0时就是空降武器。 Eos直接从-1变0，没有triggered和倒计时
+                                                //console.log(trigger,prvItem, newItemId)
                                             ];
                                         case 7:
                                             _a.sent();
-                                            trigger = cellElement.item_drop_triggered;
+                                            //检查是否产生物品降落效果
+                                            //武器空投的过程是：
+                                            //1. 进入某个格子后，触发武器空投倒计时，item_drop_triggered 从0变1
+                                            //2. item_drop_ticks减少
+                                            //3. item_drop_ticks=0时，空投发生，就可以捡了
+                                            // 首先item_drop_triggered从0变1，然后item_drop_ticks开始倒计时，当值为0时就是空降武器。 Eos直接从-1变0，没有triggered和倒计时
                                             //console.log(trigger,prvItem, newItemId)
                                             if (trigger == 1 && prvItem == null && (newItemId == 5 || newItemId == 8 || newItemId == 13)) {
                                                 //降落效果
-                                                console.log("prvItem", prvItem);
                                                 newItem.y = -300;
                                                 egret.Tween.get(newItem).to({ x: 0, y: 0 }, 1500, egret.Ease.sineIn)
                                                     .wait(0).call(function () {
-                                                    console.log("item_fall_mp3");
+                                                    //console.log("item_fall_mp3")                                                          
                                                     _this.actionSound(RES.getRes("item_fall_mp3").url);
                                                 });
                                             }
