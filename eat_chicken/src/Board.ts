@@ -29,8 +29,9 @@ class Board extends egret.DisplayObjectContainer {
        // this.townBitmap.touchEnabled = true;
       //  this.uuid = new Date().getTime()  // will use [username + date] or uuid generator later
         this.cellList =[]  //初始化cell列表并加入棋盘
-        for (var _x=0;_x<x; _x++){
-            for (var _y=0;_y<y; _y++){
+        for (var _y=0;_y<y; _y++){
+            for (var _x=0;_x<x; _x++){
+            //for (var _y=0;_y<y; _y++){
                 let cell = this.createCell(_x, _y, this.cellList.length )
                 this.addChild(cell);
             }

@@ -53,7 +53,7 @@
             private login:egret.Bitmap;
             private logout:egret.Bitmap;
 
-            //private clock:Clock
+            
             private backgroundMusic:egret.Sound = new egret.Sound()
             private backgroundMusicChannel:egret.SoundChannel
 
@@ -66,19 +66,20 @@
             private player_item = new egret.TextField();
             private player_weapon = new egret.TextField();
 
-            private safeAreaTop:egret.Shape = new egret.Shape();
-            private safeAreaLeft:egret.Shape = new egret.Shape();
-            private safeAreaRight:egret.Shape = new egret.Shape();
-            private safeAreaBottom:egret.Shape = new egret.Shape();
-
             private messageContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             private messageBox:egret.Shape = new egret.Shape();            
             private message:egret.TextField = new egret.TextField();
+
+            private descriptionContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+            private descriptionBox:egret.Shape = new egret.Shape();            
+            private description:egret.TextField = new egret.TextField();
 
             private canvas;
             //临时随机演示
             private townRandomName = ["johny", "kitty", "peter"]
             private num = 0
+
+            private messageTimeout = null;
 
             public constructor() {
                 super();
@@ -190,23 +191,23 @@
                 //城堡图，游戏创建图标，位置为左上栏             
                 let createGameFlat = this.createBitmapByName("city_png");
                 this.stage.addChild(createGameFlat);
-                createGameFlat.width = 80;
+                createGameFlat.width = 100;
                 createGameFlat.height = 100;
-                createGameFlat.x=10
-                createGameFlat.y=5
+                createGameFlat.x=15
+                createGameFlat.y=15
                 createGameFlat.touchEnabled = true;
                 createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP,this.createGame.bind(this,{name:"johny", bitmap:"house_png"}),this)
 
                 
                 //******登陆/登出功能******
                 this.login = this.createBitmapByName("login_png");           
-                this.login.x=1150
+                this.login.x=1180
                 this.login.y=10
                 this.login.touchEnabled = true;
                 this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame ,this) 
              
                 this.logout = this.createBitmapByName("logout_png");     
-                this.logout.x=1150
+                this.logout.x=1180
                 this.logout.y=10
                 this.logout.touchEnabled = true;
                 this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame ,this) 
@@ -221,7 +222,134 @@
                     }
                 }) 
                 //************************ 
+
+
+                // ***游戏滚动消息看板***
+                this.messageContainer.x = 600
+                this.messageContainer.y = 200
+                this.messageContainer.width = 350
+                this.messageContainer.height = 250
+                //this.stage.addChild(this.messageContainer)
+                this.messageBox.graphics.clear()
+                this.messageBox.graphics.beginFill(0xF7CDA4,0.4);
+                this.messageBox.graphics.lineStyle(2, 0x000000, 0.5);
+                this.messageBox.graphics.drawRoundRect(0, 0, 350, 250, 15,15);
+                this.messageBox.graphics.endFill();
+                this.messageContainer.addChild(this.messageBox);
+
+                var messageTitleBox = new egret.Shape();
+                messageTitleBox.graphics.beginFill(0x4F4F4F,0.8);
+                messageTitleBox.graphics.drawRoundRect(0, 0, 350, 30, 15,15);
+                this.messageContainer.addChild(messageTitleBox);
+                var messageTitle = new egret.TextField();
+                messageTitle.x = 145
+                messageTitle.y = 3
+                messageTitle.size = 20
+                messageTitle.textColor = 0xFFFFFF
+                messageTitle.text = '通告栏'
+                this.messageContainer.addChild(messageTitle);
+
+                this.message.x = 10
+                this.message.y = 35
+                this.message.width = 330
+                this.message.height = 200
+                this.message.size = 20
+                this.message.textColor = 0x000000                  
+                this.message.$setWordWrap(true)
+                this.message.$setMultiline(true)
+                this.messageContainer.addChild(this.message);
+                // ***********
                 
+                //游戏说明
+                let description = this.createBitmapByName("description_png");
+                this.stage.addChild(description);
+                description.x=1350
+                description.y=10
+                description.touchEnabled = true;
+                description.addEventListener(egret.TouchEvent.TOUCH_TAP,()=>{
+                    this.stage.addChild(this.descriptionContainer)
+                },this)
+
+                // ***游戏说明***
+                this.descriptionContainer.x = 350
+                this.descriptionContainer.y = 60
+                this.descriptionContainer.width = 800
+                this.descriptionContainer.height = 1000
+               // this.stage.addChild(this.descriptionContainer)
+                this.descriptionBox.graphics.clear()
+                this.descriptionBox.graphics.beginFill(0xF7CDA4,0.8);
+                this.descriptionBox.graphics.lineStyle(2, 0x000000, 0.8);
+                this.descriptionBox.graphics.drawRoundRect(0, 0, 800, 1000, 15,15);
+                this.descriptionBox.graphics.endFill();
+                this.descriptionContainer.addChild(this.descriptionBox);              
+
+                var descriptioTitleBox = new egret.Shape();
+                descriptioTitleBox.graphics.beginFill(0x4F4F4F,0.8);
+                descriptioTitleBox.graphics.drawRoundRect(0, 0, 800, 30, 15,15);
+                this.descriptionContainer.addChild(descriptioTitleBox);
+                var descriptionTitle = new egret.TextField();
+                descriptionTitle.x = 350
+                descriptionTitle.y = 5
+                descriptionTitle.size = 20
+                descriptionTitle.textColor = 0xFFFFFF
+                descriptionTitle.text = '游戏说明'
+                this.descriptionContainer.addChild(descriptionTitle);
+                
+                let descriptionClose = this.createBitmapByName("close_png");
+                this.descriptionContainer.addChild(descriptionClose);
+                descriptionClose.x=770
+                descriptionClose.y=0
+                descriptionClose.touchEnabled = true;
+                descriptionClose.addEventListener(egret.TouchEvent.TOUCH_TAP,()=>{
+                    this.stage.removeChild(this.descriptionContainer)
+                },this)
+
+                this.description.x = 10
+                this.description.y = 35
+                this.description.width = 780
+                this.description.height = 980
+                this.description.size = 22
+                this.description.textColor = 0x000000                  
+                this.description.$setWordWrap(true)
+                this.description.$setMultiline(true)
+                this.description.textFlow  = new egret.HtmlTextParser().parser(
+                    `游戏规则说明：\n\n`
+                                        + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
+                                        + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
+                                        + `3. 游戏的局主点击左列中间按钮随机出该局的地图道具分布；\n\n`
+                                        + `4. 之后，其他玩家可以选择地图上的某个格子位置，点击弹出scatter界面，确认后加入游戏，玩家的角色将空降到该地图格子中；\n\n`
+                                        + `5. 局主可以在参与人数达到2人或2人以上的情况下，随时点击左列“开始游戏”按钮来开局（在设置地图道具后半小时内未开局的情况下系统将自动关闭游戏）；\n\n`
+                                        + `6. 游戏将以30秒间隔的时间节奏来推进游戏，所有参与玩家可以在30秒内移动一步（或原地不动），30秒后游戏将做出一轮判决，直到判决出游戏的最终胜利者结束；\n\n`
+                                        + `7. 地图上有毒气圈，每3分钟向内扩大一圈，凡是处于毒气圈内的玩家将会受到伤害；\n\n`
+                                        + `8. 地图上分布有各类道具，玩家移动进入地图格子时，可以立即拾取枪械或防具，或触发地图事件（如武器空投）；\n\n`
+                                        + `9. 当同一格子内有多名玩家时，每30秒一轮的判决将会让玩家相互攻击；\n\n`
+                                        + `10. 当有一半玩家阵亡时，地图上将会在某个格子上空投EOS（空投发生时，该格子上的玩家将被全部杀死）；\n\n`
+                                        + `11. 击杀其他玩家，可获得被击杀玩家身上一定比例的EOS，以及额外的击杀奖励；\n\n`
+                                        + `12. 击杀数最高的玩家，将会获得“杀手”的奖励，游戏的最后一名玩家，将会获得“胜利者”的奖励 \n\n`
+                                        + `另外，关于scatter钱包的设置，请参考：\n`
+                                        + `1. <a href = 'https://get-scatter.com'><u>https://get-scatter.com</u></a> \n`
+                                        + `2. <a href = 'https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle'><u>https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle </u></a>`
+                )
+                /*
+                this.description.text = `游戏规则说明：\n\n`
+                                        + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
+                                        + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
+                                        + `3. 游戏的局主点击左列中间按钮随机出该局的地图道具分布；\n\n`
+                                        + `4. 之后，其他玩家可以选择地图上的某个格子位置，点击弹出scatter界面，确认后加入游戏，玩家的角色将空降到该地图格子中；\n\n`
+                                        + `5. 局主可以在参与人数达到2人或2人以上的情况下，随时点击左列“开始游戏”按钮来开局（在设置地图道具后半小时内未开局的情况下系统将自动关闭游戏）；\n\n`
+                                        + `6. 游戏将以30秒间隔的时间节奏来推进游戏，所有参与玩家可以在30秒内移动一步（或原地不动），30秒后游戏将做出一轮判决，直到判决出游戏的最终胜利者结束；\n\n`
+                                        + `7. 地图上有毒气圈，每3分钟向内扩大一圈，凡是处于毒气圈内的玩家将会受到伤害；\n\n`
+                                        + `8. 地图上分布有各类道具，玩家移动进入地图格子时，可以立即拾取枪械或防具，或触发地图事件（如武器空投）；\n\n`
+                                        + `9. 当同一格子内有多名玩家时，每30秒一轮的判决将会让玩家相互攻击；\n\n`
+                                        + `10. 当有一半玩家阵亡时，地图上将会在某个格子上空投EOS（空投发生时，该格子上的玩家将被全部杀死）；\n\n`
+                                        + `11. 击杀其他玩家，可获得被击杀玩家身上一定比例的EOS，以及额外的击杀奖励；\n\n`
+                                        + `12. 击杀数最高的玩家，将会获得“杀手”的奖励，游戏的最后一名玩家，将会获得“胜利者”的奖励 \n\n`
+                                        + `另外，关于scatter钱包的设置，请参考：\n`
+                                        + `1. https://get-scatter.com \n`
+                                        + `2. https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle`
+                */                        
+                this.description.scrollV = 0                     
+                this.descriptionContainer.addChild(this.description);
 
                 
                 this.stage.addChild(this.textfield)
@@ -240,40 +368,24 @@
             
 
             private popMessageBox(msgText){
+                /*
                 if ( !this.stage.contains(this.messageContainer)){
-                    this.stage.addChild(this.messageContainer)
-                }
-                this.messageContainer.x = this.stage.width/2 - 100
-                this.messageContainer.y = 50
-                this.messageContainer.width = 300
-                this.messageContainer.height = 200
-
-                this.messageBox.graphics.clear()
-                this.messageBox.graphics.beginFill(0xEEEEEE);
-                this.messageBox.graphics.drawRoundRect(0, 0, 300, 200, 15,15);
-                this.messageBox.graphics.endFill();
-                //this.messageBox.x = this.stage.width/2 - 100
-                //this.messageBox.y = 50
-                this.messageContainer.addChild(this.messageBox);
-
-                //this.message.x = this.messageBox.x+10
-                //this.message.y = this.messageBox.y+10
-                this.message.width = 300
-                this.message.height = 200
-                this.message.size = 18
-                this.message.textColor = 0x000000
-                this.message.text = msgText
-                this.message.$setWordWrap(true)
-                this.message.type = egret.TextFieldType.INPUT
-                this.message.$setMultiline(true)
-                this.messageContainer.addChild(this.message);
-
-                setTimeout(()=>{
+                    this.messageContainer.x = this.stage.width/2 - 100
+                    this.messageContainer.y = 50
+                    this.stage.addChild(this.messageContainer)               
+                }               
+                */
+                //重置计时器
+                egret.clearTimeout(this.messageTimeout)
+                this.messageTimeout = egret.setTimeout(()=>{
                    // this.stage.removeChild(this.messageBox)
                    // this.stage.removeChild(this.message)
-                    this.stage.removeChild(this.messageContainer)
-                },4000)
-
+                   // this.stage.removeChild(this.messageContainer)
+                   this.message.text=""
+                   this.stage.removeChild(this.messageContainer)
+                },this, 4000)
+                this.stage.addChild(this.messageContainer)
+                this.message.text = msgText
             }
 
             

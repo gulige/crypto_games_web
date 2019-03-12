@@ -20,6 +20,7 @@ class Player extends egret.DisplayObjectContainer {
     private gold:number
     private kills: number
     private moveable: boolean
+    private gentle: number
 
     public constructor(name:string, playerJson:any) {
         super();
@@ -31,6 +32,11 @@ class Player extends egret.DisplayObjectContainer {
         this.playerBitmap.width = 70;
         this.playerBitmap.height = 70;
         this.playerProfile = this.createBitmapByName("profile_"+name);
+        if (name.indexOf("female")>=0){
+            this.setGentle(1)  //female
+        } else {
+            this.setGentle(0)  //male
+        }
         //this.playerBitmap.x = this.position.x //初始化位置
         //this.playerBitmap.y = this.position.y
         //this.playerBitmap.touchEnabled = true;
@@ -96,7 +102,7 @@ class Player extends egret.DisplayObjectContainer {
         return position
     }
 
-    public setPosition(_position: egret.Point): void{
+    public setPosition(_position): void{
         this.x = _position.x
         this.y = _position.y
     }
@@ -203,5 +209,13 @@ class Player extends egret.DisplayObjectContainer {
 
     public isMoveable(){
         return this.moveable
+    }
+
+    public setGentle(num){
+        this.gentle = num
+    }
+
+    public getGentle(){
+        return this.gentle
     }
 }

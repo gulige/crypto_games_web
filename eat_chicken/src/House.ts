@@ -19,7 +19,7 @@ class House extends egret.DisplayObjectContainer {
         0.3,0.6,0,0,0,
         0,0,0,1,0
     ];
-    //private clock:Clock
+    private clock:Clock
     //private game_progress:number
 
     public constructor(param: any, _game:any) {
@@ -43,7 +43,7 @@ class House extends egret.DisplayObjectContainer {
 
         this.playerList =[]  //初始化士兵列表
         this.createPlayers(this.game.players)
-       // this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
+        this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
         
     }
 
@@ -156,11 +156,11 @@ class House extends egret.DisplayObjectContainer {
     public clearPlayerList(){
         this.playerList=[]
     }
-/*
+
     public getClock(){
         return this.clock;
     }
-*/
+
     public getBoard(){
         return this.game.board
     }

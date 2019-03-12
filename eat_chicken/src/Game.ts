@@ -55,7 +55,7 @@
             private login:egret.Bitmap;
             private logout:egret.Bitmap;
 
-            //private clock:Clock
+            private clock:Clock
             private backgroundMusic:egret.Sound = new egret.Sound()
             private backgroundMusicChannel:egret.SoundChannel
 
@@ -285,13 +285,13 @@
                 this.summaryBox.graphics.endFill();        
                 this.summaryContainer.addChild(this.summaryBox);
                 var summaryTitleBox = new egret.Shape();
-                summaryTitleBox.graphics.beginFill(0x000000,0.8);
+                summaryTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 summaryTitleBox.graphics.drawRoundRect(0, 0, 250, 30, 15,15);
                 this.summaryContainer.addChild(summaryTitleBox);
                 var summaryTitle = new egret.TextField();
                 summaryTitle.x = 100
                 summaryTitle.y = 5
-                summaryTitle.size = 18
+                summaryTitle.size = 20
                 summaryTitle.textColor = 0xFFFFFF
                 summaryTitle.text = '统计栏'
                 this.summaryContainer.addChild(summaryTitle);
@@ -300,7 +300,7 @@
                 this.summaryContent.y = 35
                 this.summaryContent.width = 250
                 this.summaryContent.height = 100
-                this.summaryContent.size = 18
+                this.summaryContent.size = 20
                 this.summaryContent.textColor = 0x000000                  
                 this.summaryContent.$setWordWrap(true)
                 //this.summaryContent.type = egret.TextFieldType.INPUT
@@ -322,13 +322,13 @@
                 this.messageContainer.addChild(this.messageBox);
 
                 var messageTitleBox = new egret.Shape();
-                messageTitleBox.graphics.beginFill(0x000000,0.8);
+                messageTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 messageTitleBox.graphics.drawRoundRect(0, 0, 250, 30, 15,15);
                 this.messageContainer.addChild(messageTitleBox);
                 var messageTitle = new egret.TextField();
                 messageTitle.x = 100
                 messageTitle.y = 5
-                messageTitle.size = 18
+                messageTitle.size = 20
                 messageTitle.textColor = 0xFFFFFF
                 messageTitle.text = '消息栏'
                 this.messageContainer.addChild(messageTitle);
@@ -337,10 +337,11 @@
                 this.message.y = 35
                 this.message.width = 230
                 this.message.height = 200
-                this.message.size = 18
+                this.message.size = 20
                 this.message.textColor = 0x000000                  
                 this.message.$setWordWrap(true)
                 this.message.$setMultiline(true)
+                //this.message.$setBold(true)
                 this.messageContainer.addChild(this.message);
                 // ***********
 
@@ -358,13 +359,13 @@
                 this.cellDetailsContainer.addChild(this.cellDetailsBox);
 
                 var cellDetailsTitleBox = new egret.Shape();
-                cellDetailsTitleBox.graphics.beginFill(0x000000,0.8);
+                cellDetailsTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 cellDetailsTitleBox.graphics.drawRoundRect(0, 0, 250, 30, 15,15);
                 this.cellDetailsContainer.addChild(cellDetailsTitleBox);
                 var cellDetailsTitle = new egret.TextField();
                 cellDetailsTitle.x = 100
                 cellDetailsTitle.y = 5
-                cellDetailsTitle.size = 18
+                cellDetailsTitle.size = 20
                 cellDetailsTitle.textColor = 0xFFFFFF
                 cellDetailsTitle.text = '格子栏'
                 this.cellDetailsContainer.addChild(cellDetailsTitle);
@@ -373,7 +374,7 @@
                 this.cellDetailsContent.y = 35
                 this.cellDetailsContent.width = 230
                 this.cellDetailsContent.height = 450
-                this.cellDetailsContent.size = 18
+                this.cellDetailsContent.size = 20
                 this.cellDetailsContent.textColor = 0x000000                  
                 this.cellDetailsContent.$setWordWrap(true)
                 this.cellDetailsContent.$setMultiline(true)
@@ -382,7 +383,7 @@
                 this.moveZoneContainer.width = 240
                 this.moveZoneContainer.height = 240
                 this.moveZoneBox.graphics.clear()
-                this.moveZoneBox.graphics.beginFill(0x00EE00,0.1);
+                this.moveZoneBox.graphics.beginFill(0x0000FF,0.1);
                 this.moveZoneBox.graphics.drawRoundRect(0, 0, 240, 240, 15,15);
                 this.moveZoneBox.graphics.endFill();
                 //this.moveZoneBox.graphics.lineStyle(4, 0x00EE00, 0.4);
@@ -506,17 +507,20 @@
                     play_stop.$setVisible(false)
                  } ,this)
                 
-                /******************** */
+                /******************** */                 
                 
                 this.stage.addChild(this.textfield)
                 //this.popMessageBox()
                 
+                
                 //let gameId = window.location.href.match(/(?<=id=).+/)[0]
                 let gameId = window.location.href.substr(window.location.href.indexOf("=")+1)
                 this.initBoard().then( ()=>{  //如果棋盘没有初始化，则先初始化再更新棋盘玩家 
-                    this.refreshHouse(gameId)
+                    this.refreshHouse(gameId).then( ()=>{
+                        this.updateClockInStage(this.currentHouse.getClock())                        
+                    })
                     // 建立与合约的定时器，每5秒更新一次数据到每个游戏房间，然后更新正在打开的棋盘玩家，然后渲染战斗（如果有的话）
-                    this.interval = egret.setInterval( async ()=>{
+                    this.interval = egret.setInterval( async ()=>{ 
                     
                         await this.refreshHouse(gameId)
                         //this.popHonorList()
@@ -605,16 +609,25 @@
                                 if (game_progress==0){  //游戏未开始
                                     
                                 } else if (game_progress==1) { // 棋盘地图已经设定
-                                    this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
+                                    this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
+                                        if (currentPlayer===null){  //当前用户未加入游戏
+                                            this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
+                                        }
+                                    })                                 
                                 } else if (game_progress==2) { // 游戏开始中
+                                    this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
+                                        if (currentPlayer!==null && currentPlayer.isMoveable()){  
+                                            this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
+                                        }
+                                    })
                                     
-                                    this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
                                 }
                             }
                                                                                   
                         }, this)
 
                     })
+                   
                 }
                     
             }
@@ -659,7 +672,7 @@
                                                         + `武器: ${ItemUtils.getItemNameById(player.getWeapon()) }\n`
                                                         + `攻击力: ${player.getAttack() }\n`
                                                         + `防御力: ${player.getDefense() }\n`
-                                                        + `EOS: ${player.getGold() }\n`
+                                                        + `EOS: ${player.getGold()/10000 }\n`
                                                         + `物品: ${items() }\n\n`                        
                         }
                     })                      
@@ -674,8 +687,13 @@
             private selectPlayer(player: Player){
                 this.board.setIndex(player, 1)
                 //this.showPlayerInfo(player)
-                this.actionSound(RES.getRes("yes_mp3").url)
-
+                let gentle = player.getGentle()
+                if (gentle == 0){
+                    this.actionSound(RES.getRes("yes_mp3").url)
+                } else {
+                    this.actionSound(RES.getRes("yes_female_mp3").url)
+                }
+                
                 let items = ()=>{
                     let nameStr = ''
                     player.getItems().map( id=>{
@@ -689,7 +707,7 @@
                             + `武器: ${ItemUtils.getItemNameById(player.getWeapon()) }\n`
                             + `攻击力: ${player.getAttack() }\n`
                             + `防御力: ${player.getDefense() }\n`
-                            + `EOS: ${player.getGold() }\n`
+                            + `EOS: ${player.getGold()/10000 }\n`
                             + `物品: ${items() }\n\n`
                 this.popMessageBox(text)            
             }
@@ -759,16 +777,19 @@
                 this.safeAreaLeft.graphics.clear()
                 this.safeAreaLeft.graphics.beginFill(0x00FF00, 0.2);            
                 this.safeAreaLeft.graphics.drawRect(0, (5-radius)*80, (5-radius)*80, this.board.height-((5-radius)*80*2));
+                //this.safeAreaLeft.graphics.drawRect(0, (5-radius)*80, (5-radius)*80, this.board.height-((5-radius)*80));
                 this.safeAreaLeft.graphics.endFill();
 
                 this.safeAreaRight.graphics.clear()
                 this.safeAreaRight.graphics.beginFill(0x00FF00, 0.2);            
                 this.safeAreaRight.graphics.drawRect(this.board.width-(5-radius)*80, (5-radius)*80, (5-radius)*80, this.board.height-((5-radius)*80*2));
+                //this.safeAreaRight.graphics.drawRect(this.board.width-(5-radius)*80, (5-radius)*80, this.board.width, this.board.height-((5-radius)*80));
                 this.safeAreaRight.graphics.endFill();
 
                 this.safeAreaBottom.graphics.clear()
                 this.safeAreaBottom.graphics.beginFill(0x00FF00, 0.2);            
                 this.safeAreaBottom.graphics.drawRect(0, this.board.height-(5-radius)*80, this.board.width, (5-radius)*80);
+                //this.safeAreaBottom.graphics.drawRect(0, this.board.height-(5-radius)*80, this.board.width, (5-radius)*80);
                 this.safeAreaBottom.graphics.endFill();
                // this.safeArea.graphics.endFill();
                 //this.safeArea.graphics.beginFill(0x000000, 0.2);
@@ -820,7 +841,8 @@
              */
             private async updateObjectsInBoard(house: House){
                 //
-                this.board.clearPlayers()
+                
+                this.board.clearPlayers()  //先清除所有玩家
                 let board = house.getBoard()  //board 为合约返回并存储在house的棋盘/格子数组
                 let cellList = this.board.getCellList()
                 let progress = house.getProgress()  //取得当前游戏progress
@@ -868,11 +890,41 @@
                                     } else {
                                         this.board.setIndex(player, 0)
                                     }
-                                    egret.Tween.get(player).to( {x:cell.x + 10*Math.random() , y:cell.y+ 10*Math.random() }, 500, egret.Ease.sineIn )
-                                    // .wait(0).call(this.checkCellItem.bind(this,cell))
-                                    // .wait(0).call(this.checkBattersInHouse.bind(this, this.currentHouse)) //检查是否生成战斗
-                                    
-                                    //player.addEventListener(egret.TouchEvent.TOUCH_TAP, this.selectPlayer.bind(this, player), this)                          
+                                    //egret.Tween.get(player).to( {x:cell.x + 10*Math.random() , y:cell.y+ 10*Math.random() }, 500, egret.Ease.sineIn )
+                                    //let playerCid = player.getCellId()
+                                    let playerName = player.getName()
+                                    //谁可以移动：1.移动位置了的玩家 2.非当前玩家 - 因为当前玩家靠点击移动
+                                    if (playerName!== ScatterUtils.getCurrentAccountName() ) {
+                                        let _x = player.x-cell.x
+                                        let _y = player.y-cell.y
+                                        if ( _x>0 && _x<80 && _y>0 && _y<80 ){  //目前player的position还未更新，以此判断player之前是不是处于当前cell，来判断是否曾经移动
+                                            egret.Tween.get(player).to( {x:cell.x + 10*Math.random() , y:cell.y+ 10*Math.random() }, 500, egret.Ease.sineIn )
+                                        } else {
+                                            let horse_json, horse_png   
+                                            if (player.x > cell.x){
+                                                //horse_json = "horse-left_json"
+                                                horse_png = "horse-left_png"
+                                            } else {
+                                                //horse_json = "horse_json"
+                                                horse_png = "horse_png"
+                                            }
+                                            player.$setVisible(false)
+                                            this.animation({json:"horse_json",png:horse_png, data:"horse",x:player.x, y:player.y}).then( horse=>{
+                                                this.board.addChild(horse); 
+                                                horse.$setScaleX(0.8);
+                                                horse.$setScaleY(0.8);
+                                                horse.play(-1) 
+                                                let _pos = {x:cell.x + 10*Math.random() , y:cell.y+ 10*Math.random() } 
+                                                egret.Tween.get(horse).to(_pos , 500, egret.Ease.sineIn )
+                                                    .wait(0).call( ()=>{
+                                                        this.board.removeChild(horse)
+                                                        player.$setVisible(true)
+                                                        player.setPosition(_pos)
+                                                    })
+
+                                            })
+                                        }      
+                                    }                          
                                 }
                             })                      
                         })
@@ -898,16 +950,21 @@
                     let tick = cellElement.item_drop_ticks
                     let trigger = cellElement.item_drop_triggered
                     //预告空降信息
-                    if (trigger===1 && tick===3){
-                        this.animation({json:"arrow-down_json",png:"arrow-down_png", data:"arrow-down",x:30, y:30}).then( animate=>{
-                                animate.play(-1);    
-                                cell.addChild(animate);  
-                                egret.setTimeout( ()=>{                                      
-                                    cell.removeChild(animate); 
-                                }, this, 10000)
-                                             
-                            })
-                        this.popMessageBox(ItemUtils.getItemNameById(newItem.getId()) + "即将降落")      
+                    if (trigger===1){
+                        if (tick!==0){  //空降未降落
+                            if (!cell.hasFallDownSign()){ //如果还没有空降指示，就添加
+                                this.animation({json:"arrow-down_json",png:"arrow-down_png", data:"arrow-down",x:30, y:30}).then( animate=>{
+                                    animate.play(-1);    
+                                    cell.addChild(animate);
+                                    cell.addFallDownSign(true)                                                 
+                                })
+                            }
+                            // 滚动通知
+                            this.popMessageBox(ItemUtils.getItemNameById(newItem.getId()) + "即将降落")
+                        } else {  // 发生空降
+                            cell.removeChildren();  //注意：清除所有物品要放在加入新物品前执行。此处主要为清除空降指示
+                        }  
+             
                     }
                     if(tick == 0){
                         // 将物品放入格子内
@@ -922,7 +979,7 @@
                         // 首先item_drop_triggered从0变1，然后item_drop_ticks开始倒计时，当值为0时就是空降武器。 Eos直接从-1变0，没有triggered和倒计时
                         
                         //console.log(trigger,prvItem, newItemId)
-                        if (trigger == 1 && prvItem==null && (newItemId == 5 || newItemId == 8 || newItemId == 13)){                        
+                        if (trigger == 1 && prvItem!==null && prvItem.getId() ===0 && (newItemId == 5 || newItemId == 8 || newItemId == 13)){                        
                             //降落效果
                             newItem.y = -300
                             egret.Tween.get(newItem).to( {x:0, y:0}, 1500, egret.Ease.sineIn )
@@ -951,8 +1008,12 @@
                 }               
                 this.playerProfileListContainer.removeChildren()
                 list.map( (player, idx)=>{
-                   
-                    let portraitFrame = this.createBitmapByName("portraitFrame_png");
+                    let portraitFrame
+                    if (player.getName()==ScatterUtils.getCurrentAccountName()){
+                        portraitFrame = this.createBitmapByName("portraitFrame_self_png");
+                    } else {
+                        portraitFrame = this.createBitmapByName("portraitFrame_png");
+                    }
                     portraitFrame.$setX(80*idx+5)
                     portraitFrame.$setY(6)
                     portraitFrame.$setWidth(72)
@@ -981,7 +1042,7 @@
              * 从合约取得最新游戏信息并更新游戏房间，数据分拆
              * 
              */
-            private async refreshHouse(id){           
+            private async refreshHouse(id){         
                 
                 await ScatterUtils.getGameInfo(parseInt(id)).then( async game=>{
                    
@@ -1112,45 +1173,74 @@
                         this.popMessageBox(ScatterUtils.message.authority)   
                         return
                     }
-                    
-                    //let gameId = this.selectedHouse.getID()
-                    ScatterUtils.move(this.currentHouse.getID(), moveX ,moveY).then( async transaction=>{
-                        console.log("move transaction", transaction)
-                        if ( !transaction.processed ){  //移动失败
-                            transaction = JSON.parse(transaction)
-                            //alert("移动失败："+transaction.error.details[0].message)
-                            this.popMessageBox("移动失败："+transaction.error.details[0].message)   
-                        } else {                    
-                            this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
-                                console.log("currentPlayer", currentPlayer)
-                                if (currentPlayer!=null){ //如果找到相应的玩家，则先产生移动效果，再更新棋盘玩家
-                                    //let currentPlayerBitmap = currentPlayer[0].getBitmap()
-                                // let position = currentPlayer[0].getPosition()                                   
-                                    egret.Tween.get(currentPlayer).to( position, 500, egret.Ease.sineIn )
-                                    currentPlayer.setMoveable(false) // 一个step里移动后就不能再移动
-                                    this.checkMoveZone()
-                                // .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
-                                // .wait(0).call( ()=>{
-                                //      this.board.getCellByXY(moveX,moveY).then( async cell=>{
-                                //          this.checkCellItem(cell)
-                                //      })                                  
-                                // });       
-                                } else {  //如果找不到相应的玩家，直接更新棋盘玩家，没有移动效果
-                                //   this.updatePlayersInBoard(gameId).then( ()=>{
-                                //       this.checkCell(moveX,moveY)
-                                //  })
-                                }
-                            })
-                            
-                                                
-                        }
 
-                    }).catch((e) => {
-                        console.error(e);
-                        //alert("移动失败")
-                        this.popMessageBox("移动失败")
-                    }) 
+                    this.animation({json:"arrow-down_json",png:"arrow-down_png", data:"arrow-down",x:position.x+30,y:position.y+25}).then( arrow=>{
+                        this.board.addChild(arrow); 
+                        arrow.$setScaleX(1.5);
+                        arrow.$setScaleY(1.5);
+                        arrow.play(-1)
+                        
+                        //let gameId = this.selectedHouse.getID()
+                        ScatterUtils.move(this.currentHouse.getID(), moveX ,moveY).then( async transaction=>{
+                            if ( !transaction.processed ){  //移动失败
+                                transaction = JSON.parse(transaction)
+                                //alert("移动失败："+transaction.error.details[0].message)
+                                //this.popMessageBox("移动失败："+transaction.error.details[0].message)  
+                                this.popMessageBox("移动失败")  
+                                this.board.removeChild(arrow)
+                            } else {                    
+                                this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
+                                    //console.log("currentPlayer", currentPlayer)
+                                    if (currentPlayer!=null){ //如果找到相应的玩家，则先产生移动效果，再更新棋盘玩家
+                                        //let currentPlayerBitmap = currentPlayer[0].getBitmap()
+                                    // let position = currentPlayer[0].getPosition() 
+                                        let horse_json, horse_png   
+                                        if (currentPlayer.x > position.x){
+                                            //horse_json = "horse-left_json"
+                                            horse_png = "horse-left_png"
+                                        } else {
+                                            //horse_json = "horse_json"
+                                            horse_png = "horse_png"
+                                        }
+                                        currentPlayer.$setVisible(false)
+                                        this.animation({json:"horse_json",png:horse_png, data:"horse",x:currentPlayer.x, y:currentPlayer.y}).then( horse=>{
+                                            this.board.addChild(horse); 
+                                            horse.$setScaleX(0.8);
+                                            horse.$setScaleY(0.8);
+                                            horse.play(-1)     
+                                            egret.Tween.get(horse).to( position, 500, egret.Ease.sineIn )
+                                                .wait(0).call( ()=>{
+                                                    this.board.removeChild(horse)
+                                                    this.board.removeChild(arrow)
+                                                    currentPlayer.setPosition(position)
+                                                    currentPlayer.$setVisible(true)
+                                                    
+                                                })
 
+                                        })                              
+                                        
+                                        currentPlayer.setMoveable(false) // 一个step里移动后就不能再移动
+                                        this.checkMoveZone()
+                                    // .wait(0).call(this.updatePlayersInBoard.bind(this,gameId))
+                                    // .wait(0).call( ()=>{
+                                    //      this.board.getCellByXY(moveX,moveY).then( async cell=>{
+                                    //          this.checkCellItem(cell)
+                                    //      })                                  
+                                    // });       
+                                    } else {  //如果找不到相应的玩家，直接更新棋盘玩家，没有移动效果
+                                    //   this.updatePlayersInBoard(gameId).then( ()=>{
+                                    //       this.checkCell(moveX,moveY)
+                                    //  })
+                                    }
+                                })                                                                           
+                            }
+                        }).catch((e) => {
+                            console.error(e);
+                            //alert("移动失败")
+                            this.popMessageBox("移动失败")
+                            this.board.removeChild(arrow)
+                        }) 
+                    })
                  })
                 
             }
@@ -1167,6 +1257,7 @@
                                 this.moveZoneContainer.x = cell.getPosition().x - 80 
                                 this.moveZoneContainer.y = cell.getPosition().y - 80 
                                 this.board.addChild(this.moveZoneContainer) 
+                                this.popMessageBox("玩家"+currentPlayer.getName()+"可以移动")
                                 //this.board.setIndex(this.moveZoneBox, -10)
                                 //this.moveZoneBox.$setVisible(true)
                                 //this.moveZoneContainer.$setVisible(true)
@@ -1269,10 +1360,11 @@
                         if ( !transaction.processed ){  //交易失败
                             transaction = JSON.parse(transaction)
                             //alert("KickOff游戏失败："+transaction.error.details[0].message)
-                            this.popMessageBox("KickOff游戏失败："+transaction.error.details[0].message)
+                            this.popMessageBox("启动游戏失败："+transaction.error.details[0].message)
                         } else {
-                            this.popMessageBox("游戏Kick Off成功！")
-
+                            this.popMessageBox("游戏启动成功！")
+                            let clock = this.currentHouse.getClock()
+                            clock.start()
                         }
                     })
                 })
@@ -1280,19 +1372,19 @@
             }
 
            
-/*
+
             private updateClockInStage(_clock:Clock){
                 if (this.stage.contains(this.clock)){
                     this.stage.removeChild(this.clock)
                 }
                 this.clock = _clock
-                this.clock.x = 1150
-                this.clock.y = 150
+                this.clock.x = 50
+                this.clock.y = 400
                 this.clock.start()
                 this.stage.addChild(this.clock)
             }
 
-*/
+
 
 
 
@@ -1320,8 +1412,9 @@
                                        
                                     this.board.removeChild(animate); 
                                     this.board.removeChild(shadowBox)
-                                    alert("欢迎: "+ message.details)
-                                }, this, 4000)
+                                    //alert("欢迎: "+ message.details)
+                                    this.popMessageBox("欢迎: "+ message.details)
+                                }, this, 8000)
                                              
                             })
                         //this.popMessageBox("欢迎: "+ message.details)
@@ -1333,8 +1426,8 @@
                         }
 
                     } else {
-                        alert(message.details)
-                        //this.popMessageBox(message.details)
+                        //alert(message.details)
+                        this.popMessageBox(message.details)
                     }                 
 
                 }).catch( e=>{
@@ -1353,8 +1446,8 @@
                  
                 ScatterUtils.logout().then( message=>{
                //     ScatterUtils.getCurrentAccountName().then( name=>{
-                        alert(message.details)
-                        //this.popMessageBox(message.details)
+                        //alert(message.details)
+                        this.popMessageBox(message.details)
                         if (message.logout){
                             if (this.stage.contains(this.logout)) {
                                 this.stage.removeChild(this.logout)
@@ -1366,7 +1459,8 @@
              //       })                                           
                 }).catch( e=>{
                     console.log("e",e)
-                    alert(e)
+                    //alert(e)
+                    this.popMessageBox(e)
                 })
             } 
 

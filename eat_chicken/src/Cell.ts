@@ -10,6 +10,7 @@ class Cell extends egret.DisplayObjectContainer {
     private item: Item = null
     private hasPoison = false
     private battleTime:number=0  //seonds
+    private fallDownSign:boolean = false
 
     public constructor(rowX:number, colY:number,id:number) {
         super();
@@ -136,5 +137,12 @@ class Cell extends egret.DisplayObjectContainer {
     public onDetailMode(){
         return this.detailBitmap.visible
     }
-   
+
+    public hasFallDownSign():boolean{
+        return this.fallDownSign
+    }
+    
+    public addFallDownSign(sign:boolean){
+        this.fallDownSign = sign
+    }
 }

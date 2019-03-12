@@ -84,7 +84,6 @@ var Main = (function (_super) {
         _this.soilderIconList = [];
         _this.houseList = [];
         _this.board = null;
-        //private clock:Clock
         _this.backgroundMusic = new egret.Sound();
         _this.playerInfo = new egret.Shape();
         _this.player_name = new egret.TextField();
@@ -94,16 +93,16 @@ var Main = (function (_super) {
         _this.player_eos = new egret.TextField();
         _this.player_item = new egret.TextField();
         _this.player_weapon = new egret.TextField();
-        _this.safeAreaTop = new egret.Shape();
-        _this.safeAreaLeft = new egret.Shape();
-        _this.safeAreaRight = new egret.Shape();
-        _this.safeAreaBottom = new egret.Shape();
         _this.messageContainer = new egret.DisplayObjectContainer();
         _this.messageBox = new egret.Shape();
         _this.message = new egret.TextField();
+        _this.descriptionContainer = new egret.DisplayObjectContainer();
+        _this.descriptionBox = new egret.Shape();
+        _this.description = new egret.TextField();
         //临时随机演示
         _this.townRandomName = ["johny", "kitty", "peter"];
         _this.num = 0;
+        _this.messageTimeout = null;
         _this.canvas = document.getElementsByTagName("CANVAS")[0];
         //this.canvas.addEventListener('mousemove',this.onMove.bind(this));
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
@@ -188,7 +187,7 @@ var Main = (function (_super) {
     Main.prototype.createGameScene = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var createGameFlat;
+            var createGameFlat, messageTitleBox, messageTitle, description, descriptioTitleBox, descriptionTitle, descriptionClose;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.loadResource()
@@ -201,20 +200,20 @@ var Main = (function (_super) {
                         _a.sent();
                         createGameFlat = this.createBitmapByName("city_png");
                         this.stage.addChild(createGameFlat);
-                        createGameFlat.width = 80;
+                        createGameFlat.width = 100;
                         createGameFlat.height = 100;
-                        createGameFlat.x = 10;
-                        createGameFlat.y = 5;
+                        createGameFlat.x = 15;
+                        createGameFlat.y = 15;
                         createGameFlat.touchEnabled = true;
                         createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, { name: "johny", bitmap: "house_png" }), this);
                         //******登陆/登出功能******
                         this.login = this.createBitmapByName("login_png");
-                        this.login.x = 1150;
+                        this.login.x = 1180;
                         this.login.y = 10;
                         this.login.touchEnabled = true;
                         this.login.addEventListener(egret.TouchEvent.TOUCH_TAP, this.loginGame, this);
                         this.logout = this.createBitmapByName("logout_png");
-                        this.logout.x = 1150;
+                        this.logout.x = 1180;
                         this.logout.y = 10;
                         this.logout.touchEnabled = true;
                         this.logout.addEventListener(egret.TouchEvent.TOUCH_TAP, this.logoutGame, this);
@@ -229,6 +228,121 @@ var Main = (function (_super) {
                             }
                         });
                         //************************ 
+                        // ***游戏滚动消息看板***
+                        this.messageContainer.x = 600;
+                        this.messageContainer.y = 200;
+                        this.messageContainer.width = 350;
+                        this.messageContainer.height = 250;
+                        //this.stage.addChild(this.messageContainer)
+                        this.messageBox.graphics.clear();
+                        this.messageBox.graphics.beginFill(0xF7CDA4, 0.4);
+                        this.messageBox.graphics.lineStyle(2, 0x000000, 0.5);
+                        this.messageBox.graphics.drawRoundRect(0, 0, 350, 250, 15, 15);
+                        this.messageBox.graphics.endFill();
+                        this.messageContainer.addChild(this.messageBox);
+                        messageTitleBox = new egret.Shape();
+                        messageTitleBox.graphics.beginFill(0x4F4F4F, 0.8);
+                        messageTitleBox.graphics.drawRoundRect(0, 0, 350, 30, 15, 15);
+                        this.messageContainer.addChild(messageTitleBox);
+                        messageTitle = new egret.TextField();
+                        messageTitle.x = 145;
+                        messageTitle.y = 3;
+                        messageTitle.size = 20;
+                        messageTitle.textColor = 0xFFFFFF;
+                        messageTitle.text = '通告栏';
+                        this.messageContainer.addChild(messageTitle);
+                        this.message.x = 10;
+                        this.message.y = 35;
+                        this.message.width = 330;
+                        this.message.height = 200;
+                        this.message.size = 20;
+                        this.message.textColor = 0x000000;
+                        this.message.$setWordWrap(true);
+                        this.message.$setMultiline(true);
+                        this.messageContainer.addChild(this.message);
+                        description = this.createBitmapByName("description_png");
+                        this.stage.addChild(description);
+                        description.x = 1350;
+                        description.y = 10;
+                        description.touchEnabled = true;
+                        description.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                            _this.stage.addChild(_this.descriptionContainer);
+                        }, this);
+                        // ***游戏说明***
+                        this.descriptionContainer.x = 350;
+                        this.descriptionContainer.y = 60;
+                        this.descriptionContainer.width = 800;
+                        this.descriptionContainer.height = 1000;
+                        // this.stage.addChild(this.descriptionContainer)
+                        this.descriptionBox.graphics.clear();
+                        this.descriptionBox.graphics.beginFill(0xF7CDA4, 0.8);
+                        this.descriptionBox.graphics.lineStyle(2, 0x000000, 0.8);
+                        this.descriptionBox.graphics.drawRoundRect(0, 0, 800, 1000, 15, 15);
+                        this.descriptionBox.graphics.endFill();
+                        this.descriptionContainer.addChild(this.descriptionBox);
+                        descriptioTitleBox = new egret.Shape();
+                        descriptioTitleBox.graphics.beginFill(0x4F4F4F, 0.8);
+                        descriptioTitleBox.graphics.drawRoundRect(0, 0, 800, 30, 15, 15);
+                        this.descriptionContainer.addChild(descriptioTitleBox);
+                        descriptionTitle = new egret.TextField();
+                        descriptionTitle.x = 350;
+                        descriptionTitle.y = 5;
+                        descriptionTitle.size = 20;
+                        descriptionTitle.textColor = 0xFFFFFF;
+                        descriptionTitle.text = '游戏说明';
+                        this.descriptionContainer.addChild(descriptionTitle);
+                        descriptionClose = this.createBitmapByName("close_png");
+                        this.descriptionContainer.addChild(descriptionClose);
+                        descriptionClose.x = 770;
+                        descriptionClose.y = 0;
+                        descriptionClose.touchEnabled = true;
+                        descriptionClose.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                            _this.stage.removeChild(_this.descriptionContainer);
+                        }, this);
+                        this.description.x = 10;
+                        this.description.y = 35;
+                        this.description.width = 780;
+                        this.description.height = 980;
+                        this.description.size = 22;
+                        this.description.textColor = 0x000000;
+                        this.description.$setWordWrap(true);
+                        this.description.$setMultiline(true);
+                        this.description.textFlow = new egret.HtmlTextParser().parser("\u6E38\u620F\u89C4\u5219\u8BF4\u660E\uFF1A\n\n"
+                            + "1. \u8FDB\u5165\u6E38\u620F\u5927\u5385\uFF0C\u70B9\u51FB\u5DE6\u4E0A\u89D2\u6309\u94AE\u5F39\u51FAscatter\u754C\u9762\uFF0C\u786E\u8BA4\u540E\u521B\u5EFA\u65B0\u7684\u4E00\u5C40\u6E38\u620F\uFF0C\u65B0\u5C40\u5C06\u51FA\u73B0\u5728\u6E38\u620F\u5927\u5385\u4E2D\uFF0C\u65B0\u5C40\u7684\u521B\u5EFA\u8005\u53EB\u5C40\u4E3B\uFF1B\n\n"
+                            + "2. \u5728\u6E38\u620F\u5927\u5385\u4E2D\u70B9\u51FB\u65B0\u5EFA\u7684\u6E38\u620F\uFF0C\u8FDB\u5165\u6E38\u620F\u754C\u9762\uFF1B\n\n"
+                            + "3. \u6E38\u620F\u7684\u5C40\u4E3B\u70B9\u51FB\u5DE6\u5217\u4E2D\u95F4\u6309\u94AE\u968F\u673A\u51FA\u8BE5\u5C40\u7684\u5730\u56FE\u9053\u5177\u5206\u5E03\uFF1B\n\n"
+                            + "4. \u4E4B\u540E\uFF0C\u5176\u4ED6\u73A9\u5BB6\u53EF\u4EE5\u9009\u62E9\u5730\u56FE\u4E0A\u7684\u67D0\u4E2A\u683C\u5B50\u4F4D\u7F6E\uFF0C\u70B9\u51FB\u5F39\u51FAscatter\u754C\u9762\uFF0C\u786E\u8BA4\u540E\u52A0\u5165\u6E38\u620F\uFF0C\u73A9\u5BB6\u7684\u89D2\u8272\u5C06\u7A7A\u964D\u5230\u8BE5\u5730\u56FE\u683C\u5B50\u4E2D\uFF1B\n\n"
+                            + "5. \u5C40\u4E3B\u53EF\u4EE5\u5728\u53C2\u4E0E\u4EBA\u6570\u8FBE\u52302\u4EBA\u62162\u4EBA\u4EE5\u4E0A\u7684\u60C5\u51B5\u4E0B\uFF0C\u968F\u65F6\u70B9\u51FB\u5DE6\u5217\u201C\u5F00\u59CB\u6E38\u620F\u201D\u6309\u94AE\u6765\u5F00\u5C40\uFF08\u5728\u8BBE\u7F6E\u5730\u56FE\u9053\u5177\u540E\u534A\u5C0F\u65F6\u5185\u672A\u5F00\u5C40\u7684\u60C5\u51B5\u4E0B\u7CFB\u7EDF\u5C06\u81EA\u52A8\u5173\u95ED\u6E38\u620F\uFF09\uFF1B\n\n"
+                            + "6. \u6E38\u620F\u5C06\u4EE530\u79D2\u95F4\u9694\u7684\u65F6\u95F4\u8282\u594F\u6765\u63A8\u8FDB\u6E38\u620F\uFF0C\u6240\u6709\u53C2\u4E0E\u73A9\u5BB6\u53EF\u4EE5\u572830\u79D2\u5185\u79FB\u52A8\u4E00\u6B65\uFF08\u6216\u539F\u5730\u4E0D\u52A8\uFF09\uFF0C30\u79D2\u540E\u6E38\u620F\u5C06\u505A\u51FA\u4E00\u8F6E\u5224\u51B3\uFF0C\u76F4\u5230\u5224\u51B3\u51FA\u6E38\u620F\u7684\u6700\u7EC8\u80DC\u5229\u8005\u7ED3\u675F\uFF1B\n\n"
+                            + "7. \u5730\u56FE\u4E0A\u6709\u6BD2\u6C14\u5708\uFF0C\u6BCF3\u5206\u949F\u5411\u5185\u6269\u5927\u4E00\u5708\uFF0C\u51E1\u662F\u5904\u4E8E\u6BD2\u6C14\u5708\u5185\u7684\u73A9\u5BB6\u5C06\u4F1A\u53D7\u5230\u4F24\u5BB3\uFF1B\n\n"
+                            + "8. \u5730\u56FE\u4E0A\u5206\u5E03\u6709\u5404\u7C7B\u9053\u5177\uFF0C\u73A9\u5BB6\u79FB\u52A8\u8FDB\u5165\u5730\u56FE\u683C\u5B50\u65F6\uFF0C\u53EF\u4EE5\u7ACB\u5373\u62FE\u53D6\u67AA\u68B0\u6216\u9632\u5177\uFF0C\u6216\u89E6\u53D1\u5730\u56FE\u4E8B\u4EF6\uFF08\u5982\u6B66\u5668\u7A7A\u6295\uFF09\uFF1B\n\n"
+                            + "9. \u5F53\u540C\u4E00\u683C\u5B50\u5185\u6709\u591A\u540D\u73A9\u5BB6\u65F6\uFF0C\u6BCF30\u79D2\u4E00\u8F6E\u7684\u5224\u51B3\u5C06\u4F1A\u8BA9\u73A9\u5BB6\u76F8\u4E92\u653B\u51FB\uFF1B\n\n"
+                            + "10. \u5F53\u6709\u4E00\u534A\u73A9\u5BB6\u9635\u4EA1\u65F6\uFF0C\u5730\u56FE\u4E0A\u5C06\u4F1A\u5728\u67D0\u4E2A\u683C\u5B50\u4E0A\u7A7A\u6295EOS\uFF08\u7A7A\u6295\u53D1\u751F\u65F6\uFF0C\u8BE5\u683C\u5B50\u4E0A\u7684\u73A9\u5BB6\u5C06\u88AB\u5168\u90E8\u6740\u6B7B\uFF09\uFF1B\n\n"
+                            + "11. \u51FB\u6740\u5176\u4ED6\u73A9\u5BB6\uFF0C\u53EF\u83B7\u5F97\u88AB\u51FB\u6740\u73A9\u5BB6\u8EAB\u4E0A\u4E00\u5B9A\u6BD4\u4F8B\u7684EOS\uFF0C\u4EE5\u53CA\u989D\u5916\u7684\u51FB\u6740\u5956\u52B1\uFF1B\n\n"
+                            + "12. \u51FB\u6740\u6570\u6700\u9AD8\u7684\u73A9\u5BB6\uFF0C\u5C06\u4F1A\u83B7\u5F97\u201C\u6740\u624B\u201D\u7684\u5956\u52B1\uFF0C\u6E38\u620F\u7684\u6700\u540E\u4E00\u540D\u73A9\u5BB6\uFF0C\u5C06\u4F1A\u83B7\u5F97\u201C\u80DC\u5229\u8005\u201D\u7684\u5956\u52B1 \n\n"
+                            + "\u53E6\u5916\uFF0C\u5173\u4E8Escatter\u94B1\u5305\u7684\u8BBE\u7F6E\uFF0C\u8BF7\u53C2\u8003\uFF1A\n"
+                            + "1. <a href = 'https://get-scatter.com'><u>https://get-scatter.com</u></a> \n"
+                            + "2. <a href = 'https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle'><u>https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle </u></a>");
+                        /*
+                        this.description.text = `游戏规则说明：\n\n`
+                                                + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
+                                                + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
+                                                + `3. 游戏的局主点击左列中间按钮随机出该局的地图道具分布；\n\n`
+                                                + `4. 之后，其他玩家可以选择地图上的某个格子位置，点击弹出scatter界面，确认后加入游戏，玩家的角色将空降到该地图格子中；\n\n`
+                                                + `5. 局主可以在参与人数达到2人或2人以上的情况下，随时点击左列“开始游戏”按钮来开局（在设置地图道具后半小时内未开局的情况下系统将自动关闭游戏）；\n\n`
+                                                + `6. 游戏将以30秒间隔的时间节奏来推进游戏，所有参与玩家可以在30秒内移动一步（或原地不动），30秒后游戏将做出一轮判决，直到判决出游戏的最终胜利者结束；\n\n`
+                                                + `7. 地图上有毒气圈，每3分钟向内扩大一圈，凡是处于毒气圈内的玩家将会受到伤害；\n\n`
+                                                + `8. 地图上分布有各类道具，玩家移动进入地图格子时，可以立即拾取枪械或防具，或触发地图事件（如武器空投）；\n\n`
+                                                + `9. 当同一格子内有多名玩家时，每30秒一轮的判决将会让玩家相互攻击；\n\n`
+                                                + `10. 当有一半玩家阵亡时，地图上将会在某个格子上空投EOS（空投发生时，该格子上的玩家将被全部杀死）；\n\n`
+                                                + `11. 击杀其他玩家，可获得被击杀玩家身上一定比例的EOS，以及额外的击杀奖励；\n\n`
+                                                + `12. 击杀数最高的玩家，将会获得“杀手”的奖励，游戏的最后一名玩家，将会获得“胜利者”的奖励 \n\n`
+                                                + `另外，关于scatter钱包的设置，请参考：\n`
+                                                + `1. https://get-scatter.com \n`
+                                                + `2. https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle`
+                        */
+                        this.description.scrollV = 0;
+                        this.descriptionContainer.addChild(this.description);
                         this.stage.addChild(this.textfield);
                         //this.popMessageBox()
                         //更新游戏房间列表，位置为上栏
@@ -240,36 +354,24 @@ var Main = (function (_super) {
     };
     Main.prototype.popMessageBox = function (msgText) {
         var _this = this;
-        if (!this.stage.contains(this.messageContainer)) {
-            this.stage.addChild(this.messageContainer);
+        /*
+        if ( !this.stage.contains(this.messageContainer)){
+            this.messageContainer.x = this.stage.width/2 - 100
+            this.messageContainer.y = 50
+            this.stage.addChild(this.messageContainer)
         }
-        this.messageContainer.x = this.stage.width / 2 - 100;
-        this.messageContainer.y = 50;
-        this.messageContainer.width = 300;
-        this.messageContainer.height = 200;
-        this.messageBox.graphics.clear();
-        this.messageBox.graphics.beginFill(0xEEEEEE);
-        this.messageBox.graphics.drawRoundRect(0, 0, 300, 200, 15, 15);
-        this.messageBox.graphics.endFill();
-        //this.messageBox.x = this.stage.width/2 - 100
-        //this.messageBox.y = 50
-        this.messageContainer.addChild(this.messageBox);
-        //this.message.x = this.messageBox.x+10
-        //this.message.y = this.messageBox.y+10
-        this.message.width = 300;
-        this.message.height = 200;
-        this.message.size = 18;
-        this.message.textColor = 0x000000;
-        this.message.text = msgText;
-        this.message.$setWordWrap(true);
-        this.message.type = egret.TextFieldType.INPUT;
-        this.message.$setMultiline(true);
-        this.messageContainer.addChild(this.message);
-        setTimeout(function () {
+        */
+        //重置计时器
+        egret.clearTimeout(this.messageTimeout);
+        this.messageTimeout = egret.setTimeout(function () {
             // this.stage.removeChild(this.messageBox)
             // this.stage.removeChild(this.message)
+            // this.stage.removeChild(this.messageContainer)
+            _this.message.text = "";
             _this.stage.removeChild(_this.messageContainer);
-        }, 4000);
+        }, this, 4000);
+        this.stage.addChild(this.messageContainer);
+        this.message.text = msgText;
     };
     /**
      * 更新顶部栏的游戏房间列表

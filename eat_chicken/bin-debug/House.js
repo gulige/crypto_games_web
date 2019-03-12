@@ -45,7 +45,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var House = (function (_super) {
     __extends(House, _super);
-    //private clock:Clock
     //private game_progress:number
     function House(param, _game) {
         var _this = _super.call(this) || this;
@@ -72,7 +71,7 @@ var House = (function (_super) {
         this.owner = this.game.creator;
         this.playerList = []; //初始化士兵列表
         this.createPlayers(this.game.players);
-        // this.clock = new Clock()  //初始化时分秒为0：0：0的时钟
+        this.clock = new Clock(); //初始化时分秒为0：0：0的时钟
     };
     House.prototype.updateHouse = function (_game) {
         this.isNewStep = (this.game.game_progress !== _game.game_progress || this.game.step !== _game.step);
@@ -202,11 +201,9 @@ var House = (function (_super) {
     House.prototype.clearPlayerList = function () {
         this.playerList = [];
     };
-    /*
-        public getClock(){
-            return this.clock;
-        }
-    */
+    House.prototype.getClock = function () {
+        return this.clock;
+    };
     House.prototype.getBoard = function () {
         return this.game.board;
     };

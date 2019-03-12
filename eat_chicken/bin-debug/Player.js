@@ -23,6 +23,12 @@ var Player = (function (_super) {
         this.playerBitmap.width = 70;
         this.playerBitmap.height = 70;
         this.playerProfile = this.createBitmapByName("profile_" + name);
+        if (name.indexOf("female") >= 0) {
+            this.setGentle(1); //female
+        }
+        else {
+            this.setGentle(0); //male
+        }
         //this.playerBitmap.x = this.position.x //初始化位置
         //this.playerBitmap.y = this.position.y
         //this.playerBitmap.touchEnabled = true;
@@ -161,6 +167,12 @@ var Player = (function (_super) {
     };
     Player.prototype.isMoveable = function () {
         return this.moveable;
+    };
+    Player.prototype.setGentle = function (num) {
+        this.gentle = num;
+    };
+    Player.prototype.getGentle = function () {
+        return this.gentle;
     };
     return Player;
 }(egret.DisplayObjectContainer));

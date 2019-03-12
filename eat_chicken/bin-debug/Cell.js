@@ -18,6 +18,7 @@ var Cell = (function (_super) {
         _this.item = null;
         _this.hasPoison = false;
         _this.battleTime = 0; //seonds
+        _this.fallDownSign = false;
         _this.createCell(rowX, colY, id);
         return _this;
     }
@@ -114,6 +115,12 @@ var Cell = (function (_super) {
     };
     Cell.prototype.onDetailMode = function () {
         return this.detailBitmap.visible;
+    };
+    Cell.prototype.hasFallDownSign = function () {
+        return this.fallDownSign;
+    };
+    Cell.prototype.addFallDownSign = function (sign) {
+        this.fallDownSign = sign;
     };
     return Cell;
 }(egret.DisplayObjectContainer));
