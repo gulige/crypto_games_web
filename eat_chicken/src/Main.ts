@@ -47,7 +47,10 @@
             private attack:egret.Bitmap
             private idle:egret.Bitmap 
 
-            private houseList:Array<House> = []
+            //private houseList:Array<House> = []
+            private eos_one:Array<any> = []
+            private eos_three:Array<any> = []
+            private eos_five:Array<any> = []
             private board: Board = null;
 
             private login:egret.Bitmap;
@@ -78,6 +81,10 @@
             //临时随机演示
             private townRandomName = ["johny", "kitty", "peter"]
             private num = 0
+
+            private oneEosContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+            private threeEosContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+            private fiveEosContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
 
             private messageTimeout = null;
 
@@ -188,15 +195,180 @@
                 //console.log(canvas)
                 //****** 以下为游戏工具栏，位于地图舞台左侧 ******
 
-                //城堡图，游戏创建图标，位置为左上栏             
-                let createGameFlat = this.createBitmapByName("city_png");
-                this.stage.addChild(createGameFlat);
-                createGameFlat.width = 100;
-                createGameFlat.height = 100;
-                createGameFlat.x=15
-                createGameFlat.y=15
-                createGameFlat.touchEnabled = true;
-                createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP,this.createGame.bind(this,{name:"johny", bitmap:"house_png"}),this)
+                //游戏创建图标，位置为左上栏   
+                 // 1 EOS game list          
+                let createGameFlat_1eos = this.createBitmapByName("EOS_1_png");
+                this.stage.addChild(createGameFlat_1eos);
+                createGameFlat_1eos.width = 100;
+                createGameFlat_1eos.height = 100;
+                createGameFlat_1eos.x=15
+                createGameFlat_1eos.y=70
+                createGameFlat_1eos.touchEnabled = true;
+                createGameFlat_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.createGame.bind(this,"1.0000"),this)
+                //所有状态game list
+                let progress_all_1eos:egret.Shape = new egret.Shape(); 
+                progress_all_1eos.graphics.beginFill(0x00EE00);
+                progress_all_1eos.graphics.lineStyle(2, 0x000000);
+                progress_all_1eos.graphics.drawRoundRect(15, 180, 100, 30, 15,15);
+                progress_all_1eos.graphics.endFill();
+                progress_all_1eos.touchEnabled = true;
+                progress_all_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 1, -1, "game_png", this.oneEosContainer),this)
+                this.stage.addChild(progress_all_1eos);
+                let progress_all_1eos_text:egret.TextField = new egret.TextField(); 
+                progress_all_1eos_text.x = 35
+                progress_all_1eos_text.y = 185
+                progress_all_1eos_text.size = 18
+                progress_all_1eos_text.textColor = 0x000000   
+                progress_all_1eos_text.text = ` 全部 `            
+                this.stage.addChild(progress_all_1eos_text);
+                //状态为1 game list (可加入)
+                let progress_1_1eos:egret.Shape = new egret.Shape(); 
+                progress_1_1eos.graphics.beginFill(0x00EE00);
+                progress_1_1eos.graphics.lineStyle(2, 0x000000);
+                progress_1_1eos.graphics.drawRoundRect(15, 220, 100, 30, 15,15);
+                progress_1_1eos.graphics.endFill();
+                progress_1_1eos.touchEnabled = true;
+                progress_1_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 1, 1, "game_png", this.oneEosContainer),this)
+                this.stage.addChild(progress_1_1eos);
+                let progress_1_1eos_text:egret.TextField = new egret.TextField(); 
+                progress_1_1eos_text.x = 18
+                progress_1_1eos_text.y = 225
+                progress_1_1eos_text.size = 18
+                progress_1_1eos_text.textColor = 0x000000   
+                progress_1_1eos_text.text = `可加入游戏`            
+                this.stage.addChild(progress_1_1eos_text);
+                //状态为2 game list (游戏进行中)
+                let progress_2_1eos:egret.Shape = new egret.Shape(); 
+                progress_2_1eos.graphics.beginFill(0xFFFF00);
+                progress_2_1eos.graphics.lineStyle(2, 0x000000);
+                progress_2_1eos.graphics.drawRoundRect(15, 260, 100, 30, 15,15);
+                progress_2_1eos.graphics.endFill();
+                progress_2_1eos.touchEnabled = true;
+                progress_2_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 1, 2, "game_png", this.oneEosContainer),this)
+                this.stage.addChild(progress_2_1eos);        
+                let progress_2_1eos_text:egret.TextField = new egret.TextField(); 
+                progress_2_1eos_text.x = 18
+                progress_2_1eos_text.y = 265
+                progress_2_1eos_text.size = 18
+                progress_2_1eos_text.textColor = 0x000000   
+                progress_2_1eos_text.text = `游戏进行中`            
+                this.stage.addChild(progress_2_1eos_text);
+                //------------
+                // 3 EOS game list
+                let createGameFlat_3eos = this.createBitmapByName("EOS_3_png");
+                this.stage.addChild(createGameFlat_3eos);
+                createGameFlat_3eos.width = 100;
+                createGameFlat_3eos.height = 100;
+                createGameFlat_3eos.x=15
+                createGameFlat_3eos.y=390
+                createGameFlat_3eos.touchEnabled = true;
+                createGameFlat_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.createGame.bind(this,"3.0000"),this)
+                //所有状态game list
+                let progress_all_3eos:egret.Shape = new egret.Shape(); 
+                progress_all_3eos.graphics.beginFill(0x00EE00);
+                progress_all_3eos.graphics.lineStyle(2, 0x000000);
+                progress_all_3eos.graphics.drawRoundRect(15, 500, 100, 30, 15,15);
+                progress_all_3eos.graphics.endFill();
+                progress_all_3eos.touchEnabled = true;
+                progress_all_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 3, -1, "game_1_png", this.threeEosContainer),this)
+                this.stage.addChild(progress_all_3eos);
+                let progress_all_3eos_text:egret.TextField = new egret.TextField(); 
+                progress_all_3eos_text.x = 35
+                progress_all_3eos_text.y = 505
+                progress_all_3eos_text.size = 18
+                progress_all_3eos_text.textColor = 0x000000   
+                progress_all_3eos_text.text = ` 全部 `            
+                this.stage.addChild(progress_all_3eos_text);
+                //状态为1 game list (可加入)
+                let progress_1_3eos:egret.Shape = new egret.Shape(); 
+                progress_1_3eos.graphics.beginFill(0x00EE00);
+                progress_1_3eos.graphics.lineStyle(2, 0x000000);
+                progress_1_3eos.graphics.drawRoundRect(15, 540, 100, 30, 15,15);
+                progress_1_3eos.graphics.endFill();
+                progress_1_3eos.touchEnabled = true;
+                progress_1_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 3, 1, "game_1_png", this.threeEosContainer),this)
+                this.stage.addChild(progress_1_3eos);
+                let progress_1_3eos_text:egret.TextField = new egret.TextField(); 
+                progress_1_3eos_text.x = 18
+                progress_1_3eos_text.y = 545
+                progress_1_3eos_text.size = 18
+                progress_1_3eos_text.textColor = 0x000000   
+                progress_1_3eos_text.text = `可加入游戏`            
+                this.stage.addChild(progress_1_3eos_text);
+                //状态为2 game list (游戏进行中)
+                let progress_2_3eos:egret.Shape = new egret.Shape(); 
+                progress_2_3eos.graphics.beginFill(0xFFFF00);
+                progress_2_3eos.graphics.lineStyle(2, 0x000000);
+                progress_2_3eos.graphics.drawRoundRect(15, 580, 100, 30, 15,15);
+                progress_2_3eos.graphics.endFill();
+                progress_2_3eos.touchEnabled = true;
+                progress_2_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 3, 2, "game_1_png", this.threeEosContainer),this)
+                this.stage.addChild(progress_2_3eos);        
+                let progress_2_3eos_text:egret.TextField = new egret.TextField(); 
+                progress_2_3eos_text.x = 18
+                progress_2_3eos_text.y = 585
+                progress_2_3eos_text.size = 18
+                progress_2_3eos_text.textColor = 0x000000   
+                progress_2_3eos_text.text = `游戏进行中`            
+                this.stage.addChild(progress_2_3eos_text);
+                //------------
+                 // 5 EOS game list
+                let createGameFlat_5eos = this.createBitmapByName("EOS_5_png");
+                this.stage.addChild(createGameFlat_5eos);
+                createGameFlat_5eos.width = 100;
+                createGameFlat_5eos.height = 100;
+                createGameFlat_5eos.x=15
+                createGameFlat_5eos.y=700
+                createGameFlat_5eos.touchEnabled = true;
+                createGameFlat_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.createGame.bind(this,"5.0000"),this)
+                //所有状态game list
+                let progress_all_5eos:egret.Shape = new egret.Shape(); 
+                progress_all_5eos.graphics.beginFill(0x00EE00);
+                progress_all_5eos.graphics.lineStyle(2, 0x000000);
+                progress_all_5eos.graphics.drawRoundRect(15, 810, 100, 30, 15,15);
+                progress_all_5eos.graphics.endFill();
+                progress_all_5eos.touchEnabled = true;
+                progress_all_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 5, -1, "game_2_png", this.fiveEosContainer),this)
+                this.stage.addChild(progress_all_5eos);
+                let progress_all_5eos_text:egret.TextField = new egret.TextField(); 
+                progress_all_5eos_text.x = 35
+                progress_all_5eos_text.y = 815
+                progress_all_5eos_text.size = 18
+                progress_all_5eos_text.textColor = 0x000000   
+                progress_all_5eos_text.text = ` 全部 `            
+                this.stage.addChild(progress_all_5eos_text);
+                //状态为1 game list (可加入)
+                let progress_1_5eos:egret.Shape = new egret.Shape(); 
+                progress_1_5eos.graphics.beginFill(0x00EE00);
+                progress_1_5eos.graphics.lineStyle(2, 0x000000);
+                progress_1_5eos.graphics.drawRoundRect(15, 850, 100, 30, 15,15);
+                progress_1_5eos.graphics.endFill();
+                progress_1_5eos.touchEnabled = true;
+                progress_1_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 5, 1, "game_2_png", this.fiveEosContainer),this)
+                this.stage.addChild(progress_1_5eos);
+                let progress_1_5eos_text:egret.TextField = new egret.TextField(); 
+                progress_1_5eos_text.x = 18
+                progress_1_5eos_text.y = 855
+                progress_1_5eos_text.size = 18
+                progress_1_5eos_text.textColor = 0x000000   
+                progress_1_5eos_text.text = `可加入游戏`            
+                this.stage.addChild(progress_1_5eos_text);
+                //状态为2 game list (游戏进行中)
+                let progress_2_5eos:egret.Shape = new egret.Shape(); 
+                progress_2_5eos.graphics.beginFill(0xFFFF00);
+                progress_2_5eos.graphics.lineStyle(2, 0x000000);
+                progress_2_5eos.graphics.drawRoundRect(15, 890, 100, 30, 15,15);
+                progress_2_5eos.graphics.endFill();
+                progress_2_5eos.touchEnabled = true;
+                progress_2_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 5, 2, "game_2_png", this.fiveEosContainer),this)
+                this.stage.addChild(progress_2_5eos);        
+                let progress_2_5eos_text:egret.TextField = new egret.TextField(); 
+                progress_2_5eos_text.x = 18
+                progress_2_5eos_text.y = 895
+                progress_2_5eos_text.size = 18
+                progress_2_5eos_text.textColor = 0x000000   
+                progress_2_5eos_text.text = `游戏进行中`            
+                this.stage.addChild(progress_2_5eos_text);
 
                 
                 //******登陆/登出功能******
@@ -231,7 +403,7 @@
                 this.messageContainer.height = 250
                 //this.stage.addChild(this.messageContainer)
                 this.messageBox.graphics.clear()
-                this.messageBox.graphics.beginFill(0xF7CDA4,0.4);
+                this.messageBox.graphics.beginFill(0xF7CDA4,0.8);
                 this.messageBox.graphics.lineStyle(2, 0x000000, 0.5);
                 this.messageBox.graphics.drawRoundRect(0, 0, 350, 250, 15,15);
                 this.messageBox.graphics.endFill();
@@ -351,8 +523,19 @@
                 this.description.scrollV = 0                     
                 this.descriptionContainer.addChild(this.description);
 
-                
-                this.stage.addChild(this.textfield)
+                //游戏房间列表（卡牌）容器
+                this.oneEosContainer.x = 180
+                this.oneEosContainer.y = 70
+                this.stage.addChild(this.oneEosContainer)
+
+                this.threeEosContainer.x = 180
+                this.threeEosContainer.y = 390
+                this.stage.addChild(this.threeEosContainer)
+
+                this.fiveEosContainer.x = 180
+                this.fiveEosContainer.y = 700
+                this.stage.addChild(this.fiveEosContainer)
+                //this.stage.addChild(this.textfield)
                 //this.popMessageBox()
                 
                 
@@ -403,19 +586,34 @@
                 }) */
                 await ScatterUtils.getAllGamesInfo().then( async games=>{
                     //清除已有游戏房间
-                    await this.houseList.map( house=>{
+                   /* await this.houseList.map( house=>{
                         if (this.stage.contains(house)){
                             this.stage.removeChild(house);
                             house.destroy()
                             house=null
                         }
                         
-                    })
-                    this.houseList = []
+                    }) */
+                    this.eos_one, this.eos_three, this.eos_five = []
+                    
                     // 重新添加游戏房间
                     console.log(games)
                     if (games.rows){
-                        await games.rows.map( (gameJson,idx)=>{
+
+                        this.eos_one = await games.rows.filter( gameJson=>{
+                            return gameJson.join_eos == "1.0000 EOS"
+                        })
+                        this.eos_three = await games.rows.filter( gameJson=>{
+                            return gameJson.join_eos == "3.0000 EOS"
+                        })
+                        this.eos_five = await games.rows.filter( gameJson=>{
+                            return gameJson.join_eos == "5.0000 EOS"
+                        })
+                        this.updateGameList(this.eos_one.slice(0,7), "game_png", this.oneEosContainer, this.eos_one, 0)
+                        this.updateGameList(this.eos_three.slice(0,7), "game_1_png", this.threeEosContainer, this.eos_three, 0)
+                        this.updateGameList(this.eos_five.slice(0,7), "game_2_png", this.fiveEosContainer, this.eos_five, 0)
+                        /*
+                        await eos_one.map( (gameJson,idx)=>{
                             //console.log(gameJson)
                             this.createHouse({name:"johny", bitmap:"game_png"},gameJson).then( house=>{
                                // console.log(house)
@@ -424,6 +622,7 @@
                                 this.houseList.push(house)
                             })
                         })
+                        */
                     }else {
                         //alert("无游戏信息")
                         this.popMessageBox("无游戏信息")
@@ -438,12 +637,113 @@
                 
             }
 
+            private async filterAndUpdateGameList(eos, progress, cardType, container:egret.DisplayObjectContainer){
+
+                let list:Array<any> = []
+                switch (eos) {
+                    case 1:
+                        list = this.eos_one
+                        break;
+                    case 3:   
+                        list = this.eos_three
+                        break;
+                    case 5:   
+                        list = this.eos_five
+                        break;       
+                    default:
+                        
+                }
+                if (list.length > 0){
+                    let gameList;
+                    if (progress < 0){ //全部
+                        gameList = list
+                    } else {  //根据游戏状态
+                        gameList = await list.filter( game=>{
+                        return game.game_progress == progress
+                    })
+                    }
+                    
+                    this.updateGameList(gameList.slice(0,7),cardType, container, gameList, 0)
+                }
+            }
+
+            private updateGameList(array, cardType,container:egret.DisplayObjectContainer, fullArray, currentIdx:number){
+                container.removeChildren()
+                array.map( (gameJson,idx)=>{
+                    //console.log(gameJson)
+                    this.createHouse({name:"johny", bitmap:cardType},gameJson).then( house=>{
+                        house.setPosition(new egret.Point(180*idx,0))
+                        container.addChild(house)
+                        let progress
+                        let color
+                        switch (gameJson.game_progress) {
+                            case 0:
+                                progress = "游戏未开始"
+                                color = 0x00EE00
+                                break;
+                            case 1:   
+                                progress = "游戏可加入"
+                                color = 0x00EE00
+                                break;
+                            case 2:   
+                                progress = "游戏进行中"
+                                color = 0xFFFF00
+                                break; 
+                            case 3:   
+                                progress = "游戏已结束"
+                                color = 0xFF0000
+                                break;       
+                            default:
+                                progress = "游戏未开始"
+                        }
+
+                        let detailBox:egret.Shape = new egret.Shape(); 
+                        detailBox.graphics.beginFill(color);
+                        detailBox.graphics.lineStyle(2, 0x000000, 0.5);
+                        detailBox.graphics.drawRoundRect(180*idx, 215, 150, 40, 15,15);
+                        detailBox.graphics.endFill();
+                        container.addChild(detailBox);
+                        let message:egret.TextField = new egret.TextField(); 
+                        message.x = 180*idx
+                        message.y = 216
+                        message.size = 18
+                        message.textColor = 0x000000   
+                        message.text = ` 房号:${gameJson.game_id + 1}   玩家: ${gameJson.players.length}\n`   
+                                        + ` 状态: ${progress}`          
+                        container.addChild(message);
+                    })
+                })
+
+                let count = 0
+                fullArray.map( (el, idx)=>{                          
+                    if ( fullArray.length > 7 && idx%7 == 0){
+                        let seqBox:egret.Shape = new egret.Shape(); 
+                        let fillColor = (idx == currentIdx)? 0xFA8258 : 0xFFFFFF 
+                        seqBox.graphics.beginFill(fillColor);
+                        seqBox.graphics.lineStyle(1, 0x000000, 0.5);
+                        seqBox.graphics.drawRect(50*count, 260, 30, 30);
+                        seqBox.graphics.endFill();
+                        container.addChild(seqBox);
+                        seqBox.touchEnabled = true;
+                        seqBox.addEventListener(egret.TouchEvent.TOUCH_TAP, this.updateGameList.bind(this,fullArray.slice(idx,idx+7),cardType,container, fullArray, idx), this);
+                        let seq:egret.TextField = new egret.TextField(); 
+                        seq.x = count < 10? 50*count+10:50*count+5;
+                        seq.y = 268;
+                        seq.size = 18;
+                        seq.textColor = 0x000000;
+                        count++; 
+                        seq.text = count.toString();                                                 
+                        container.addChild(seq);
+                    }
+                })
+            }
+
             
             /**
-             * 创建游戏(房间) 
+             * 创建智能合约游戏 
              * 
              */
-            private createGame(){
+            private createGame(game_eos:string){
                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
@@ -451,7 +751,7 @@
                         return
                     }
 
-                    ScatterUtils.createGame("1.0000 EOS").then( transaction=>{
+                    ScatterUtils.createGame(game_eos+" EOS").then( transaction=>{
                         console.log("create", transaction)
 
                         // 判断是否创建成功 

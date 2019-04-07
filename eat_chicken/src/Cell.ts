@@ -12,12 +12,12 @@ class Cell extends egret.DisplayObjectContainer {
     private battleTime:number=0  //seonds
     private fallDownSign:boolean = false
 
-    public constructor(rowX:number, colY:number,id:number) {
+    public constructor(x:number, y:number,id:number) {
         super();
-        this.createCell(rowX, colY, id);
+        this.createCell(x, y, id);
     }
 
-    private createCell(rowX:number,colY:number,_id:number): void {
+    private createCell(x:number,y:number,_id:number): void {
         this.id = _id
         
         this.detailBitmap = this.createBitmapByName("show_png");
@@ -33,11 +33,11 @@ class Cell extends egret.DisplayObjectContainer {
         this.cellRect.graphics.endFill();
         this.addChild(this.cellRect);
 
-        this.position = new egret.Point(80*rowX, 80*colY);
+        this.position = new egret.Point(80*x, 80*y);
         this.x = this.position.x //初始化位置
         this.y = this.position.y
         //this.cellBitmap.touchEnabled = true;
-        this.cell_X_Y = {x:rowX, y:colY}
+        this.cell_X_Y = {x:x, y:y}
 
         //this.addChild(this.cellBitmap)
         this.touchEnabled = true;

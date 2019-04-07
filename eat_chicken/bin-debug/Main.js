@@ -82,7 +82,10 @@ var Main = (function (_super) {
         _this._route = new egret.Shape();
         _this._life = new egret.Shape();
         _this.soilderIconList = [];
-        _this.houseList = [];
+        //private houseList:Array<House> = []
+        _this.eos_one = [];
+        _this.eos_three = [];
+        _this.eos_five = [];
         _this.board = null;
         _this.backgroundMusic = new egret.Sound();
         _this.playerInfo = new egret.Shape();
@@ -102,6 +105,9 @@ var Main = (function (_super) {
         //临时随机演示
         _this.townRandomName = ["johny", "kitty", "peter"];
         _this.num = 0;
+        _this.oneEosContainer = new egret.DisplayObjectContainer();
+        _this.threeEosContainer = new egret.DisplayObjectContainer();
+        _this.fiveEosContainer = new egret.DisplayObjectContainer();
         _this.messageTimeout = null;
         _this.canvas = document.getElementsByTagName("CANVAS")[0];
         //this.canvas.addEventListener('mousemove',this.onMove.bind(this));
@@ -187,25 +193,177 @@ var Main = (function (_super) {
     Main.prototype.createGameScene = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var createGameFlat, messageTitleBox, messageTitle, description, descriptioTitleBox, descriptionTitle, descriptionClose;
+            var createGameFlat_1eos, progress_all_1eos, progress_all_1eos_text, progress_1_1eos, progress_1_1eos_text, progress_2_1eos, progress_2_1eos_text, createGameFlat_3eos, progress_all_3eos, progress_all_3eos_text, progress_1_3eos, progress_1_3eos_text, progress_2_3eos, progress_2_3eos_text, createGameFlat_5eos, progress_all_5eos, progress_all_5eos_text, progress_1_5eos, progress_1_5eos_text, progress_2_5eos, progress_2_5eos_text, messageTitleBox, messageTitle, description, descriptioTitleBox, descriptionTitle, descriptionClose;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.loadResource()
                         // let canvas=document.getElementsByTagName("CANVAS")[0];
                         //console.log(canvas)
                         //****** 以下为游戏工具栏，位于地图舞台左侧 ******
-                        //城堡图，游戏创建图标，位置为左上栏             
+                        //游戏创建图标，位置为左上栏   
+                        // 1 EOS game list          
                     ];
                     case 1:
                         _a.sent();
-                        createGameFlat = this.createBitmapByName("city_png");
-                        this.stage.addChild(createGameFlat);
-                        createGameFlat.width = 100;
-                        createGameFlat.height = 100;
-                        createGameFlat.x = 15;
-                        createGameFlat.y = 15;
-                        createGameFlat.touchEnabled = true;
-                        createGameFlat.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, { name: "johny", bitmap: "house_png" }), this);
+                        createGameFlat_1eos = this.createBitmapByName("EOS_1_png");
+                        this.stage.addChild(createGameFlat_1eos);
+                        createGameFlat_1eos.width = 100;
+                        createGameFlat_1eos.height = 100;
+                        createGameFlat_1eos.x = 15;
+                        createGameFlat_1eos.y = 70;
+                        createGameFlat_1eos.touchEnabled = true;
+                        createGameFlat_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, "1.0000"), this);
+                        progress_all_1eos = new egret.Shape();
+                        progress_all_1eos.graphics.beginFill(0x00EE00);
+                        progress_all_1eos.graphics.lineStyle(2, 0x000000);
+                        progress_all_1eos.graphics.drawRoundRect(15, 180, 100, 30, 15, 15);
+                        progress_all_1eos.graphics.endFill();
+                        progress_all_1eos.touchEnabled = true;
+                        progress_all_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 1, -1, "game_png", this.oneEosContainer), this);
+                        this.stage.addChild(progress_all_1eos);
+                        progress_all_1eos_text = new egret.TextField();
+                        progress_all_1eos_text.x = 35;
+                        progress_all_1eos_text.y = 185;
+                        progress_all_1eos_text.size = 18;
+                        progress_all_1eos_text.textColor = 0x000000;
+                        progress_all_1eos_text.text = " \u5168\u90E8 ";
+                        this.stage.addChild(progress_all_1eos_text);
+                        progress_1_1eos = new egret.Shape();
+                        progress_1_1eos.graphics.beginFill(0x00EE00);
+                        progress_1_1eos.graphics.lineStyle(2, 0x000000);
+                        progress_1_1eos.graphics.drawRoundRect(15, 220, 100, 30, 15, 15);
+                        progress_1_1eos.graphics.endFill();
+                        progress_1_1eos.touchEnabled = true;
+                        progress_1_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 1, 1, "game_png", this.oneEosContainer), this);
+                        this.stage.addChild(progress_1_1eos);
+                        progress_1_1eos_text = new egret.TextField();
+                        progress_1_1eos_text.x = 18;
+                        progress_1_1eos_text.y = 225;
+                        progress_1_1eos_text.size = 18;
+                        progress_1_1eos_text.textColor = 0x000000;
+                        progress_1_1eos_text.text = "\u53EF\u52A0\u5165\u6E38\u620F";
+                        this.stage.addChild(progress_1_1eos_text);
+                        progress_2_1eos = new egret.Shape();
+                        progress_2_1eos.graphics.beginFill(0xFFFF00);
+                        progress_2_1eos.graphics.lineStyle(2, 0x000000);
+                        progress_2_1eos.graphics.drawRoundRect(15, 260, 100, 30, 15, 15);
+                        progress_2_1eos.graphics.endFill();
+                        progress_2_1eos.touchEnabled = true;
+                        progress_2_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 1, 2, "game_png", this.oneEosContainer), this);
+                        this.stage.addChild(progress_2_1eos);
+                        progress_2_1eos_text = new egret.TextField();
+                        progress_2_1eos_text.x = 18;
+                        progress_2_1eos_text.y = 265;
+                        progress_2_1eos_text.size = 18;
+                        progress_2_1eos_text.textColor = 0x000000;
+                        progress_2_1eos_text.text = "\u6E38\u620F\u8FDB\u884C\u4E2D";
+                        this.stage.addChild(progress_2_1eos_text);
+                        createGameFlat_3eos = this.createBitmapByName("EOS_3_png");
+                        this.stage.addChild(createGameFlat_3eos);
+                        createGameFlat_3eos.width = 100;
+                        createGameFlat_3eos.height = 100;
+                        createGameFlat_3eos.x = 15;
+                        createGameFlat_3eos.y = 390;
+                        createGameFlat_3eos.touchEnabled = true;
+                        createGameFlat_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, "3.0000"), this);
+                        progress_all_3eos = new egret.Shape();
+                        progress_all_3eos.graphics.beginFill(0x00EE00);
+                        progress_all_3eos.graphics.lineStyle(2, 0x000000);
+                        progress_all_3eos.graphics.drawRoundRect(15, 500, 100, 30, 15, 15);
+                        progress_all_3eos.graphics.endFill();
+                        progress_all_3eos.touchEnabled = true;
+                        progress_all_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 3, -1, "game_1_png", this.threeEosContainer), this);
+                        this.stage.addChild(progress_all_3eos);
+                        progress_all_3eos_text = new egret.TextField();
+                        progress_all_3eos_text.x = 35;
+                        progress_all_3eos_text.y = 505;
+                        progress_all_3eos_text.size = 18;
+                        progress_all_3eos_text.textColor = 0x000000;
+                        progress_all_3eos_text.text = " \u5168\u90E8 ";
+                        this.stage.addChild(progress_all_3eos_text);
+                        progress_1_3eos = new egret.Shape();
+                        progress_1_3eos.graphics.beginFill(0x00EE00);
+                        progress_1_3eos.graphics.lineStyle(2, 0x000000);
+                        progress_1_3eos.graphics.drawRoundRect(15, 540, 100, 30, 15, 15);
+                        progress_1_3eos.graphics.endFill();
+                        progress_1_3eos.touchEnabled = true;
+                        progress_1_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 3, 1, "game_1_png", this.threeEosContainer), this);
+                        this.stage.addChild(progress_1_3eos);
+                        progress_1_3eos_text = new egret.TextField();
+                        progress_1_3eos_text.x = 18;
+                        progress_1_3eos_text.y = 545;
+                        progress_1_3eos_text.size = 18;
+                        progress_1_3eos_text.textColor = 0x000000;
+                        progress_1_3eos_text.text = "\u53EF\u52A0\u5165\u6E38\u620F";
+                        this.stage.addChild(progress_1_3eos_text);
+                        progress_2_3eos = new egret.Shape();
+                        progress_2_3eos.graphics.beginFill(0xFFFF00);
+                        progress_2_3eos.graphics.lineStyle(2, 0x000000);
+                        progress_2_3eos.graphics.drawRoundRect(15, 580, 100, 30, 15, 15);
+                        progress_2_3eos.graphics.endFill();
+                        progress_2_3eos.touchEnabled = true;
+                        progress_2_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 3, 2, "game_1_png", this.threeEosContainer), this);
+                        this.stage.addChild(progress_2_3eos);
+                        progress_2_3eos_text = new egret.TextField();
+                        progress_2_3eos_text.x = 18;
+                        progress_2_3eos_text.y = 585;
+                        progress_2_3eos_text.size = 18;
+                        progress_2_3eos_text.textColor = 0x000000;
+                        progress_2_3eos_text.text = "\u6E38\u620F\u8FDB\u884C\u4E2D";
+                        this.stage.addChild(progress_2_3eos_text);
+                        createGameFlat_5eos = this.createBitmapByName("EOS_5_png");
+                        this.stage.addChild(createGameFlat_5eos);
+                        createGameFlat_5eos.width = 100;
+                        createGameFlat_5eos.height = 100;
+                        createGameFlat_5eos.x = 15;
+                        createGameFlat_5eos.y = 700;
+                        createGameFlat_5eos.touchEnabled = true;
+                        createGameFlat_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.createGame.bind(this, "5.0000"), this);
+                        progress_all_5eos = new egret.Shape();
+                        progress_all_5eos.graphics.beginFill(0x00EE00);
+                        progress_all_5eos.graphics.lineStyle(2, 0x000000);
+                        progress_all_5eos.graphics.drawRoundRect(15, 810, 100, 30, 15, 15);
+                        progress_all_5eos.graphics.endFill();
+                        progress_all_5eos.touchEnabled = true;
+                        progress_all_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 5, -1, "game_2_png", this.fiveEosContainer), this);
+                        this.stage.addChild(progress_all_5eos);
+                        progress_all_5eos_text = new egret.TextField();
+                        progress_all_5eos_text.x = 35;
+                        progress_all_5eos_text.y = 815;
+                        progress_all_5eos_text.size = 18;
+                        progress_all_5eos_text.textColor = 0x000000;
+                        progress_all_5eos_text.text = " \u5168\u90E8 ";
+                        this.stage.addChild(progress_all_5eos_text);
+                        progress_1_5eos = new egret.Shape();
+                        progress_1_5eos.graphics.beginFill(0x00EE00);
+                        progress_1_5eos.graphics.lineStyle(2, 0x000000);
+                        progress_1_5eos.graphics.drawRoundRect(15, 850, 100, 30, 15, 15);
+                        progress_1_5eos.graphics.endFill();
+                        progress_1_5eos.touchEnabled = true;
+                        progress_1_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 5, 1, "game_2_png", this.fiveEosContainer), this);
+                        this.stage.addChild(progress_1_5eos);
+                        progress_1_5eos_text = new egret.TextField();
+                        progress_1_5eos_text.x = 18;
+                        progress_1_5eos_text.y = 855;
+                        progress_1_5eos_text.size = 18;
+                        progress_1_5eos_text.textColor = 0x000000;
+                        progress_1_5eos_text.text = "\u53EF\u52A0\u5165\u6E38\u620F";
+                        this.stage.addChild(progress_1_5eos_text);
+                        progress_2_5eos = new egret.Shape();
+                        progress_2_5eos.graphics.beginFill(0xFFFF00);
+                        progress_2_5eos.graphics.lineStyle(2, 0x000000);
+                        progress_2_5eos.graphics.drawRoundRect(15, 890, 100, 30, 15, 15);
+                        progress_2_5eos.graphics.endFill();
+                        progress_2_5eos.touchEnabled = true;
+                        progress_2_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 5, 2, "game_2_png", this.fiveEosContainer), this);
+                        this.stage.addChild(progress_2_5eos);
+                        progress_2_5eos_text = new egret.TextField();
+                        progress_2_5eos_text.x = 18;
+                        progress_2_5eos_text.y = 895;
+                        progress_2_5eos_text.size = 18;
+                        progress_2_5eos_text.textColor = 0x000000;
+                        progress_2_5eos_text.text = "\u6E38\u620F\u8FDB\u884C\u4E2D";
+                        this.stage.addChild(progress_2_5eos_text);
                         //******登陆/登出功能******
                         this.login = this.createBitmapByName("login_png");
                         this.login.x = 1180;
@@ -235,7 +393,7 @@ var Main = (function (_super) {
                         this.messageContainer.height = 250;
                         //this.stage.addChild(this.messageContainer)
                         this.messageBox.graphics.clear();
-                        this.messageBox.graphics.beginFill(0xF7CDA4, 0.4);
+                        this.messageBox.graphics.beginFill(0xF7CDA4, 0.8);
                         this.messageBox.graphics.lineStyle(2, 0x000000, 0.5);
                         this.messageBox.graphics.drawRoundRect(0, 0, 350, 250, 15, 15);
                         this.messageBox.graphics.endFill();
@@ -343,7 +501,17 @@ var Main = (function (_super) {
                         */
                         this.description.scrollV = 0;
                         this.descriptionContainer.addChild(this.description);
-                        this.stage.addChild(this.textfield);
+                        //游戏房间列表（卡牌）容器
+                        this.oneEosContainer.x = 180;
+                        this.oneEosContainer.y = 70;
+                        this.stage.addChild(this.oneEosContainer);
+                        this.threeEosContainer.x = 180;
+                        this.threeEosContainer.y = 390;
+                        this.stage.addChild(this.threeEosContainer);
+                        this.fiveEosContainer.x = 180;
+                        this.fiveEosContainer.y = 700;
+                        this.stage.addChild(this.fiveEosContainer);
+                        //this.stage.addChild(this.textfield)
                         //this.popMessageBox()
                         //更新游戏房间列表，位置为上栏
                         this.refreshHouseList();
@@ -389,42 +557,50 @@ var Main = (function (_super) {
       
                       }) */
                     return [4 /*yield*/, ScatterUtils.getAllGamesInfo().then(function (games) { return __awaiter(_this, void 0, void 0, function () {
-                            var _this = this;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0: 
-                                    //清除已有游戏房间
-                                    return [4 /*yield*/, this.houseList.map(function (house) {
-                                            if (_this.stage.contains(house)) {
-                                                _this.stage.removeChild(house);
-                                                house.destroy();
-                                                house = null;
-                                            }
-                                        })];
-                                    case 1:
+                            var _a, _b, _c;
+                            return __generator(this, function (_d) {
+                                switch (_d.label) {
+                                    case 0:
                                         //清除已有游戏房间
-                                        _a.sent();
-                                        this.houseList = [];
+                                        /* await this.houseList.map( house=>{
+                                             if (this.stage.contains(house)){
+                                                 this.stage.removeChild(house);
+                                                 house.destroy()
+                                                 house=null
+                                             }
+                                             
+                                         }) */
+                                        this.eos_one, this.eos_three, this.eos_five = [];
                                         // 重新添加游戏房间
                                         console.log(games);
-                                        if (!games.rows) return [3 /*break*/, 3];
-                                        return [4 /*yield*/, games.rows.map(function (gameJson, idx) {
-                                                //console.log(gameJson)
-                                                _this.createHouse({ name: "johny", bitmap: "game_png" }, gameJson).then(function (house) {
-                                                    // console.log(house)
-                                                    house.setPosition(new egret.Point(170 * (1 + idx), 50));
-                                                    _this.stage.addChild(house);
-                                                    _this.houseList.push(house);
-                                                });
+                                        if (!games.rows) return [3 /*break*/, 4];
+                                        _a = this;
+                                        return [4 /*yield*/, games.rows.filter(function (gameJson) {
+                                                return gameJson.join_eos == "1.0000 EOS";
+                                            })];
+                                    case 1:
+                                        _a.eos_one = _d.sent();
+                                        _b = this;
+                                        return [4 /*yield*/, games.rows.filter(function (gameJson) {
+                                                return gameJson.join_eos == "3.0000 EOS";
                                             })];
                                     case 2:
-                                        _a.sent();
-                                        return [3 /*break*/, 4];
+                                        _b.eos_three = _d.sent();
+                                        _c = this;
+                                        return [4 /*yield*/, games.rows.filter(function (gameJson) {
+                                                return gameJson.join_eos == "5.0000 EOS";
+                                            })];
                                     case 3:
+                                        _c.eos_five = _d.sent();
+                                        this.updateGameList(this.eos_one.slice(0, 7), "game_png", this.oneEosContainer, this.eos_one, 0);
+                                        this.updateGameList(this.eos_three.slice(0, 7), "game_1_png", this.threeEosContainer, this.eos_three, 0);
+                                        this.updateGameList(this.eos_five.slice(0, 7), "game_2_png", this.fiveEosContainer, this.eos_five, 0);
+                                        return [3 /*break*/, 5];
+                                    case 4:
                                         //alert("无游戏信息")
                                         this.popMessageBox("无游戏信息");
-                                        _a.label = 4;
-                                    case 4: return [2 /*return*/];
+                                        _d.label = 5;
+                                    case 5: return [2 /*return*/];
                                 }
                             });
                         }); }).catch(function (e) {
@@ -444,11 +620,118 @@ var Main = (function (_super) {
             });
         });
     };
+    Main.prototype.filterAndUpdateGameList = function (eos, progress, cardType, container) {
+        return __awaiter(this, void 0, void 0, function () {
+            var list, gameList;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        list = [];
+                        switch (eos) {
+                            case 1:
+                                list = this.eos_one;
+                                break;
+                            case 3:
+                                list = this.eos_three;
+                                break;
+                            case 5:
+                                list = this.eos_five;
+                                break;
+                            default:
+                        }
+                        if (!(list.length > 0)) return [3 /*break*/, 4];
+                        gameList = void 0;
+                        if (!(progress < 0)) return [3 /*break*/, 1];
+                        gameList = list;
+                        return [3 /*break*/, 3];
+                    case 1: return [4 /*yield*/, list.filter(function (game) {
+                            return game.game_progress == progress;
+                        })];
+                    case 2:
+                        gameList = _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        this.updateGameList(gameList.slice(0, 7), cardType, container, gameList, 0);
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Main.prototype.updateGameList = function (array, cardType, container, fullArray, currentIdx) {
+        var _this = this;
+        container.removeChildren();
+        array.map(function (gameJson, idx) {
+            //console.log(gameJson)
+            _this.createHouse({ name: "johny", bitmap: cardType }, gameJson).then(function (house) {
+                house.setPosition(new egret.Point(180 * idx, 0));
+                container.addChild(house);
+                var progress;
+                var color;
+                switch (gameJson.game_progress) {
+                    case 0:
+                        progress = "游戏未开始";
+                        color = 0x00EE00;
+                        break;
+                    case 1:
+                        progress = "游戏可加入";
+                        color = 0x00EE00;
+                        break;
+                    case 2:
+                        progress = "游戏进行中";
+                        color = 0xFFFF00;
+                        break;
+                    case 3:
+                        progress = "游戏已结束";
+                        color = 0xFF0000;
+                        break;
+                    default:
+                        progress = "游戏未开始";
+                }
+                var detailBox = new egret.Shape();
+                detailBox.graphics.beginFill(color);
+                detailBox.graphics.lineStyle(2, 0x000000, 0.5);
+                detailBox.graphics.drawRoundRect(180 * idx, 215, 150, 40, 15, 15);
+                detailBox.graphics.endFill();
+                container.addChild(detailBox);
+                var message = new egret.TextField();
+                message.x = 180 * idx;
+                message.y = 216;
+                message.size = 18;
+                message.textColor = 0x000000;
+                message.text = " \u623F\u53F7:" + (gameJson.game_id + 1) + "   \u73A9\u5BB6: " + gameJson.players.length + "\n"
+                    + (" \u72B6\u6001: " + progress);
+                container.addChild(message);
+            });
+        });
+        var count = 0;
+        fullArray.map(function (el, idx) {
+            if (fullArray.length > 7 && idx % 7 == 0) {
+                var seqBox = new egret.Shape();
+                var fillColor = (idx == currentIdx) ? 0xFA8258 : 0xFFFFFF;
+                seqBox.graphics.beginFill(fillColor);
+                seqBox.graphics.lineStyle(1, 0x000000, 0.5);
+                seqBox.graphics.drawRect(50 * count, 260, 30, 30);
+                seqBox.graphics.endFill();
+                container.addChild(seqBox);
+                seqBox.touchEnabled = true;
+                seqBox.addEventListener(egret.TouchEvent.TOUCH_TAP, _this.updateGameList.bind(_this, fullArray.slice(idx, idx + 7), cardType, container, fullArray, idx), _this);
+                var seq = new egret.TextField();
+                seq.x = count < 10 ? 50 * count + 10 : 50 * count + 5;
+                seq.y = 268;
+                seq.size = 18;
+                seq.textColor = 0x000000;
+                count++;
+                seq.text = count.toString();
+                container.addChild(seq);
+            }
+        });
+    };
     /**
-     * 创建游戏(房间)
+     * 创建智能合约游戏
      *
      */
-    Main.prototype.createGame = function () {
+    Main.prototype.createGame = function (game_eos) {
         var _this = this;
         ScatterUtils.getIdentity().then(function (identity) {
             if (identity == null) {
@@ -456,7 +739,7 @@ var Main = (function (_super) {
                 _this.popMessageBox(ScatterUtils.message.authority);
                 return;
             }
-            ScatterUtils.createGame("1.0000 EOS").then(function (transaction) {
+            ScatterUtils.createGame(game_eos + " EOS").then(function (transaction) {
                 console.log("create", transaction);
                 // 判断是否创建成功 
                 if (transaction.processed) {

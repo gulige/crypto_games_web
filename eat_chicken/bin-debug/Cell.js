@@ -10,7 +10,7 @@ r.prototype = e.prototype, t.prototype = new r();
 };
 var Cell = (function (_super) {
     __extends(Cell, _super);
-    function Cell(rowX, colY, id) {
+    function Cell(x, y, id) {
         var _this = _super.call(this) || this;
         _this.cellRect = new egret.Shape();
         _this.task = { action: "idle", target: null, status: null };
@@ -19,10 +19,10 @@ var Cell = (function (_super) {
         _this.hasPoison = false;
         _this.battleTime = 0; //seonds
         _this.fallDownSign = false;
-        _this.createCell(rowX, colY, id);
+        _this.createCell(x, y, id);
         return _this;
     }
-    Cell.prototype.createCell = function (rowX, colY, _id) {
+    Cell.prototype.createCell = function (x, y, _id) {
         this.id = _id;
         this.detailBitmap = this.createBitmapByName("show_png");
         //this.showBitmap.width = 80;   //cell的长/宽
@@ -35,11 +35,11 @@ var Cell = (function (_super) {
         this.cellRect.graphics.drawRect(0, 0, 80, 80);
         this.cellRect.graphics.endFill();
         this.addChild(this.cellRect);
-        this.position = new egret.Point(80 * rowX, 80 * colY);
+        this.position = new egret.Point(80 * x, 80 * y);
         this.x = this.position.x; //初始化位置
         this.y = this.position.y;
         //this.cellBitmap.touchEnabled = true;
-        this.cell_X_Y = { x: rowX, y: colY };
+        this.cell_X_Y = { x: x, y: y };
         //this.addChild(this.cellBitmap)
         this.touchEnabled = true;
         // this.town = _town

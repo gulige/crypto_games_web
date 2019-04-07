@@ -41,11 +41,11 @@ class ScatterUtils extends Object {
     private static network =  {
         EOS:{
             blockchain:'eos',
-            protocol:'http',
+            protocol:'https',
             //host:'jungle2.cryptolions.io',
-            host:'121.168.149.101',
-            //port:443,
-            port:8888,
+            host:'eos-jungle.eosblocksmith.io',
+            port:443,
+            //port:8888,
             chainId: ScatterUtils.chain.jungle 
         },
         ETH:{
@@ -74,7 +74,7 @@ class ScatterUtils extends Object {
                     ], // 配置私钥字符串
        // httpEndpoint: 'http://114.115.135.201:8888', // EOS开发链url与端口
        // httpEndpoint: 'https://jungle2.cryptolions.io:443',
-        httpEndpoint: 'http://121.168.149.101:8888',
+        httpEndpoint: 'https://eos-jungle.eosblocksmith.io:443',
         //chainId: ScatterUtils.chain.dev, // 通过cleos get info可以获取chainId
         chainId: ScatterUtils.chain.jungle,
         expireInSeconds: 60,
@@ -272,7 +272,7 @@ class ScatterUtils extends Object {
      * @param  joinY: 加入游戏起始 Y 位置
      * return:  返回EOS 交易成功或失败信息
      */
-    public static async joinGame(gameId: number, transferEOS: string, joinX:number, joinY:number){
+    public static async joinGame(gameId: number, transferEOS: string, joinRow:number, joinCol:number){
         
         let result = await this.eos.transaction(
             {
@@ -288,7 +288,7 @@ class ScatterUtils extends Object {
                             from: this.currentAccount.name,
                             to: this.contact.jungle,
                             quantity: transferEOS,
-                            memo: gameId + ',' + joinX + ',' + joinY
+                            memo: gameId + ',' + joinRow + ',' + joinCol
                         }
                     }
                 ]
@@ -363,7 +363,7 @@ class ScatterUtils extends Object {
      * @param  moveX: 移动到 X 位置
      * @param  moveY  移动到 Y 位置
      */
-    public static async move(gameId: number, moveX:number, moveY:number){
+    public static async move(gameId: number, moveRow:number, moveCol:number){
         
         let result = await this.eos.transaction(
             {
@@ -378,8 +378,8 @@ class ScatterUtils extends Object {
                         data: {
                             who: this.currentAccount.name,
                             game_id: gameId,
-                            row: moveX,
-                            column: moveY
+                            row: moveRow,
+                            column: moveCol
                         }
                     }
                 ]

@@ -591,13 +591,15 @@
                     this.board = new Board(11,11)   // 构建棋盘 11 x 11
                     this.board.x = 300  //定位棋盘在stage中的位置
                     this.board.y = 100 
+                    this.board.width = 880
+                    this.board.height = 880
                     this.stage.addChild(this.board);
                     
                     //cell添加点击移动事件
                     let cells = this.board.getCellList()
                     cells.map( cell=>{
                         
-                        let cellXY = cell.getXY()  // cell在棋盘中的 X/Y 轴坐标
+                        //let cellXY = cell.getXY()  // cell在棋盘中的 X/Y 轴坐标
                         // 监听格子点击事件并根据游戏状态行动
                         cell.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{  
                             if (this.currentHouse == null) {return}   
@@ -611,14 +613,16 @@
                                 } else if (game_progress==1) { // 棋盘地图已经设定
                                     this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
                                         if (currentPlayer===null){  //当前用户未加入游戏
-                                            this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
+                                            //this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
+                                            this.joinGame(cell)
                                         }
                                     })                                 
                                 } else if (game_progress==2) { // 游戏开始中
                                     this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
                                         if (currentPlayer!==null && currentPlayer.isMoveable()){  
-                                            this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
-                                        }
+                                            //this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
+                                            this.move(cell)
+                                    }
                                     })
                                     
                                 }
@@ -761,7 +765,7 @@
              * 
              */
             private createSafeAreaInBoard(radius:number){
-                //console.log(this.board.width)
+                console.log(this.board.width)
                 //console.log(radius)
                 if ( !this.board.contains(this.safeAreaTop)){
                     this.board.addChild(this.safeAreaTop);
@@ -1088,7 +1092,7 @@
              * 加入游戏(房间) 
              * 
              */
-            private joinGame(joinX:number, joinY:number, position:any){
+            private joinGame(cell:Cell){
 
                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
@@ -1104,7 +1108,9 @@
                         return
                     }
                     */
-                    ScatterUtils.joinGame(this.currentHouse.getID(), this.currentHouse.getJoinEos(), joinX, joinY).then( transaction=>{
+                    let cellXY = cell.getXY()
+                    let position = cell.getPosition()
+                    ScatterUtils.joinGame(this.currentHouse.getID(), this.currentHouse.getJoinEos(), cellXY.y, cellXY.x).then( transaction=>{
                         console.log("transaction", transaction)        
                         
                         if ( !transaction.processed ){  //交易失败
@@ -1166,14 +1172,15 @@
              * 点击棋盘位置，触发移动请求，验证放在后台合约，前端只根据结果显示
              * 
              */     
-            private async move(moveX:number, moveY:number, position:any){
+            private async move(cell:Cell){
                  ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
                         this.popMessageBox(ScatterUtils.message.authority)   
                         return
                     }
-
+                    let cellXY = cell.getXY()
+                    let position = cell.getPosition()
                     this.animation({json:"arrow-down_json",png:"arrow-down_png", data:"arrow-down",x:position.x+30,y:position.y+25}).then( arrow=>{
                         this.board.addChild(arrow); 
                         arrow.$setScaleX(1.5);
@@ -1181,7 +1188,7 @@
                         arrow.play(-1)
                         
                         //let gameId = this.selectedHouse.getID()
-                        ScatterUtils.move(this.currentHouse.getID(), moveX ,moveY).then( async transaction=>{
+                        ScatterUtils.move(this.currentHouse.getID(), cellXY.y , cellXY.x).then( async transaction=>{
                             if ( !transaction.processed ){  //移动失败
                                 transaction = JSON.parse(transaction)
                                 //alert("移动失败："+transaction.error.details[0].message)

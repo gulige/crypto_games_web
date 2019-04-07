@@ -612,10 +612,12 @@ var Game = (function (_super) {
                     this.board = new Board(11, 11); // 构建棋盘 11 x 11
                     this.board.x = 300; //定位棋盘在stage中的位置
                     this.board.y = 100;
+                    this.board.width = 880;
+                    this.board.height = 880;
                     this.stage.addChild(this.board);
                     cells = this.board.getCellList();
                     cells.map(function (cell) {
-                        var cellXY = cell.getXY(); // cell在棋盘中的 X/Y 轴坐标
+                        //let cellXY = cell.getXY()  // cell在棋盘中的 X/Y 轴坐标
                         // 监听格子点击事件并根据游戏状态行动
                         cell.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
                             if (_this.currentHouse == null) {
@@ -631,14 +633,16 @@ var Game = (function (_super) {
                                 else if (game_progress == 1) {
                                     _this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then(function (currentPlayer) {
                                         if (currentPlayer === null) {
-                                            _this.joinGame(cellXY.x, cellXY.y, cell.getPosition());
+                                            //this.joinGame(cellXY.x, cellXY.y, cell.getPosition())
+                                            _this.joinGame(cell);
                                         }
                                     });
                                 }
                                 else if (game_progress == 2) {
                                     _this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then(function (currentPlayer) {
                                         if (currentPlayer !== null && currentPlayer.isMoveable()) {
-                                            _this.move(cellXY.x, cellXY.y, cell.getPosition()); //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
+                                            //this.move(cellXY.x, cellXY.y, cell.getPosition())  //cellXY 为 棋盘的x/y轴坐标；  cell.x, cell.y 为棋盘的像素坐标
+                                            _this.move(cell);
                                         }
                                     });
                                 }
@@ -783,7 +787,7 @@ var Game = (function (_super) {
      */
     Game.prototype.createSafeAreaInBoard = function (radius) {
         var _this = this;
-        //console.log(this.board.width)
+        console.log(this.board.width);
         //console.log(radius)
         if (!this.board.contains(this.safeAreaTop)) {
             this.board.addChild(this.safeAreaTop);
@@ -1166,7 +1170,7 @@ var Game = (function (_super) {
      * 加入游戏(房间)
      *
      */
-    Game.prototype.joinGame = function (joinX, joinY, position) {
+    Game.prototype.joinGame = function (cell) {
         var _this = this;
         ScatterUtils.getIdentity().then(function (identity) {
             if (identity == null) {
@@ -1182,7 +1186,9 @@ var Game = (function (_super) {
                 return
             }
             */
-            ScatterUtils.joinGame(_this.currentHouse.getID(), _this.currentHouse.getJoinEos(), joinX, joinY).then(function (transaction) {
+            var cellXY = cell.getXY();
+            var position = cell.getPosition();
+            ScatterUtils.joinGame(_this.currentHouse.getID(), _this.currentHouse.getJoinEos(), cellXY.y, cellXY.x).then(function (transaction) {
                 console.log("transaction", transaction);
                 if (!transaction.processed) {
                     transaction = JSON.parse(transaction);
@@ -1243,7 +1249,7 @@ var Game = (function (_super) {
      * 点击棋盘位置，触发移动请求，验证放在后台合约，前端只根据结果显示
      *
      */
-    Game.prototype.move = function (moveX, moveY, position) {
+    Game.prototype.move = function (cell) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -1253,13 +1259,15 @@ var Game = (function (_super) {
                         _this.popMessageBox(ScatterUtils.message.authority);
                         return;
                     }
+                    var cellXY = cell.getXY();
+                    var position = cell.getPosition();
                     _this.animation({ json: "arrow-down_json", png: "arrow-down_png", data: "arrow-down", x: position.x + 30, y: position.y + 25 }).then(function (arrow) {
                         _this.board.addChild(arrow);
                         arrow.$setScaleX(1.5);
                         arrow.$setScaleY(1.5);
                         arrow.play(-1);
                         //let gameId = this.selectedHouse.getID()
-                        ScatterUtils.move(_this.currentHouse.getID(), moveX, moveY).then(function (transaction) { return __awaiter(_this, void 0, void 0, function () {
+                        ScatterUtils.move(_this.currentHouse.getID(), cellXY.y, cellXY.x).then(function (transaction) { return __awaiter(_this, void 0, void 0, function () {
                             var _this = this;
                             return __generator(this, function (_a) {
                                 if (!transaction.processed) {
