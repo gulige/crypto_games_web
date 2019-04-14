@@ -103,7 +103,7 @@ var ScatterUtils = (function (_super) {
                         _a.sent();
                         if (!this.connected) {
                             console.log('not connected');
-                            return [2 /*return*/, { login: false, details: this.message.nowallet }];
+                            return [2 /*return*/, { login: false, code: 1 }];
                         }
                         _a.label = 2;
                     case 2:
@@ -123,7 +123,7 @@ var ScatterUtils = (function (_super) {
                                 const tron = ScatterJS.scatter.trx(this.network.TRX, new TronWeb(fullNode, fullNode, eventServer));
                                 */
                                 //console.log("login success,", this.currentAccount)
-                                return { login: true, details: _this.currentAccount.name };
+                                return { login: true, account: _this.currentAccount.name }; // login success
                             })];
                     case 3:
                         message = _a.sent();
@@ -132,7 +132,7 @@ var ScatterUtils = (function (_super) {
                         e_1 = _a.sent();
                         //console.log("login fail,", e)
                         //没有解锁或没有身份
-                        return [2 /*return*/, { login: false, details: "未能使用钱包，可能是" + this.message.walletlock + "或者" + this.message.noidentity }];
+                        return [2 /*return*/, { login: false, code: 2 }];
                     case 5: return [2 /*return*/];
                 }
             });
@@ -444,17 +444,17 @@ var ScatterUtils = (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             var _currentAccountName;
             return __generator(this, function (_a) {
-                //ScatterJS.scatter.forgetIdentity();
+                _currentAccountName = this.currentAccount.name;
                 try {
-                    _currentAccountName = this.currentAccount.name;
+                    //ScatterJS.scatter.logout();            
                     ScatterJS.scatter.forgetIdentity();
                     this.currentAccount = null;
                     this.eos = null;
-                    return [2 /*return*/, { logout: true, details: _currentAccountName + this.message.logout }];
+                    return [2 /*return*/, { logout: true, account: _currentAccountName }];
                 }
                 catch (e) {
                     console.log(e);
-                    return [2 /*return*/, { logout: false, details: "登出失败" }];
+                    return [2 /*return*/, { logout: false, account: _currentAccountName }];
                 }
                 return [2 /*return*/];
             });

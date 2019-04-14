@@ -30,6 +30,7 @@
 
         class Game extends egret.DisplayObjectContainer {
 
+            private gameContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             private _touchStatus:boolean = false;              //当前触摸状态，按下时，值为true
             private _distance:egret.Point = new egret.Point();
             private textfield: egret.TextField = new egret.TextField();
@@ -73,6 +74,7 @@
             private safeAreaRight:egret.Shape = new egret.Shape();
             private safeAreaBottom:egret.Shape = new egret.Shape();
 
+            //游戏玩家头像列表
             private playerProfileListContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             //** 荣誉榜 */
             private honorListContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
@@ -80,17 +82,20 @@
             private honorListText:egret.TextField = new egret.TextField();
             // 统计看板
             private summaryContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
-            private summaryBox:egret.Shape = new egret.Shape();            
+            private summaryBox:egret.Shape = new egret.Shape();     
+            private summaryTitle = new egret.TextField();       
             private summaryContent:egret.TextField = new egret.TextField();
 
             // 格子内容栏
             private cellDetailsContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
-            private cellDetailsBox:egret.Shape = new egret.Shape();            
+            private cellDetailsBox:egret.Shape = new egret.Shape();   
+            private cellDetailsTitle = new egret.TextField();         
             private cellDetailsContent:egret.TextField = new egret.TextField();
 
             // 事件/提示信息栏
             private messageContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
-            private messageBox:egret.Shape = new egret.Shape();            
+            private messageBox:egret.Shape = new egret.Shape();    
+            private messageTitle = new egret.TextField();        
             private message:egret.TextField = new egret.TextField();
 
             // 移动区域显示
@@ -98,6 +103,10 @@
             private moveZoneBox:egret.Shape = new egret.Shape(); 
 
             private canvas;
+            //PC 还是 移动设备
+            private mobile:boolean = false;  //if mobile device
+            // 国际化 locale 
+            //private locale:string = "zh_CN"
             //临时随机演示
             private townRandomName = ["johny", "kitty", "peter"]
             private num = 0
@@ -149,7 +158,7 @@
              * 开始运行游戏：加载地图，资源配置
              */
             private async runGame() {
-
+                LocaleUtils.locale = localStorage.getItem("eatchicken_locale")==null? 'zh_CN': localStorage.getItem("eatchicken_locale").toString()
                // await ScatterUtils.login()
                 //await ScatterUtils.getAccountInfo()
                  
@@ -232,14 +241,18 @@
              */
             private async createGameScene() {
                 
+                this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.mouseDown, this);
+                this.stage.addEventListener(egret.TouchEvent.TOUCH_END, this.mouseUp, this);
+                this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
 
+                this.stage.addChild(this.gameContainer)
             // let canvas=document.getElementsByTagName("CANVAS")[0];
                 //console.log(canvas)
                 //****** 以下为游戏工具栏，位于地图舞台左侧 ******
 
                 //游戏大厅，游戏创建图标，位置为左上栏             
                 let createGameFlat = this.createBitmapByName("town_png");
-                this.stage.addChild(createGameFlat);
+                this.gameContainer.addChild(createGameFlat);
                 createGameFlat.width = 80;
                 createGameFlat.height = 80;
                 createGameFlat.x=10
@@ -277,7 +290,7 @@
                 this.summaryContainer.y = 100 
                 this.summaryContainer.width = 250
                 this.summaryContainer.height = 100
-                this.stage.addChild(this.summaryContainer)
+                this.gameContainer.addChild(this.summaryContainer)
                 this.summaryBox.graphics.clear()
                 this.summaryBox.graphics.beginFill(0xF7CDA4,0.2);
                 this.summaryBox.graphics.lineStyle(2, 0x000000, 0.5);
@@ -288,13 +301,13 @@
                 summaryTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 summaryTitleBox.graphics.drawRoundRect(0, 0, 250, 30, 15,15);
                 this.summaryContainer.addChild(summaryTitleBox);
-                var summaryTitle = new egret.TextField();
-                summaryTitle.x = 100
-                summaryTitle.y = 5
-                summaryTitle.size = 20
-                summaryTitle.textColor = 0xFFFFFF
-                summaryTitle.text = '统计栏'
-                this.summaryContainer.addChild(summaryTitle);
+                
+                this.summaryTitle.x = 90
+                this.summaryTitle.y = 5
+                this.summaryTitle.size = 20
+                this.summaryTitle.textColor = 0xFFFFFF
+                this.summaryTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "game.statistic.bar.title")
+                this.summaryContainer.addChild(this.summaryTitle);
 
                 this.summaryContent.x = 10
                 this.summaryContent.y = 35
@@ -313,7 +326,7 @@
                 this.messageContainer.y = 210
                 this.messageContainer.width = 250
                 this.messageContainer.height = 250
-                this.stage.addChild(this.messageContainer)
+                this.gameContainer.addChild(this.messageContainer)
                 this.messageBox.graphics.clear()
                 this.messageBox.graphics.beginFill(0xF7CDA4,0.4);
                 this.messageBox.graphics.lineStyle(2, 0x000000, 0.5);
@@ -325,13 +338,13 @@
                 messageTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 messageTitleBox.graphics.drawRoundRect(0, 0, 250, 30, 15,15);
                 this.messageContainer.addChild(messageTitleBox);
-                var messageTitle = new egret.TextField();
-                messageTitle.x = 100
-                messageTitle.y = 5
-                messageTitle.size = 20
-                messageTitle.textColor = 0xFFFFFF
-                messageTitle.text = '消息栏'
-                this.messageContainer.addChild(messageTitle);
+                
+                this.messageTitle.x = 90
+                this.messageTitle.y = 5
+                this.messageTitle.size = 20
+                this.messageTitle.textColor = 0xFFFFFF
+                this.messageTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "game.message.bar.title")
+                this.messageContainer.addChild(this.messageTitle);
 
                 this.message.x = 10
                 this.message.y = 35
@@ -362,13 +375,13 @@
                 cellDetailsTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 cellDetailsTitleBox.graphics.drawRoundRect(0, 0, 250, 30, 15,15);
                 this.cellDetailsContainer.addChild(cellDetailsTitleBox);
-                var cellDetailsTitle = new egret.TextField();
-                cellDetailsTitle.x = 100
-                cellDetailsTitle.y = 5
-                cellDetailsTitle.size = 20
-                cellDetailsTitle.textColor = 0xFFFFFF
-                cellDetailsTitle.text = '格子栏'
-                this.cellDetailsContainer.addChild(cellDetailsTitle);
+                
+                this.cellDetailsTitle.x = 100
+                this.cellDetailsTitle.y = 5
+                this.cellDetailsTitle.size = 20
+                this.cellDetailsTitle.textColor = 0xFFFFFF
+                this.cellDetailsTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "game.grid.bar.title")
+                this.cellDetailsContainer.addChild(this.cellDetailsTitle);
 
                 this.cellDetailsContent.x = 10
                 this.cellDetailsContent.y = 35
@@ -427,10 +440,10 @@
                 //根据Scatter当前身份状况判断是否已经登陆/登出，并显示相应按钮
                 ScatterUtils.getIdentity().then( identiy=>{
                     if (identiy==null){ 
-                        this.stage.addChild(this.login);
+                        this.gameContainer.addChild(this.login);
                     } else {
                         ScatterUtils.login()
-                        this.stage.addChild(this.logout);
+                        this.gameContainer.addChild(this.logout);
                     }
                 }) 
                 //************************ 
@@ -443,7 +456,7 @@
                 this.show.height = 40
                 this.show.touchEnabled = true;
                 this.show.$setVisible(false)
-                this.stage.addChild(this.show)
+                this.gameContainer.addChild(this.show)
                 this.show.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
                     this.show.$setVisible(false)
                     this.hide.$setVisible(true)
@@ -456,7 +469,7 @@
                 this.hide.width = 40
                 this.hide.height = 40
                 this.hide.touchEnabled = true;               
-                this.stage.addChild(this.hide)
+                this.gameContainer.addChild(this.hide)
                 this.hide.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
                     this.show.$setVisible(true)
                     this.hide.$setVisible(false)
@@ -480,7 +493,7 @@
                 play_honor.addEventListener(egret.TouchEvent.TOUCH_TAP, this.backgroundSound.bind(this, RES.getRes("honor_1_mp3").url) ,this)
                 */
                 let play_easy = this.createBitmapByName("music_png");
-                this.stage.addChild(play_easy);
+                this.gameContainer.addChild(play_easy);
                 play_easy.x=1400
                 play_easy.y=5
                 play_easy.touchEnabled = true;
@@ -492,11 +505,11 @@
                     play_stop.$setVisible(true)
 
                 } ,this)
-                this.stage.addChild(play_easy);
+                this.gameContainer.addChild(play_easy);
                 this.backgroundSound(RES.getRes("easy_1_mp3").url)
 
                 let play_stop = this.createBitmapByName("mute_png");
-                this.stage.addChild(play_stop);
+                this.gameContainer.addChild(play_stop);
                 play_stop.$setVisible(false)
                 play_stop.x=1400
                 play_stop.y=5
@@ -507,10 +520,51 @@
                     play_stop.$setVisible(false)
                  } ,this)
                 
-                /******************** */                 
+                /******************** */    
+
+                // ***国际化选择 中文/英文***
+                let localeContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+                localeContainer.x = 1450
+                localeContainer.y = 5
+                //localeContainer.width = 250
+                //localeContainer.height = 250
+                localeContainer.touchEnabled = true;
+                this.gameContainer.addChild(localeContainer)
+                let localeBox:egret.Shape = new egret.Shape();
+                localeBox.graphics.clear()
+                localeBox.graphics.beginFill(0xF7CDA4);
+                localeBox.graphics.lineStyle(2, 0x000000, 0.5);
+                localeBox.graphics.drawRect(0, 0, 60, 40);
+                localeBox.graphics.endFill();
+                localeContainer.addChild(localeBox);
+
+                let localeTitle = new egret.TextField();
+                localeTitle.x = 10
+                localeTitle.y = 10
+                localeTitle.size = 20
+                localeTitle.textColor = 0x443A3A
+                localeTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale=="zh_CN"?"en_US":"zh_CN","locale")
+                localeContainer.addChild(localeTitle); 
+
                 
-                this.stage.addChild(this.textfield)
-                //this.popMessageBox()
+                localeContainer.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
+                    
+                    if (LocaleUtils.locale == "zh_CN"){
+                        LocaleUtils.locale = "en_US"
+                    } else {
+                        LocaleUtils.locale = "zh_CN"                      
+                    }
+                    localStorage.setItem("eatchicken_locale", LocaleUtils.locale)
+                    localeTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale=="zh_CN"?"en_US":"zh_CN","locale")
+                    this.staticLabelI18N()
+                   
+                 } ,this)
+                
+                //***** 判断设备是PC还是移动端*********
+                if ((navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i))) {
+                    this.mobile = true
+                }
+                 /******************** */  
                 
                 
                 //let gameId = window.location.href.match(/(?<=id=).+/)[0]
@@ -547,14 +601,24 @@
             }
 
             /**
+             * 将静态标签进行国际化转换
+             */
+            private staticLabelI18N(){
+                this.summaryTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "game.statistic.bar.title");
+                this.messageTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "game.message.bar.title")
+                this.cellDetailsTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "game.grid.bar.title")
+                this.updateSummaryBoard()
+            }
+
+            /**
              * 初始化功能键
              */
             private updateButton(){              
                 let isOwner = this.currentHouse.getOwner() == ScatterUtils.getCurrentAccountName()
                 if (isOwner){
-                    if (!this.stage.contains(this.setMapFlat)){
-                        this.stage.addChild(this.setMapFlat)
-                        this.stage.addChild(this.kickOffFlat)
+                    if (!this.gameContainer.contains(this.setMapFlat)){
+                        this.gameContainer.addChild(this.setMapFlat)
+                        this.gameContainer.addChild(this.kickOffFlat)
                     }
 
                     let progress = this.currentHouse.getProgress()
@@ -575,9 +639,9 @@
                         this.kickOffFlat.filters =[this.colorFlilter];
                     }
                 } else {
-                    if (this.stage.contains(this.setMapFlat)){
-                        this.stage.removeChild(this.setMapFlat)
-                        this.stage.removeChild(this.kickOffFlat)
+                    if (this.gameContainer.contains(this.setMapFlat)){
+                        this.gameContainer.removeChild(this.setMapFlat)
+                        this.gameContainer.removeChild(this.kickOffFlat)
                     }
                 }        
             }
@@ -593,7 +657,7 @@
                     this.board.y = 100 
                     this.board.width = 880
                     this.board.height = 880
-                    this.stage.addChild(this.board);
+                    this.gameContainer.addChild(this.board);
                     
                     //cell添加点击移动事件
                     let cells = this.board.getCellList()
@@ -641,10 +705,10 @@
              */
             private changeDetailMode(detailMode:boolean){
                 if (detailMode==true){
-                    this.stage.addChild(this.cellDetailsContainer)
+                    this.gameContainer.addChild(this.cellDetailsContainer)
                 } else {
-                    if (this.stage.contains(this.cellDetailsContainer)){
-                        this.stage.removeChild(this.cellDetailsContainer)
+                    if (this.gameContainer.contains(this.cellDetailsContainer)){
+                        this.gameContainer.removeChild(this.cellDetailsContainer)
                     }
                 }
                 
@@ -666,18 +730,18 @@
                             let items = ()=>{
                                 let nameStr = ''
                                 player.getItems().map( id=>{
-                                    nameStr = nameStr + ItemUtils.getItemNameById(id)+'\n         '
+                                    nameStr = nameStr + ItemUtils.getItemNameById(id, LocaleUtils.locale)+'\n         '
                                 })
                                 return nameStr
                             }
                             this.cellDetailsContent.text = this.cellDetailsContent.text
-                                                        + `玩家: ${player.getName()}\n`
+                                                        + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.player")} ${player.getName()}\n`
                                                         + `HP: ${player.getLife() }\n`
-                                                        + `武器: ${ItemUtils.getItemNameById(player.getWeapon()) }\n`
-                                                        + `攻击力: ${player.getAttack() }\n`
-                                                        + `防御力: ${player.getDefense() }\n`
+                                                        + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.weapon")} ${ItemUtils.getItemNameById(player.getWeapon(),LocaleUtils.locale) }\n`
+                                                        + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.force")} ${player.getAttack() }\n`
+                                                        + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.defence")} ${player.getDefense() }\n`
                                                         + `EOS: ${player.getGold()/10000 }\n`
-                                                        + `物品: ${items() }\n\n`                        
+                                                        + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.item")} ${items() }\n\n`                        
                         }
                     })                      
                 })
@@ -701,19 +765,19 @@
                 let items = ()=>{
                     let nameStr = ''
                     player.getItems().map( id=>{
-                        nameStr = nameStr + ItemUtils.getItemNameById(id)+'\n         '
+                        nameStr = nameStr + ItemUtils.getItemNameById(id,LocaleUtils.locale)+'\n         '
                     })
                     return nameStr
                 }
 
-                var text =  `玩家: ${player.getName()}\n`
+                var text =  `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.player")} ${player.getName()}\n`
                             + `HP: ${player.getLife() }\n`
-                            + `武器: ${ItemUtils.getItemNameById(player.getWeapon()) }\n`
-                            + `攻击力: ${player.getAttack() }\n`
-                            + `防御力: ${player.getDefense() }\n`
+                            + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.weapon")} ${ItemUtils.getItemNameById(player.getWeapon(),LocaleUtils.locale) }\n`
+                            + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.force")} ${player.getAttack() }\n`
+                            + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.defence")} ${player.getDefense() }\n`
                             + `EOS: ${player.getGold()/10000 }\n`
-                            + `物品: ${items() }\n\n`
-                this.popMessageBox(text)            
+                            + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.item")} ${items() }\n\n`
+                this.popMessageBox(text)        
             }
 
             /**
@@ -744,9 +808,9 @@
 
                 this.board.addChild(this.honorListContainer)               
                 this.honorListText.y = 150            
-                this.honorListText.text = `本局赢家: ${this.currentHouse.getWinner()}\n`
-                                           + `最佳杀手:  ${this.currentHouse.getBestKiller() }\n`
-                                           + `最多EOS赢家: ${this.currentHouse.getBestEOSWin() }`
+                this.honorListText.text = `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.honor.winner")} ${this.currentHouse.getWinner()}\n`
+                                           + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.honor.killer")}  ${this.currentHouse.getBestKiller() }\n`
+                                           + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.honor.eos.winner")} ${this.currentHouse.getBestEOSWin() }`
             }
 
             /**
@@ -755,9 +819,9 @@
              */
             private updateSummaryBoard(){
                 let playerJsonArray = this.currentHouse.getPlayerJsonList()     
-                this.summaryContent.text = `总玩家数: ${this.currentHouse.getTotalJoinPlayers()}\n`
-                                           + `总EOS数: ${this.currentHouse.getEOSInHouse()+".0000" }\n`
-                                           + `生存玩家: ${this.currentHouse.getAlivePlayers() }`
+                this.summaryContent.text = `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.statistic.total.players")} ${this.currentHouse.getTotalJoinPlayers()}\n`
+                                           + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.statistic.total.eos")} ${this.currentHouse.getEOSInHouse()+".0000" }\n`
+                                           + `${LocaleUtils.getLabelById(LocaleUtils.locale,"game.statistic.survive.players")} ${this.currentHouse.getAlivePlayers() }`
             }
 
             /**
@@ -964,7 +1028,7 @@
                                 })
                             }
                             // 滚动通知
-                            this.popMessageBox(ItemUtils.getItemNameById(newItem.getId()) + "即将降落")
+                            this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.item.fall", [ItemUtils.getItemNameById(newItem.getId(),LocaleUtils.locale)] )) 
                         } else {  // 发生空降
                             cell.removeChildren();  //注意：清除所有物品要放在加入新物品前执行。此处主要为清除空降指示
                         }  
@@ -1003,8 +1067,8 @@
              * 
              */
             private updatePlayerProfileInStage(list){
-                if ( !this.stage.contains(this.playerProfileListContainer)){
-                    this.stage.addChild(this.playerProfileListContainer)
+                if ( !this.gameContainer.contains(this.playerProfileListContainer)){
+                    this.gameContainer.addChild(this.playerProfileListContainer)
                     this.playerProfileListContainer.x = 300  //1200
                     this.playerProfileListContainer.y =10
                     //this.playerProfileListContainer.$setWidth(80)
@@ -1072,7 +1136,7 @@
                     } else {
                         //alert("无游戏信息")
                         this.currentHouse = null
-                        this.popMessageBox("无游戏信息")
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.not.found"))
                         
                     }
 
@@ -1080,7 +1144,7 @@
                     console.error(e);
                     //alert("获取游戏信息失败")
                     this.currentHouse = null
-                    this.popMessageBox("获取游戏信息失败")
+                    this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.fetch.failure"))
                     
                 }) 
                 
@@ -1097,7 +1161,7 @@
                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
-                        this.popMessageBox(ScatterUtils.message.authority)
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.authority"))
                         return
                     }
                     /*
@@ -1116,10 +1180,10 @@
                         if ( !transaction.processed ){  //交易失败
                             transaction = JSON.parse(transaction)
                             //alert("加入游戏失败:"+transaction.error.details[0].message)
-                            this.popMessageBox("加入游戏失败:"+transaction.error.details[0].message)
+                            this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.join.failed",[transaction.error.details[0].message]))
                         } else {
                             //alert("加入游戏！")
-                            this.popMessageBox("加入游戏！")
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.message.join.success"))
                             //添加玩家降落地图效果
                             let tmpPlayer = new Player('jump_png', {})
                             this.board.putPlayer(tmpPlayer)
@@ -1132,7 +1196,7 @@
                     }).catch((e) => {
                         console.error(e);
                         //alert("加入游戏失败:"+ e)
-                        this.popMessageBox("加入游戏失败:"+ e)
+                        this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.join.failed",[e]))
                     })
 
                 })                        
@@ -1146,7 +1210,7 @@
                  ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
-                        this.popMessageBox(ScatterUtils.message.authority)
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.authority"))
                         return
                     }
 
@@ -1155,11 +1219,11 @@
                         console.log("result", result)
                         if (result.succ == 1){
                             //alert("棋盘地图设定成功！")       
-                            this.popMessageBox("棋盘地图设定成功！")         
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.message.setmap.success"))         
                         } else {
                             //alert("棋盘地图设定失败："+ result.errmsg)
                             //alert("棋盘地图已经设定")
-                            this.popMessageBox("棋盘地图已经设定")
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.message.setmap.success"))
                         }
                         
                     })
@@ -1176,7 +1240,7 @@
                  ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
-                        this.popMessageBox(ScatterUtils.message.authority)   
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.authority"))  
                         return
                     }
                     let cellXY = cell.getXY()
@@ -1193,7 +1257,7 @@
                                 transaction = JSON.parse(transaction)
                                 //alert("移动失败："+transaction.error.details[0].message)
                                 //this.popMessageBox("移动失败："+transaction.error.details[0].message)  
-                                this.popMessageBox("移动失败")  
+                                this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.message.move.failed"))  
                                 this.board.removeChild(arrow)
                             } else {                    
                                 this.currentHouse.getPlayerByName(ScatterUtils.getCurrentAccountName()).then( currentPlayer =>{
@@ -1244,7 +1308,7 @@
                         }).catch((e) => {
                             console.error(e);
                             //alert("移动失败")
-                            this.popMessageBox("移动失败")
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.message.move.failed"))
                             this.board.removeChild(arrow)
                         }) 
                     })
@@ -1264,7 +1328,7 @@
                                 this.moveZoneContainer.x = cell.getPosition().x - 80 
                                 this.moveZoneContainer.y = cell.getPosition().y - 80 
                                 this.board.addChild(this.moveZoneContainer) 
-                                this.popMessageBox("玩家"+currentPlayer.getName()+"可以移动")
+                                this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.can.move", [currentPlayer.getName()])) // "玩家"+currentPlayer.getName()+"可以移动")
                                 //this.board.setIndex(this.moveZoneBox, -10)
                                 //this.moveZoneBox.$setVisible(true)
                                 //this.moveZoneContainer.$setVisible(true)
@@ -1351,25 +1415,26 @@
                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
-                        this.popMessageBox(ScatterUtils.message.authority)
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.authority"))  
                         return
                     }
-
+                    /*
                     if (!this.currentHouse){   // 判断是否有选中的城市，没有则不join       
                         console.log("no house selected")
                         //alert("请选择Kick Off的游戏房间")
                         this.popMessageBox("游戏失效")
                         return
                     }
+                    */
                     //let game_id = this.selectedHouse.getID()
                     ScatterUtils.kickOff(this.currentHouse.getID()).then( transaction=>{
                         console.log(transaction)
                         if ( !transaction.processed ){  //交易失败
                             transaction = JSON.parse(transaction)
                             //alert("KickOff游戏失败："+transaction.error.details[0].message)
-                            this.popMessageBox("启动游戏失败："+transaction.error.details[0].message)
+                            this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.start.fail", [transaction.error.details[0].message]))
                         } else {
-                            this.popMessageBox("游戏启动成功！")
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.start.success"))
                             let clock = this.currentHouse.getClock()
                             clock.start()
                         }
@@ -1381,14 +1446,14 @@
            
 
             private updateClockInStage(_clock:Clock){
-                if (this.stage.contains(this.clock)){
-                    this.stage.removeChild(this.clock)
+                if (this.gameContainer.contains(this.clock)){
+                    this.gameContainer.removeChild(this.clock)
                 }
                 this.clock = _clock
                 this.clock.x = 50
                 this.clock.y = 400
                 this.clock.start()
-                this.stage.addChild(this.clock)
+                this.gameContainer.addChild(this.clock)
             }
 
 
@@ -1420,21 +1485,26 @@
                                     this.board.removeChild(animate); 
                                     this.board.removeChild(shadowBox)
                                     //alert("欢迎: "+ message.details)
-                                    this.popMessageBox("欢迎: "+ message.details)
+                                    this.popMessageBox( LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.login.success", [message.account])  ) 
                                 }, this, 8000)
                                              
                             })
                         //this.popMessageBox("欢迎: "+ message.details)
-                        if (this.stage.contains(this.login)) {
-                            this.stage.removeChild(this.login)
+                        if (this.gameContainer.contains(this.login)) {
+                            this.gameContainer.removeChild(this.login)
                         }
-                        if (!this.stage.contains(this.logout)) {
-                            this.stage.addChild(this.logout)
+                        if (!this.gameContainer.contains(this.logout)) {
+                            this.gameContainer.addChild(this.logout)
                         }
 
                     } else {
                         //alert(message.details)
-                        this.popMessageBox(message.details)
+                        if (message.code ==1){
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.nowallet"))
+                        } else if (message.code ==2){
+                            this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.wallet.locked", [LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.walletlock"), LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.noidentity")]))
+                        }
+                        
                     }                 
 
                 }).catch( e=>{
@@ -1454,15 +1524,18 @@
                 ScatterUtils.logout().then( message=>{
                //     ScatterUtils.getCurrentAccountName().then( name=>{
                         //alert(message.details)
-                        this.popMessageBox(message.details)
-                        if (message.logout){
-                            if (this.stage.contains(this.logout)) {
-                                this.stage.removeChild(this.logout)
-                            }
-                            if (!this.stage.contains(this.login)) {
-                                this.stage.addChild(this.login)
-                            }
+                        
+                    if (message.logout){
+                        if (this.gameContainer.contains(this.logout)) {
+                            this.gameContainer.removeChild(this.logout)
                         }
+                        if (!this.gameContainer.contains(this.login)) {
+                            this.gameContainer.addChild(this.login)
+                        }
+                        this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.logout.success", [message.account]))
+                    }  else {
+                        // logout fail
+                    }
              //       })                                           
                 }).catch( e=>{
                     console.log("e",e)
@@ -1539,7 +1612,7 @@
                 this.player_weapon.y = this.playerInfo.y + 40
                 this.player_weapon.size = 18
                 this.player_weapon.textColor = 0x000000
-                this.player_weapon.text = "武器: " + ItemUtils.getItemNameById(target.getWeapon())
+                this.player_weapon.text = "武器: " + ItemUtils.getItemNameById(target.getWeapon(),LocaleUtils.locale)
                 this.board.addChild(this.player_weapon);
 
                 this.player_attack.x = this.playerInfo.x
@@ -1566,7 +1639,7 @@
                 let items = ()=>{
                     let nameStr = ''
                     target.getItems().map( id=>{
-                        nameStr = nameStr + ItemUtils.getItemNameById(id)+'\n         '
+                        nameStr = nameStr + ItemUtils.getItemNameById(id,LocaleUtils.locale)+'\n         '
                     })
                     return nameStr
                 }
@@ -1660,13 +1733,6 @@
                 container.addChild(this._life)
             }
 
-            private showText(_text:string, position:any){
-                this.textfield.x = position.x
-                this.textfield.y = position.y
-                this.textfield.size = 22
-                this.textfield.textColor = 0x000000
-                this.textfield.text = _text
-            }
 
             /** 
              *  描述：点击士兵条栏产生的选中士兵对象行为
@@ -1679,7 +1745,7 @@
 
                 var text =  `玩家: ${player.getName()}\n`
                             + `HP: ${player.getLife() }\n`
-                            + `武器: ${ItemUtils.getItemNameById(player.getWeapon()) }\n`
+                            + `武器: ${ItemUtils.getItemNameById(player.getWeapon(),LocaleUtils.locale) }\n`
                             + `攻击力: ${player.getAttack() }\n`
                             + `防御力: ${player.getDefense() }\n`
                             + `EOS: ${player.getGold() }\n\n`
@@ -1981,9 +2047,85 @@
                 return result;
             }
 
+            private touchPoints:Object = {names:[]}; //{touchid:touch local,names:[ID1,ID2]};
+            private distance:number = 0;
+
+            private touchCon:number = 0;
+
+            private mouseDown(evt:egret.TouchEvent)
+            {
+
+                if(this.touchPoints[evt.touchPointID]==null)
+                {
+
+                    this.touchPoints[evt.touchPointID] = new egret.Point(evt.stageX,evt.stageY);
+                    this.touchPoints["names"].push(evt.touchPointID);
+                }
+                this.touchCon++;
+
+                if(this.touchCon==2)
+                {
+                    this.distance = this.getTouchDistance();
+                    
+                }
+
+            }
+
+            private lastPositionX:number = 0;
+            private lastPositionY:number = 0;
+            private mouseMove(evt:egret.TouchEvent)
+            {
+                //egret.log("touch move:"+evt.touchPointID);
+              
+                if(this.touchCon==2)
+                {
+
+                    this.touchPoints[evt.touchPointID].x = evt.stageX;
+                    this.touchPoints[evt.touchPointID].y = evt.stageY;
+                    var newdistance = this.getTouchDistance();
+                    this.gameContainer.scaleX = newdistance/this.distance;
+                    this.gameContainer.scaleY = this.gameContainer.scaleX;
+                } else if (this.mobile){
+                    let _x = evt.stageX - this.touchPoints[evt.touchPointID].x 
+                    let _y = evt.stageY - this.touchPoints[evt.touchPointID].y 
+
+                    this.gameContainer.x =  _x + this.lastPositionX;
+                    this.gameContainer.y =  _y + this.lastPositionY;
+                }
+            }
+
+            private mouseUp(evt:egret.TouchEvent)
+            {
+ 
+                delete  this.touchPoints[evt.touchPointID];
+                this.touchCon--;
+                this.lastPositionX = this.gameContainer.x
+                this.lastPositionY = this.gameContainer.y
+                //
+                this.width *= this.scaleX;
+                this.height *= this.scaleY;
+                this.scaleX = 1;
+                this.scaleY = 1;
+                this.anchorOffsetX = this.width/2;
+                this.anchorOffsetY = this.height/2;
+
+            }
+
+            private getTouchDistance():number
+            {
+                var _distance:number = 0;
+                var names = this.touchPoints["names"];
+                _distance = egret.Point.distance( this.touchPoints[names[names.length-1]],
+                    this.touchPoints[names[names.length-2]]);
+                    //alert(_distance) 
+                return _distance;
+               
+            }
+
             /** 
              *  鼠标左键按下
              */
+            /*
             private mouseDown(evt:egret.TouchEvent)
             {
                 this._touchStatus = true;
@@ -1991,10 +2133,11 @@
                 this._distance.y = evt.stageY - evt.target.y;
                 this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
             }
-
+            */
             /** 
              *  鼠标移动
              */
+            /*
             private mouseMove(evt:egret.TouchEvent)
             {
                 if( this._touchStatus )
@@ -2008,16 +2151,17 @@
                 
                 }
             }
-
+            */
             /** 
              *  鼠标左键抬起
              */
+            /*
             private mouseUp(evt:egret.TouchEvent)
             {
                 this._touchStatus = false;
                 this.stage.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
             }
-
+            */
             /** 
              *  从顶部士兵标签栏移除指定士兵
              */

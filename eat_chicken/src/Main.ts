@@ -30,6 +30,7 @@
 
         class Main extends egret.DisplayObjectContainer {
 
+            private gameContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             private _touchStatus:boolean = false;              //当前触摸状态，按下时，值为true
             private _distance:egret.Point = new egret.Point();
             private textfield: egret.TextField = new egret.TextField();
@@ -72,10 +73,12 @@
             private messageContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             private messageBox:egret.Shape = new egret.Shape();            
             private message:egret.TextField = new egret.TextField();
+            private messageTitle = new egret.TextField();
 
             private descriptionContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
             private descriptionBox:egret.Shape = new egret.Shape();            
             private description:egret.TextField = new egret.TextField();
+            private descriptionTitle = new egret.TextField();
 
             private canvas;
             //临时随机演示
@@ -87,6 +90,8 @@
             private fiveEosContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
 
             private messageTimeout = null;
+            //PC 还是 移动设备
+            private mobile:boolean = false;  //if mobile device
 
             public constructor() {
                 super();
@@ -120,7 +125,7 @@
              * 开始运行游戏：加载地图，资源配置
              */
             private async runGame() {
-
+                LocaleUtils.locale = localStorage.getItem("eatchicken_locale")==null? 'zh_CN': localStorage.getItem("eatchicken_locale").toString()
                // await ScatterUtils.login()
                 //await ScatterUtils.getAccountInfo()
                  
@@ -134,12 +139,6 @@
                 // console.log("info",info)
 
                 
-
-               
-
-                
-//this.x=0
-//this.y=150
               //  var image = new eui.Image();
               //  image.source = "resource/assets/west.jpg";
                // this.addChild(image);
@@ -191,6 +190,12 @@
              */
             private async createGameScene() {
                  await this.loadResource()
+
+                this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.mouseDown, this);
+                this.stage.addEventListener(egret.TouchEvent.TOUCH_END, this.mouseUp, this);
+                this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
+
+                this.stage.addChild(this.gameContainer)
             // let canvas=document.getElementsByTagName("CANVAS")[0];
                 //console.log(canvas)
                 //****** 以下为游戏工具栏，位于地图舞台左侧 ******
@@ -198,7 +203,7 @@
                 //游戏创建图标，位置为左上栏   
                  // 1 EOS game list          
                 let createGameFlat_1eos = this.createBitmapByName("EOS_1_png");
-                this.stage.addChild(createGameFlat_1eos);
+                this.gameContainer.addChild(createGameFlat_1eos);
                 createGameFlat_1eos.width = 100;
                 createGameFlat_1eos.height = 100;
                 createGameFlat_1eos.x=15
@@ -213,14 +218,14 @@
                 progress_all_1eos.graphics.endFill();
                 progress_all_1eos.touchEnabled = true;
                 progress_all_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 1, -1, "game_png", this.oneEosContainer),this)
-                this.stage.addChild(progress_all_1eos);
+                this.gameContainer.addChild(progress_all_1eos);
                 let progress_all_1eos_text:egret.TextField = new egret.TextField(); 
                 progress_all_1eos_text.x = 35
                 progress_all_1eos_text.y = 185
                 progress_all_1eos_text.size = 18
                 progress_all_1eos_text.textColor = 0x000000   
-                progress_all_1eos_text.text = ` 全部 `            
-                this.stage.addChild(progress_all_1eos_text);
+                progress_all_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all")            
+                this.gameContainer.addChild(progress_all_1eos_text);
                 //状态为1 game list (可加入)
                 let progress_1_1eos:egret.Shape = new egret.Shape(); 
                 progress_1_1eos.graphics.beginFill(0x00EE00);
@@ -229,14 +234,14 @@
                 progress_1_1eos.graphics.endFill();
                 progress_1_1eos.touchEnabled = true;
                 progress_1_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 1, 1, "game_png", this.oneEosContainer),this)
-                this.stage.addChild(progress_1_1eos);
+                this.gameContainer.addChild(progress_1_1eos);
                 let progress_1_1eos_text:egret.TextField = new egret.TextField(); 
                 progress_1_1eos_text.x = 18
                 progress_1_1eos_text.y = 225
                 progress_1_1eos_text.size = 18
                 progress_1_1eos_text.textColor = 0x000000   
-                progress_1_1eos_text.text = `可加入游戏`            
-                this.stage.addChild(progress_1_1eos_text);
+                progress_1_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable")             
+                this.gameContainer.addChild(progress_1_1eos_text);
                 //状态为2 game list (游戏进行中)
                 let progress_2_1eos:egret.Shape = new egret.Shape(); 
                 progress_2_1eos.graphics.beginFill(0xFFFF00);
@@ -245,18 +250,18 @@
                 progress_2_1eos.graphics.endFill();
                 progress_2_1eos.touchEnabled = true;
                 progress_2_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 1, 2, "game_png", this.oneEosContainer),this)
-                this.stage.addChild(progress_2_1eos);        
+                this.gameContainer.addChild(progress_2_1eos);        
                 let progress_2_1eos_text:egret.TextField = new egret.TextField(); 
                 progress_2_1eos_text.x = 18
                 progress_2_1eos_text.y = 265
                 progress_2_1eos_text.size = 18
                 progress_2_1eos_text.textColor = 0x000000   
-                progress_2_1eos_text.text = `游戏进行中`            
-                this.stage.addChild(progress_2_1eos_text);
+                progress_2_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing")            
+                this.gameContainer.addChild(progress_2_1eos_text);
                 //------------
                 // 3 EOS game list
                 let createGameFlat_3eos = this.createBitmapByName("EOS_3_png");
-                this.stage.addChild(createGameFlat_3eos);
+                this.gameContainer.addChild(createGameFlat_3eos);
                 createGameFlat_3eos.width = 100;
                 createGameFlat_3eos.height = 100;
                 createGameFlat_3eos.x=15
@@ -271,14 +276,14 @@
                 progress_all_3eos.graphics.endFill();
                 progress_all_3eos.touchEnabled = true;
                 progress_all_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 3, -1, "game_1_png", this.threeEosContainer),this)
-                this.stage.addChild(progress_all_3eos);
+                this.gameContainer.addChild(progress_all_3eos);
                 let progress_all_3eos_text:egret.TextField = new egret.TextField(); 
                 progress_all_3eos_text.x = 35
                 progress_all_3eos_text.y = 505
                 progress_all_3eos_text.size = 18
                 progress_all_3eos_text.textColor = 0x000000   
-                progress_all_3eos_text.text = ` 全部 `            
-                this.stage.addChild(progress_all_3eos_text);
+                progress_all_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all")             
+                this.gameContainer.addChild(progress_all_3eos_text);
                 //状态为1 game list (可加入)
                 let progress_1_3eos:egret.Shape = new egret.Shape(); 
                 progress_1_3eos.graphics.beginFill(0x00EE00);
@@ -287,14 +292,14 @@
                 progress_1_3eos.graphics.endFill();
                 progress_1_3eos.touchEnabled = true;
                 progress_1_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 3, 1, "game_1_png", this.threeEosContainer),this)
-                this.stage.addChild(progress_1_3eos);
+                this.gameContainer.addChild(progress_1_3eos);
                 let progress_1_3eos_text:egret.TextField = new egret.TextField(); 
                 progress_1_3eos_text.x = 18
                 progress_1_3eos_text.y = 545
                 progress_1_3eos_text.size = 18
                 progress_1_3eos_text.textColor = 0x000000   
-                progress_1_3eos_text.text = `可加入游戏`            
-                this.stage.addChild(progress_1_3eos_text);
+                progress_1_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable")              
+                this.gameContainer.addChild(progress_1_3eos_text);
                 //状态为2 game list (游戏进行中)
                 let progress_2_3eos:egret.Shape = new egret.Shape(); 
                 progress_2_3eos.graphics.beginFill(0xFFFF00);
@@ -303,18 +308,18 @@
                 progress_2_3eos.graphics.endFill();
                 progress_2_3eos.touchEnabled = true;
                 progress_2_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 3, 2, "game_1_png", this.threeEosContainer),this)
-                this.stage.addChild(progress_2_3eos);        
+                this.gameContainer.addChild(progress_2_3eos);        
                 let progress_2_3eos_text:egret.TextField = new egret.TextField(); 
                 progress_2_3eos_text.x = 18
                 progress_2_3eos_text.y = 585
                 progress_2_3eos_text.size = 18
                 progress_2_3eos_text.textColor = 0x000000   
-                progress_2_3eos_text.text = `游戏进行中`            
-                this.stage.addChild(progress_2_3eos_text);
+                progress_2_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing")           
+                this.gameContainer.addChild(progress_2_3eos_text);
                 //------------
                  // 5 EOS game list
                 let createGameFlat_5eos = this.createBitmapByName("EOS_5_png");
-                this.stage.addChild(createGameFlat_5eos);
+                this.gameContainer.addChild(createGameFlat_5eos);
                 createGameFlat_5eos.width = 100;
                 createGameFlat_5eos.height = 100;
                 createGameFlat_5eos.x=15
@@ -329,14 +334,14 @@
                 progress_all_5eos.graphics.endFill();
                 progress_all_5eos.touchEnabled = true;
                 progress_all_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 5, -1, "game_2_png", this.fiveEosContainer),this)
-                this.stage.addChild(progress_all_5eos);
+                this.gameContainer.addChild(progress_all_5eos);
                 let progress_all_5eos_text:egret.TextField = new egret.TextField(); 
                 progress_all_5eos_text.x = 35
                 progress_all_5eos_text.y = 815
                 progress_all_5eos_text.size = 18
                 progress_all_5eos_text.textColor = 0x000000   
-                progress_all_5eos_text.text = ` 全部 `            
-                this.stage.addChild(progress_all_5eos_text);
+                progress_all_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all")             
+                this.gameContainer.addChild(progress_all_5eos_text);
                 //状态为1 game list (可加入)
                 let progress_1_5eos:egret.Shape = new egret.Shape(); 
                 progress_1_5eos.graphics.beginFill(0x00EE00);
@@ -345,14 +350,14 @@
                 progress_1_5eos.graphics.endFill();
                 progress_1_5eos.touchEnabled = true;
                 progress_1_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 5, 1, "game_2_png", this.fiveEosContainer),this)
-                this.stage.addChild(progress_1_5eos);
+                this.gameContainer.addChild(progress_1_5eos);
                 let progress_1_5eos_text:egret.TextField = new egret.TextField(); 
                 progress_1_5eos_text.x = 18
                 progress_1_5eos_text.y = 855
                 progress_1_5eos_text.size = 18
                 progress_1_5eos_text.textColor = 0x000000   
-                progress_1_5eos_text.text = `可加入游戏`            
-                this.stage.addChild(progress_1_5eos_text);
+                progress_1_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable")             
+                this.gameContainer.addChild(progress_1_5eos_text);
                 //状态为2 game list (游戏进行中)
                 let progress_2_5eos:egret.Shape = new egret.Shape(); 
                 progress_2_5eos.graphics.beginFill(0xFFFF00);
@@ -361,14 +366,14 @@
                 progress_2_5eos.graphics.endFill();
                 progress_2_5eos.touchEnabled = true;
                 progress_2_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP,this.filterAndUpdateGameList.bind(this, 5, 2, "game_2_png", this.fiveEosContainer),this)
-                this.stage.addChild(progress_2_5eos);        
+                this.gameContainer.addChild(progress_2_5eos);        
                 let progress_2_5eos_text:egret.TextField = new egret.TextField(); 
                 progress_2_5eos_text.x = 18
                 progress_2_5eos_text.y = 895
                 progress_2_5eos_text.size = 18
                 progress_2_5eos_text.textColor = 0x000000   
-                progress_2_5eos_text.text = `游戏进行中`            
-                this.stage.addChild(progress_2_5eos_text);
+                progress_2_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing")            
+                this.gameContainer.addChild(progress_2_5eos_text);
 
                 
                 //******登陆/登出功能******
@@ -387,10 +392,10 @@
                 //根据Scatter当前身份状况判断是否已经登陆/登出，并显示相应按钮
                 ScatterUtils.getIdentity().then( identiy=>{
                     if (identiy==null){ 
-                        this.stage.addChild(this.login);
+                        this.gameContainer.addChild(this.login);
                     } else {
                         ScatterUtils.login()
-                        this.stage.addChild(this.logout);
+                        this.gameContainer.addChild(this.logout);
                     }
                 }) 
                 //************************ 
@@ -413,13 +418,13 @@
                 messageTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 messageTitleBox.graphics.drawRoundRect(0, 0, 350, 30, 15,15);
                 this.messageContainer.addChild(messageTitleBox);
-                var messageTitle = new egret.TextField();
-                messageTitle.x = 145
-                messageTitle.y = 3
-                messageTitle.size = 20
-                messageTitle.textColor = 0xFFFFFF
-                messageTitle.text = '通告栏'
-                this.messageContainer.addChild(messageTitle);
+                
+                this.messageTitle.x = 145
+                this.messageTitle.y = 3
+                this.messageTitle.size = 20
+                this.messageTitle.textColor = 0xFFFFFF
+                this.messageTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.notice.bar.title")
+                this.messageContainer.addChild(this.messageTitle);
 
                 this.message.x = 10
                 this.message.y = 35
@@ -432,15 +437,63 @@
                 this.messageContainer.addChild(this.message);
                 // ***********
                 
-                //游戏说明
+                //游戏说明button
                 let description = this.createBitmapByName("description_png");
-                this.stage.addChild(description);
-                description.x=1350
+                this.gameContainer.addChild(description);
+                description.x=1310
                 description.y=10
+                description.width = 110
                 description.touchEnabled = true;
                 description.addEventListener(egret.TouchEvent.TOUCH_TAP,()=>{
-                    this.stage.addChild(this.descriptionContainer)
+                    this.gameContainer.addChild(this.descriptionContainer)
                 },this)
+
+                let descriptionTitle = new egret.TextField();
+                descriptionTitle.x =1315
+                descriptionTitle.y = 25
+                descriptionTitle.size = 20
+                descriptionTitle.textColor = 0x1C1C1C
+                descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.desc.caption")
+                this.gameContainer.addChild(descriptionTitle); 
+
+                // ***国际化选择 中文/英文***
+                let localeContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+                localeContainer.x = 1435
+                localeContainer.y = 13
+                localeContainer.touchEnabled = true;
+                this.gameContainer.addChild(localeContainer)
+                let localeBox:egret.Shape = new egret.Shape();
+                localeBox.graphics.clear()
+                localeBox.graphics.beginFill(0xF7CDA4);
+                localeBox.graphics.lineStyle(2, 0x000000, 0.5);
+                localeBox.graphics.drawRect(0, 0, 60, 40);
+                localeBox.graphics.endFill();
+                localeContainer.addChild(localeBox);
+
+                let localeTitle = new egret.TextField();
+                localeTitle.x = 10
+                localeTitle.y = 10
+                localeTitle.size = 20
+                localeTitle.textColor = 0x443A3A
+                localeTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale=="zh_CN"?"en_US":"zh_CN","locale")
+                localeContainer.addChild(localeTitle); 
+
+                
+                localeContainer.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
+                    
+                    if (LocaleUtils.locale == "zh_CN"){
+                        LocaleUtils.locale = "en_US"
+                        
+                    } else {
+                        LocaleUtils.locale = "zh_CN"                      
+                    }
+                    localStorage.setItem("eatchicken_locale", LocaleUtils.locale)
+                    localeTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale=="zh_CN"?"en_US":"zh_CN","locale")
+                    staticLabelI18N()
+                   
+                 } ,this)
+                 //****************
+
 
                 // ***游戏说明***
                 this.descriptionContainer.x = 350
@@ -459,13 +512,13 @@
                 descriptioTitleBox.graphics.beginFill(0x4F4F4F,0.8);
                 descriptioTitleBox.graphics.drawRoundRect(0, 0, 800, 30, 15,15);
                 this.descriptionContainer.addChild(descriptioTitleBox);
-                var descriptionTitle = new egret.TextField();
-                descriptionTitle.x = 350
-                descriptionTitle.y = 5
-                descriptionTitle.size = 20
-                descriptionTitle.textColor = 0xFFFFFF
-                descriptionTitle.text = '游戏说明'
-                this.descriptionContainer.addChild(descriptionTitle);
+                
+                this.descriptionTitle.x = 350
+                this.descriptionTitle.y = 5
+                this.descriptionTitle.size = 20
+                this.descriptionTitle.textColor = 0xFFFFFF
+                this.descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc.caption")
+                this.descriptionContainer.addChild(this.descriptionTitle);
                 
                 let descriptionClose = this.createBitmapByName("close_png");
                 this.descriptionContainer.addChild(descriptionClose);
@@ -473,7 +526,7 @@
                 descriptionClose.y=0
                 descriptionClose.touchEnabled = true;
                 descriptionClose.addEventListener(egret.TouchEvent.TOUCH_TAP,()=>{
-                    this.stage.removeChild(this.descriptionContainer)
+                    this.gameContainer.removeChild(this.descriptionContainer)
                 },this)
 
                 this.description.x = 10
@@ -484,7 +537,9 @@
                 this.description.textColor = 0x000000                  
                 this.description.$setWordWrap(true)
                 this.description.$setMultiline(true)
-                this.description.textFlow  = new egret.HtmlTextParser().parser(
+                this.description.textFlow  = new egret.HtmlTextParser().parser(LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.desc") )
+
+                    /*
                     `游戏规则说明：\n\n`
                                         + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
                                         + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
@@ -502,7 +557,7 @@
                                         + `1. <a href = 'https://get-scatter.com'><u>https://get-scatter.com</u></a> \n`
                                         + `2. <a href = 'https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle'><u>https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle </u></a>`
                 )
-                /*
+                
                 this.description.text = `游戏规则说明：\n\n`
                                         + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
                                         + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
@@ -526,18 +581,22 @@
                 //游戏房间列表（卡牌）容器
                 this.oneEosContainer.x = 180
                 this.oneEosContainer.y = 70
-                this.stage.addChild(this.oneEosContainer)
+                this.gameContainer.addChild(this.oneEosContainer)
 
                 this.threeEosContainer.x = 180
                 this.threeEosContainer.y = 390
-                this.stage.addChild(this.threeEosContainer)
+                this.gameContainer.addChild(this.threeEosContainer)
 
                 this.fiveEosContainer.x = 180
                 this.fiveEosContainer.y = 700
-                this.stage.addChild(this.fiveEosContainer)
+                this.gameContainer.addChild(this.fiveEosContainer)
+
+
                 //this.stage.addChild(this.textfield)
                 //this.popMessageBox()
-                
+                if ((navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i))) {
+                    this.mobile = true
+                }
                 
                 //更新游戏房间列表，位置为上栏
                 this.refreshHouseList()
@@ -547,6 +606,24 @@
                 //}, this, 5000)  //每5秒从合约从取得所有游戏信息并更新
 
                 //this.stage.y=150
+                let staticLabelI18N = () =>{
+                    this.description.textFlow  = new egret.HtmlTextParser().parser(LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.desc") )
+                    this.descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc.caption")
+                    this.messageTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.notice.bar.title")
+                    descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.desc.caption")
+                    progress_all_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all")
+                    progress_all_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all")
+                    progress_all_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all")
+                    progress_1_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable") 
+                    progress_1_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable") 
+                    progress_1_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable") 
+                    progress_2_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing") 
+                    progress_2_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing") 
+                    progress_2_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing") 
+                    this.updateGameList(this.eos_one.slice(0,7), "game_png", this.oneEosContainer, this.eos_one, 0)
+                    this.updateGameList(this.eos_three.slice(0,7), "game_1_png", this.threeEosContainer, this.eos_three, 0)
+                    this.updateGameList(this.eos_five.slice(0,7), "game_2_png", this.fiveEosContainer, this.eos_five, 0)
+                }
             }
             
 
@@ -565,9 +642,9 @@
                    // this.stage.removeChild(this.message)
                    // this.stage.removeChild(this.messageContainer)
                    this.message.text=""
-                   this.stage.removeChild(this.messageContainer)
+                   this.gameContainer.removeChild(this.messageContainer)
                 },this, 4000)
-                this.stage.addChild(this.messageContainer)
+                this.gameContainer.addChild(this.messageContainer)
                 this.message.text = msgText
             }
 
@@ -625,13 +702,13 @@
                         */
                     }else {
                         //alert("无游戏信息")
-                        this.popMessageBox("无游戏信息")
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.not.found"))
                     }
 
                 }).catch((e) => {
                     console.error(e);
                     //alert("获取游戏信息失败")
-                    this.popMessageBox("获取游戏信息失败")
+                    this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.fetch.failure"))
                 }) 
                 
                 
@@ -678,23 +755,23 @@
                         let color
                         switch (gameJson.game_progress) {
                             case 0:
-                                progress = "游戏未开始"
+                                progress = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.status.notstart") //"游戏未开始"
                                 color = 0x00EE00
                                 break;
                             case 1:   
-                                progress = "游戏可加入"
+                                progress = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.status.joinable") //"游戏可加入"
                                 color = 0x00EE00
                                 break;
                             case 2:   
-                                progress = "游戏进行中"
+                                progress = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.status.ongoing") //"游戏进行中"
                                 color = 0xFFFF00
                                 break; 
                             case 3:   
-                                progress = "游戏已结束"
+                                progress = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.status.over") //"游戏已结束"
                                 color = 0xFF0000
                                 break;       
                             default:
-                                progress = "游戏未开始"
+                                progress = LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.status.notstart") //"游戏未开始"
                         }
 
                         let detailBox:egret.Shape = new egret.Shape(); 
@@ -708,8 +785,8 @@
                         message.y = 216
                         message.size = 18
                         message.textColor = 0x000000   
-                        message.text = ` 房号:${gameJson.game_id + 1}   玩家: ${gameJson.players.length}\n`   
-                                        + ` 状态: ${progress}`          
+                        message.text = ` ${LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.room.num")}${gameJson.game_id + 1}   ${LocaleUtils.getLabelById(LocaleUtils.locale,"game.player")} ${gameJson.players.length}\n`   
+                                        + ` ${LocaleUtils.getLabelById(LocaleUtils.locale,"hall.game.status")} ${progress}`          
                         container.addChild(message);
                     })
                 })
@@ -747,7 +824,7 @@
                 ScatterUtils.getIdentity().then( identity=>{
                     if (identity==null){
                         //alert(ScatterUtils.message.authority)
-                        this.popMessageBox(ScatterUtils.message.authority)
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.authority"))
                         return
                     }
 
@@ -762,13 +839,13 @@
                         } else {
                             transaction = JSON.parse(transaction)
                             //alert("创建游戏失败:"+transaction.error.details[0].message)
-                            this.popMessageBox("创建游戏失败:"+transaction.error.details[0].message)
+                            this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"hall.notice.failed.create",[transaction.error.details[0].message]))
                         }    
                         
                     }).catch((e) => {
                         console.log(e);
                         //alert("取消创建游戏")
-                        this.popMessageBox("取消创建游戏")
+                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"hall.notice.cancel.create"))
                     })
 
                 })                                                          
@@ -834,18 +911,21 @@
                 ScatterUtils.login().then( message=>{
                       
                     if (message.login){  //登陆成功， 进行登陆/登出按钮转换
-                        alert("欢迎: "+ message.details)
+                        //alert("欢迎: "+ message.details)
                         //this.popMessageBox("欢迎: "+ message.details)
-                        if (this.stage.contains(this.login)) {
-                            this.stage.removeChild(this.login)
+                        if (this.gameContainer.contains(this.login)) {
+                            this.gameContainer.removeChild(this.login)
                         }
-                        if (!this.stage.contains(this.logout)) {
-                            this.stage.addChild(this.logout)
+                        if (!this.gameContainer.contains(this.logout)) {
+                            this.gameContainer.addChild(this.logout)
                         }
-
+                        this.popMessageBox( LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.login.success", [message.account])  ) 
                     } else {
-                        alert(message.details)
-                        //this.popMessageBox(message.details)
+                        if (message.code ==1){
+                            this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.nowallet"))
+                        } else if (message.code ==2){
+                            this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.wallet.locked", [LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.walletlock"), LocaleUtils.getLabelById(LocaleUtils.locale,"game.wallet.noidentity")]))
+                        }
                     }                 
 
                 }).catch( e=>{
@@ -862,20 +942,24 @@
              private async logoutGame(){
                 ScatterUtils.logout().then( message=>{
                //     ScatterUtils.getCurrentAccountName().then( name=>{
-                        alert(message.details)
+                        //alert(message.details)
                         //this.popMessageBox(message.details)
-                        if (message.logout){
-                            if (this.stage.contains(this.logout)) {
-                                this.stage.removeChild(this.logout)
-                            }
-                            if (!this.stage.contains(this.login)) {
-                                this.stage.addChild(this.login)
-                            }
+                    if (message.logout){
+                        if (this.gameContainer.contains(this.logout)) {
+                            this.gameContainer.removeChild(this.logout)
                         }
+                        if (!this.gameContainer.contains(this.login)) {
+                            this.gameContainer.addChild(this.login)
+                        }
+                        this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale,"game.message.logout.success", [message.account]))
+                    } else {
+                        // logout fail
+                    }
+                    
              //       })                                           
                 }).catch( e=>{
                     console.log("e",e)
-                    alert(e)
+                    this.popMessageBox(e)
                 })
             } 
 
@@ -1247,38 +1331,79 @@
             /** 
              *  鼠标左键按下
              */
+            private touchPoints:Object = {names:[]}; //{touchid:touch local,names:[ID1,ID2]};
+            private distance:number = 0;
+
+            private touchCon:number = 0;
+
             private mouseDown(evt:egret.TouchEvent)
             {
-                this._touchStatus = true;
-                this._distance.x = evt.stageX -  evt.target.x;
-                this._distance.y = evt.stageY - evt.target.y;
-                this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
+
+                if(this.touchPoints[evt.touchPointID]==null)
+                {
+
+                    this.touchPoints[evt.touchPointID] = new egret.Point(evt.stageX,evt.stageY);
+                    this.touchPoints["names"].push(evt.touchPointID);
+                }
+                this.touchCon++;
+
+                if(this.touchCon==2)
+                {
+                    this.distance = this.getTouchDistance();
+                    
+                }
+
             }
 
-            /** 
-             *  鼠标移动
-             */
+            private lastPositionX:number = 0;
+            private lastPositionY:number = 0;
             private mouseMove(evt:egret.TouchEvent)
             {
-                if( this._touchStatus )
+                //egret.log("touch move:"+evt.touchPointID);
+              
+                if(this.touchCon==2)
                 {
-                    try{ 
-                        evt.target.x = evt.stageX - this._distance.x;
-                        evt.target.y = evt.stageY - this._distance.y;
-                    } catch (e){ //移动过程中出现的未知问题，待解决
-                        console.log(e)
-                    }
-                
+
+                    this.touchPoints[evt.touchPointID].x = evt.stageX;
+                    this.touchPoints[evt.touchPointID].y = evt.stageY;
+                    var newdistance = this.getTouchDistance();
+                    this.gameContainer.scaleX = newdistance/this.distance;
+                    this.gameContainer.scaleY = this.gameContainer.scaleX;
+                } else if (this.mobile){
+                    let _x = evt.stageX - this.touchPoints[evt.touchPointID].x 
+                    let _y = evt.stageY - this.touchPoints[evt.touchPointID].y 
+
+                    this.gameContainer.x =  _x + this.lastPositionX;
+                    this.gameContainer.y =  _y + this.lastPositionY;
                 }
             }
 
-            /** 
-             *  鼠标左键抬起
-             */
             private mouseUp(evt:egret.TouchEvent)
             {
-                this._touchStatus = false;
-                this.stage.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
+ 
+                delete  this.touchPoints[evt.touchPointID];
+                this.touchCon--;
+                this.lastPositionX = this.gameContainer.x
+                this.lastPositionY = this.gameContainer.y
+                //
+                this.width *= this.scaleX;
+                this.height *= this.scaleY;
+                this.scaleX = 1;
+                this.scaleY = 1;
+                this.anchorOffsetX = this.width/2;
+                this.anchorOffsetY = this.height/2;
+
+            }
+
+            private getTouchDistance():number
+            {
+                var _distance:number = 0;
+                var names = this.touchPoints["names"];
+                _distance = egret.Point.distance( this.touchPoints[names[names.length-1]],
+                    this.touchPoints[names[names.length-2]]);
+                    //alert(_distance) 
+                return _distance;
+               
             }
 
             /** 

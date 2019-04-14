@@ -75,6 +75,7 @@ var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
         var _this = _super.call(this) || this;
+        _this.gameContainer = new egret.DisplayObjectContainer();
         _this._touchStatus = false; //当前触摸状态，按下时，值为true
         _this._distance = new egret.Point();
         _this.textfield = new egret.TextField();
@@ -99,9 +100,11 @@ var Main = (function (_super) {
         _this.messageContainer = new egret.DisplayObjectContainer();
         _this.messageBox = new egret.Shape();
         _this.message = new egret.TextField();
+        _this.messageTitle = new egret.TextField();
         _this.descriptionContainer = new egret.DisplayObjectContainer();
         _this.descriptionBox = new egret.Shape();
         _this.description = new egret.TextField();
+        _this.descriptionTitle = new egret.TextField();
         //临时随机演示
         _this.townRandomName = ["johny", "kitty", "peter"];
         _this.num = 0;
@@ -109,6 +112,16 @@ var Main = (function (_super) {
         _this.threeEosContainer = new egret.DisplayObjectContainer();
         _this.fiveEosContainer = new egret.DisplayObjectContainer();
         _this.messageTimeout = null;
+        //PC 还是 移动设备
+        _this.mobile = false; //if mobile device
+        /**
+         *  鼠标左键按下
+         */
+        _this.touchPoints = { names: [] }; //{touchid:touch local,names:[ID1,ID2]};
+        _this.distance = 0;
+        _this.touchCon = 0;
+        _this.lastPositionX = 0;
+        _this.lastPositionY = 0;
         _this.canvas = document.getElementsByTagName("CANVAS")[0];
         //this.canvas.addEventListener('mousemove',this.onMove.bind(this));
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
@@ -136,6 +149,7 @@ var Main = (function (_super) {
     Main.prototype.runGame = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                LocaleUtils.locale = localStorage.getItem("eatchicken_locale") == null ? 'zh_CN' : localStorage.getItem("eatchicken_locale").toString();
                 // await ScatterUtils.login()
                 //await ScatterUtils.getAccountInfo()
                 //await  ScatterUtils.getAllGamesInfo()
@@ -145,8 +159,6 @@ var Main = (function (_super) {
                 //await ScatterUtils.kickoff(10)
                 // let info = await ScatterUtils.move(10, 1 ,2)
                 // console.log("info",info)
-                //this.x=0
-                //this.y=150
                 //  var image = new eui.Image();
                 //  image.source = "resource/assets/west.jpg";
                 // this.addChild(image);
@@ -193,20 +205,18 @@ var Main = (function (_super) {
     Main.prototype.createGameScene = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
-            var createGameFlat_1eos, progress_all_1eos, progress_all_1eos_text, progress_1_1eos, progress_1_1eos_text, progress_2_1eos, progress_2_1eos_text, createGameFlat_3eos, progress_all_3eos, progress_all_3eos_text, progress_1_3eos, progress_1_3eos_text, progress_2_3eos, progress_2_3eos_text, createGameFlat_5eos, progress_all_5eos, progress_all_5eos_text, progress_1_5eos, progress_1_5eos_text, progress_2_5eos, progress_2_5eos_text, messageTitleBox, messageTitle, description, descriptioTitleBox, descriptionTitle, descriptionClose;
+            var createGameFlat_1eos, progress_all_1eos, progress_all_1eos_text, progress_1_1eos, progress_1_1eos_text, progress_2_1eos, progress_2_1eos_text, createGameFlat_3eos, progress_all_3eos, progress_all_3eos_text, progress_1_3eos, progress_1_3eos_text, progress_2_3eos, progress_2_3eos_text, createGameFlat_5eos, progress_all_5eos, progress_all_5eos_text, progress_1_5eos, progress_1_5eos_text, progress_2_5eos, progress_2_5eos_text, messageTitleBox, description, descriptionTitle, localeContainer, localeBox, localeTitle, descriptioTitleBox, descriptionClose, staticLabelI18N;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.loadResource()
-                        // let canvas=document.getElementsByTagName("CANVAS")[0];
-                        //console.log(canvas)
-                        //****** 以下为游戏工具栏，位于地图舞台左侧 ******
-                        //游戏创建图标，位置为左上栏   
-                        // 1 EOS game list          
-                    ];
+                    case 0: return [4 /*yield*/, this.loadResource()];
                     case 1:
                         _a.sent();
+                        this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.mouseDown, this);
+                        this.stage.addEventListener(egret.TouchEvent.TOUCH_END, this.mouseUp, this);
+                        this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
+                        this.stage.addChild(this.gameContainer);
                         createGameFlat_1eos = this.createBitmapByName("EOS_1_png");
-                        this.stage.addChild(createGameFlat_1eos);
+                        this.gameContainer.addChild(createGameFlat_1eos);
                         createGameFlat_1eos.width = 100;
                         createGameFlat_1eos.height = 100;
                         createGameFlat_1eos.x = 15;
@@ -220,14 +230,14 @@ var Main = (function (_super) {
                         progress_all_1eos.graphics.endFill();
                         progress_all_1eos.touchEnabled = true;
                         progress_all_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 1, -1, "game_png", this.oneEosContainer), this);
-                        this.stage.addChild(progress_all_1eos);
+                        this.gameContainer.addChild(progress_all_1eos);
                         progress_all_1eos_text = new egret.TextField();
                         progress_all_1eos_text.x = 35;
                         progress_all_1eos_text.y = 185;
                         progress_all_1eos_text.size = 18;
                         progress_all_1eos_text.textColor = 0x000000;
-                        progress_all_1eos_text.text = " \u5168\u90E8 ";
-                        this.stage.addChild(progress_all_1eos_text);
+                        progress_all_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all");
+                        this.gameContainer.addChild(progress_all_1eos_text);
                         progress_1_1eos = new egret.Shape();
                         progress_1_1eos.graphics.beginFill(0x00EE00);
                         progress_1_1eos.graphics.lineStyle(2, 0x000000);
@@ -235,14 +245,14 @@ var Main = (function (_super) {
                         progress_1_1eos.graphics.endFill();
                         progress_1_1eos.touchEnabled = true;
                         progress_1_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 1, 1, "game_png", this.oneEosContainer), this);
-                        this.stage.addChild(progress_1_1eos);
+                        this.gameContainer.addChild(progress_1_1eos);
                         progress_1_1eos_text = new egret.TextField();
                         progress_1_1eos_text.x = 18;
                         progress_1_1eos_text.y = 225;
                         progress_1_1eos_text.size = 18;
                         progress_1_1eos_text.textColor = 0x000000;
-                        progress_1_1eos_text.text = "\u53EF\u52A0\u5165\u6E38\u620F";
-                        this.stage.addChild(progress_1_1eos_text);
+                        progress_1_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable");
+                        this.gameContainer.addChild(progress_1_1eos_text);
                         progress_2_1eos = new egret.Shape();
                         progress_2_1eos.graphics.beginFill(0xFFFF00);
                         progress_2_1eos.graphics.lineStyle(2, 0x000000);
@@ -250,16 +260,16 @@ var Main = (function (_super) {
                         progress_2_1eos.graphics.endFill();
                         progress_2_1eos.touchEnabled = true;
                         progress_2_1eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 1, 2, "game_png", this.oneEosContainer), this);
-                        this.stage.addChild(progress_2_1eos);
+                        this.gameContainer.addChild(progress_2_1eos);
                         progress_2_1eos_text = new egret.TextField();
                         progress_2_1eos_text.x = 18;
                         progress_2_1eos_text.y = 265;
                         progress_2_1eos_text.size = 18;
                         progress_2_1eos_text.textColor = 0x000000;
-                        progress_2_1eos_text.text = "\u6E38\u620F\u8FDB\u884C\u4E2D";
-                        this.stage.addChild(progress_2_1eos_text);
+                        progress_2_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing");
+                        this.gameContainer.addChild(progress_2_1eos_text);
                         createGameFlat_3eos = this.createBitmapByName("EOS_3_png");
-                        this.stage.addChild(createGameFlat_3eos);
+                        this.gameContainer.addChild(createGameFlat_3eos);
                         createGameFlat_3eos.width = 100;
                         createGameFlat_3eos.height = 100;
                         createGameFlat_3eos.x = 15;
@@ -273,14 +283,14 @@ var Main = (function (_super) {
                         progress_all_3eos.graphics.endFill();
                         progress_all_3eos.touchEnabled = true;
                         progress_all_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 3, -1, "game_1_png", this.threeEosContainer), this);
-                        this.stage.addChild(progress_all_3eos);
+                        this.gameContainer.addChild(progress_all_3eos);
                         progress_all_3eos_text = new egret.TextField();
                         progress_all_3eos_text.x = 35;
                         progress_all_3eos_text.y = 505;
                         progress_all_3eos_text.size = 18;
                         progress_all_3eos_text.textColor = 0x000000;
-                        progress_all_3eos_text.text = " \u5168\u90E8 ";
-                        this.stage.addChild(progress_all_3eos_text);
+                        progress_all_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all");
+                        this.gameContainer.addChild(progress_all_3eos_text);
                         progress_1_3eos = new egret.Shape();
                         progress_1_3eos.graphics.beginFill(0x00EE00);
                         progress_1_3eos.graphics.lineStyle(2, 0x000000);
@@ -288,14 +298,14 @@ var Main = (function (_super) {
                         progress_1_3eos.graphics.endFill();
                         progress_1_3eos.touchEnabled = true;
                         progress_1_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 3, 1, "game_1_png", this.threeEosContainer), this);
-                        this.stage.addChild(progress_1_3eos);
+                        this.gameContainer.addChild(progress_1_3eos);
                         progress_1_3eos_text = new egret.TextField();
                         progress_1_3eos_text.x = 18;
                         progress_1_3eos_text.y = 545;
                         progress_1_3eos_text.size = 18;
                         progress_1_3eos_text.textColor = 0x000000;
-                        progress_1_3eos_text.text = "\u53EF\u52A0\u5165\u6E38\u620F";
-                        this.stage.addChild(progress_1_3eos_text);
+                        progress_1_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable");
+                        this.gameContainer.addChild(progress_1_3eos_text);
                         progress_2_3eos = new egret.Shape();
                         progress_2_3eos.graphics.beginFill(0xFFFF00);
                         progress_2_3eos.graphics.lineStyle(2, 0x000000);
@@ -303,16 +313,16 @@ var Main = (function (_super) {
                         progress_2_3eos.graphics.endFill();
                         progress_2_3eos.touchEnabled = true;
                         progress_2_3eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 3, 2, "game_1_png", this.threeEosContainer), this);
-                        this.stage.addChild(progress_2_3eos);
+                        this.gameContainer.addChild(progress_2_3eos);
                         progress_2_3eos_text = new egret.TextField();
                         progress_2_3eos_text.x = 18;
                         progress_2_3eos_text.y = 585;
                         progress_2_3eos_text.size = 18;
                         progress_2_3eos_text.textColor = 0x000000;
-                        progress_2_3eos_text.text = "\u6E38\u620F\u8FDB\u884C\u4E2D";
-                        this.stage.addChild(progress_2_3eos_text);
+                        progress_2_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing");
+                        this.gameContainer.addChild(progress_2_3eos_text);
                         createGameFlat_5eos = this.createBitmapByName("EOS_5_png");
-                        this.stage.addChild(createGameFlat_5eos);
+                        this.gameContainer.addChild(createGameFlat_5eos);
                         createGameFlat_5eos.width = 100;
                         createGameFlat_5eos.height = 100;
                         createGameFlat_5eos.x = 15;
@@ -326,14 +336,14 @@ var Main = (function (_super) {
                         progress_all_5eos.graphics.endFill();
                         progress_all_5eos.touchEnabled = true;
                         progress_all_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 5, -1, "game_2_png", this.fiveEosContainer), this);
-                        this.stage.addChild(progress_all_5eos);
+                        this.gameContainer.addChild(progress_all_5eos);
                         progress_all_5eos_text = new egret.TextField();
                         progress_all_5eos_text.x = 35;
                         progress_all_5eos_text.y = 815;
                         progress_all_5eos_text.size = 18;
                         progress_all_5eos_text.textColor = 0x000000;
-                        progress_all_5eos_text.text = " \u5168\u90E8 ";
-                        this.stage.addChild(progress_all_5eos_text);
+                        progress_all_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all");
+                        this.gameContainer.addChild(progress_all_5eos_text);
                         progress_1_5eos = new egret.Shape();
                         progress_1_5eos.graphics.beginFill(0x00EE00);
                         progress_1_5eos.graphics.lineStyle(2, 0x000000);
@@ -341,14 +351,14 @@ var Main = (function (_super) {
                         progress_1_5eos.graphics.endFill();
                         progress_1_5eos.touchEnabled = true;
                         progress_1_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 5, 1, "game_2_png", this.fiveEosContainer), this);
-                        this.stage.addChild(progress_1_5eos);
+                        this.gameContainer.addChild(progress_1_5eos);
                         progress_1_5eos_text = new egret.TextField();
                         progress_1_5eos_text.x = 18;
                         progress_1_5eos_text.y = 855;
                         progress_1_5eos_text.size = 18;
                         progress_1_5eos_text.textColor = 0x000000;
-                        progress_1_5eos_text.text = "\u53EF\u52A0\u5165\u6E38\u620F";
-                        this.stage.addChild(progress_1_5eos_text);
+                        progress_1_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable");
+                        this.gameContainer.addChild(progress_1_5eos_text);
                         progress_2_5eos = new egret.Shape();
                         progress_2_5eos.graphics.beginFill(0xFFFF00);
                         progress_2_5eos.graphics.lineStyle(2, 0x000000);
@@ -356,14 +366,14 @@ var Main = (function (_super) {
                         progress_2_5eos.graphics.endFill();
                         progress_2_5eos.touchEnabled = true;
                         progress_2_5eos.addEventListener(egret.TouchEvent.TOUCH_TAP, this.filterAndUpdateGameList.bind(this, 5, 2, "game_2_png", this.fiveEosContainer), this);
-                        this.stage.addChild(progress_2_5eos);
+                        this.gameContainer.addChild(progress_2_5eos);
                         progress_2_5eos_text = new egret.TextField();
                         progress_2_5eos_text.x = 18;
                         progress_2_5eos_text.y = 895;
                         progress_2_5eos_text.size = 18;
                         progress_2_5eos_text.textColor = 0x000000;
-                        progress_2_5eos_text.text = "\u6E38\u620F\u8FDB\u884C\u4E2D";
-                        this.stage.addChild(progress_2_5eos_text);
+                        progress_2_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing");
+                        this.gameContainer.addChild(progress_2_5eos_text);
                         //******登陆/登出功能******
                         this.login = this.createBitmapByName("login_png");
                         this.login.x = 1180;
@@ -378,11 +388,11 @@ var Main = (function (_super) {
                         //根据Scatter当前身份状况判断是否已经登陆/登出，并显示相应按钮
                         ScatterUtils.getIdentity().then(function (identiy) {
                             if (identiy == null) {
-                                _this.stage.addChild(_this.login);
+                                _this.gameContainer.addChild(_this.login);
                             }
                             else {
                                 ScatterUtils.login();
-                                _this.stage.addChild(_this.logout);
+                                _this.gameContainer.addChild(_this.logout);
                             }
                         });
                         //************************ 
@@ -402,13 +412,12 @@ var Main = (function (_super) {
                         messageTitleBox.graphics.beginFill(0x4F4F4F, 0.8);
                         messageTitleBox.graphics.drawRoundRect(0, 0, 350, 30, 15, 15);
                         this.messageContainer.addChild(messageTitleBox);
-                        messageTitle = new egret.TextField();
-                        messageTitle.x = 145;
-                        messageTitle.y = 3;
-                        messageTitle.size = 20;
-                        messageTitle.textColor = 0xFFFFFF;
-                        messageTitle.text = '通告栏';
-                        this.messageContainer.addChild(messageTitle);
+                        this.messageTitle.x = 145;
+                        this.messageTitle.y = 3;
+                        this.messageTitle.size = 20;
+                        this.messageTitle.textColor = 0xFFFFFF;
+                        this.messageTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.notice.bar.title");
+                        this.messageContainer.addChild(this.messageTitle);
                         this.message.x = 10;
                         this.message.y = 35;
                         this.message.width = 330;
@@ -419,13 +428,52 @@ var Main = (function (_super) {
                         this.message.$setMultiline(true);
                         this.messageContainer.addChild(this.message);
                         description = this.createBitmapByName("description_png");
-                        this.stage.addChild(description);
-                        description.x = 1350;
+                        this.gameContainer.addChild(description);
+                        description.x = 1310;
                         description.y = 10;
+                        description.width = 110;
                         description.touchEnabled = true;
                         description.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
-                            _this.stage.addChild(_this.descriptionContainer);
+                            _this.gameContainer.addChild(_this.descriptionContainer);
                         }, this);
+                        descriptionTitle = new egret.TextField();
+                        descriptionTitle.x = 1315;
+                        descriptionTitle.y = 25;
+                        descriptionTitle.size = 20;
+                        descriptionTitle.textColor = 0x1C1C1C;
+                        descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc.caption");
+                        this.gameContainer.addChild(descriptionTitle);
+                        localeContainer = new egret.DisplayObjectContainer();
+                        localeContainer.x = 1435;
+                        localeContainer.y = 13;
+                        localeContainer.touchEnabled = true;
+                        this.gameContainer.addChild(localeContainer);
+                        localeBox = new egret.Shape();
+                        localeBox.graphics.clear();
+                        localeBox.graphics.beginFill(0xF7CDA4);
+                        localeBox.graphics.lineStyle(2, 0x000000, 0.5);
+                        localeBox.graphics.drawRect(0, 0, 60, 40);
+                        localeBox.graphics.endFill();
+                        localeContainer.addChild(localeBox);
+                        localeTitle = new egret.TextField();
+                        localeTitle.x = 10;
+                        localeTitle.y = 10;
+                        localeTitle.size = 20;
+                        localeTitle.textColor = 0x443A3A;
+                        localeTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale == "zh_CN" ? "en_US" : "zh_CN", "locale");
+                        localeContainer.addChild(localeTitle);
+                        localeContainer.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
+                            if (LocaleUtils.locale == "zh_CN") {
+                                LocaleUtils.locale = "en_US";
+                            }
+                            else {
+                                LocaleUtils.locale = "zh_CN";
+                            }
+                            localStorage.setItem("eatchicken_locale", LocaleUtils.locale);
+                            localeTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale == "zh_CN" ? "en_US" : "zh_CN", "locale");
+                            staticLabelI18N();
+                        }, this);
+                        //****************
                         // ***游戏说明***
                         this.descriptionContainer.x = 350;
                         this.descriptionContainer.y = 60;
@@ -442,20 +490,19 @@ var Main = (function (_super) {
                         descriptioTitleBox.graphics.beginFill(0x4F4F4F, 0.8);
                         descriptioTitleBox.graphics.drawRoundRect(0, 0, 800, 30, 15, 15);
                         this.descriptionContainer.addChild(descriptioTitleBox);
-                        descriptionTitle = new egret.TextField();
-                        descriptionTitle.x = 350;
-                        descriptionTitle.y = 5;
-                        descriptionTitle.size = 20;
-                        descriptionTitle.textColor = 0xFFFFFF;
-                        descriptionTitle.text = '游戏说明';
-                        this.descriptionContainer.addChild(descriptionTitle);
+                        this.descriptionTitle.x = 350;
+                        this.descriptionTitle.y = 5;
+                        this.descriptionTitle.size = 20;
+                        this.descriptionTitle.textColor = 0xFFFFFF;
+                        this.descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc.caption");
+                        this.descriptionContainer.addChild(this.descriptionTitle);
                         descriptionClose = this.createBitmapByName("close_png");
                         this.descriptionContainer.addChild(descriptionClose);
                         descriptionClose.x = 770;
                         descriptionClose.y = 0;
                         descriptionClose.touchEnabled = true;
                         descriptionClose.addEventListener(egret.TouchEvent.TOUCH_TAP, function () {
-                            _this.stage.removeChild(_this.descriptionContainer);
+                            _this.gameContainer.removeChild(_this.descriptionContainer);
                         }, this);
                         this.description.x = 10;
                         this.description.y = 35;
@@ -465,56 +512,80 @@ var Main = (function (_super) {
                         this.description.textColor = 0x000000;
                         this.description.$setWordWrap(true);
                         this.description.$setMultiline(true);
-                        this.description.textFlow = new egret.HtmlTextParser().parser("\u6E38\u620F\u89C4\u5219\u8BF4\u660E\uFF1A\n\n"
-                            + "1. \u8FDB\u5165\u6E38\u620F\u5927\u5385\uFF0C\u70B9\u51FB\u5DE6\u4E0A\u89D2\u6309\u94AE\u5F39\u51FAscatter\u754C\u9762\uFF0C\u786E\u8BA4\u540E\u521B\u5EFA\u65B0\u7684\u4E00\u5C40\u6E38\u620F\uFF0C\u65B0\u5C40\u5C06\u51FA\u73B0\u5728\u6E38\u620F\u5927\u5385\u4E2D\uFF0C\u65B0\u5C40\u7684\u521B\u5EFA\u8005\u53EB\u5C40\u4E3B\uFF1B\n\n"
-                            + "2. \u5728\u6E38\u620F\u5927\u5385\u4E2D\u70B9\u51FB\u65B0\u5EFA\u7684\u6E38\u620F\uFF0C\u8FDB\u5165\u6E38\u620F\u754C\u9762\uFF1B\n\n"
-                            + "3. \u6E38\u620F\u7684\u5C40\u4E3B\u70B9\u51FB\u5DE6\u5217\u4E2D\u95F4\u6309\u94AE\u968F\u673A\u51FA\u8BE5\u5C40\u7684\u5730\u56FE\u9053\u5177\u5206\u5E03\uFF1B\n\n"
-                            + "4. \u4E4B\u540E\uFF0C\u5176\u4ED6\u73A9\u5BB6\u53EF\u4EE5\u9009\u62E9\u5730\u56FE\u4E0A\u7684\u67D0\u4E2A\u683C\u5B50\u4F4D\u7F6E\uFF0C\u70B9\u51FB\u5F39\u51FAscatter\u754C\u9762\uFF0C\u786E\u8BA4\u540E\u52A0\u5165\u6E38\u620F\uFF0C\u73A9\u5BB6\u7684\u89D2\u8272\u5C06\u7A7A\u964D\u5230\u8BE5\u5730\u56FE\u683C\u5B50\u4E2D\uFF1B\n\n"
-                            + "5. \u5C40\u4E3B\u53EF\u4EE5\u5728\u53C2\u4E0E\u4EBA\u6570\u8FBE\u52302\u4EBA\u62162\u4EBA\u4EE5\u4E0A\u7684\u60C5\u51B5\u4E0B\uFF0C\u968F\u65F6\u70B9\u51FB\u5DE6\u5217\u201C\u5F00\u59CB\u6E38\u620F\u201D\u6309\u94AE\u6765\u5F00\u5C40\uFF08\u5728\u8BBE\u7F6E\u5730\u56FE\u9053\u5177\u540E\u534A\u5C0F\u65F6\u5185\u672A\u5F00\u5C40\u7684\u60C5\u51B5\u4E0B\u7CFB\u7EDF\u5C06\u81EA\u52A8\u5173\u95ED\u6E38\u620F\uFF09\uFF1B\n\n"
-                            + "6. \u6E38\u620F\u5C06\u4EE530\u79D2\u95F4\u9694\u7684\u65F6\u95F4\u8282\u594F\u6765\u63A8\u8FDB\u6E38\u620F\uFF0C\u6240\u6709\u53C2\u4E0E\u73A9\u5BB6\u53EF\u4EE5\u572830\u79D2\u5185\u79FB\u52A8\u4E00\u6B65\uFF08\u6216\u539F\u5730\u4E0D\u52A8\uFF09\uFF0C30\u79D2\u540E\u6E38\u620F\u5C06\u505A\u51FA\u4E00\u8F6E\u5224\u51B3\uFF0C\u76F4\u5230\u5224\u51B3\u51FA\u6E38\u620F\u7684\u6700\u7EC8\u80DC\u5229\u8005\u7ED3\u675F\uFF1B\n\n"
-                            + "7. \u5730\u56FE\u4E0A\u6709\u6BD2\u6C14\u5708\uFF0C\u6BCF3\u5206\u949F\u5411\u5185\u6269\u5927\u4E00\u5708\uFF0C\u51E1\u662F\u5904\u4E8E\u6BD2\u6C14\u5708\u5185\u7684\u73A9\u5BB6\u5C06\u4F1A\u53D7\u5230\u4F24\u5BB3\uFF1B\n\n"
-                            + "8. \u5730\u56FE\u4E0A\u5206\u5E03\u6709\u5404\u7C7B\u9053\u5177\uFF0C\u73A9\u5BB6\u79FB\u52A8\u8FDB\u5165\u5730\u56FE\u683C\u5B50\u65F6\uFF0C\u53EF\u4EE5\u7ACB\u5373\u62FE\u53D6\u67AA\u68B0\u6216\u9632\u5177\uFF0C\u6216\u89E6\u53D1\u5730\u56FE\u4E8B\u4EF6\uFF08\u5982\u6B66\u5668\u7A7A\u6295\uFF09\uFF1B\n\n"
-                            + "9. \u5F53\u540C\u4E00\u683C\u5B50\u5185\u6709\u591A\u540D\u73A9\u5BB6\u65F6\uFF0C\u6BCF30\u79D2\u4E00\u8F6E\u7684\u5224\u51B3\u5C06\u4F1A\u8BA9\u73A9\u5BB6\u76F8\u4E92\u653B\u51FB\uFF1B\n\n"
-                            + "10. \u5F53\u6709\u4E00\u534A\u73A9\u5BB6\u9635\u4EA1\u65F6\uFF0C\u5730\u56FE\u4E0A\u5C06\u4F1A\u5728\u67D0\u4E2A\u683C\u5B50\u4E0A\u7A7A\u6295EOS\uFF08\u7A7A\u6295\u53D1\u751F\u65F6\uFF0C\u8BE5\u683C\u5B50\u4E0A\u7684\u73A9\u5BB6\u5C06\u88AB\u5168\u90E8\u6740\u6B7B\uFF09\uFF1B\n\n"
-                            + "11. \u51FB\u6740\u5176\u4ED6\u73A9\u5BB6\uFF0C\u53EF\u83B7\u5F97\u88AB\u51FB\u6740\u73A9\u5BB6\u8EAB\u4E0A\u4E00\u5B9A\u6BD4\u4F8B\u7684EOS\uFF0C\u4EE5\u53CA\u989D\u5916\u7684\u51FB\u6740\u5956\u52B1\uFF1B\n\n"
-                            + "12. \u51FB\u6740\u6570\u6700\u9AD8\u7684\u73A9\u5BB6\uFF0C\u5C06\u4F1A\u83B7\u5F97\u201C\u6740\u624B\u201D\u7684\u5956\u52B1\uFF0C\u6E38\u620F\u7684\u6700\u540E\u4E00\u540D\u73A9\u5BB6\uFF0C\u5C06\u4F1A\u83B7\u5F97\u201C\u80DC\u5229\u8005\u201D\u7684\u5956\u52B1 \n\n"
-                            + "\u53E6\u5916\uFF0C\u5173\u4E8Escatter\u94B1\u5305\u7684\u8BBE\u7F6E\uFF0C\u8BF7\u53C2\u8003\uFF1A\n"
-                            + "1. <a href = 'https://get-scatter.com'><u>https://get-scatter.com</u></a> \n"
-                            + "2. <a href = 'https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle'><u>https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle </u></a>");
+                        this.description.textFlow = new egret.HtmlTextParser().parser(LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc"));
                         /*
-                        this.description.text = `游戏规则说明：\n\n`
-                                                + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
-                                                + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
-                                                + `3. 游戏的局主点击左列中间按钮随机出该局的地图道具分布；\n\n`
-                                                + `4. 之后，其他玩家可以选择地图上的某个格子位置，点击弹出scatter界面，确认后加入游戏，玩家的角色将空降到该地图格子中；\n\n`
-                                                + `5. 局主可以在参与人数达到2人或2人以上的情况下，随时点击左列“开始游戏”按钮来开局（在设置地图道具后半小时内未开局的情况下系统将自动关闭游戏）；\n\n`
-                                                + `6. 游戏将以30秒间隔的时间节奏来推进游戏，所有参与玩家可以在30秒内移动一步（或原地不动），30秒后游戏将做出一轮判决，直到判决出游戏的最终胜利者结束；\n\n`
-                                                + `7. 地图上有毒气圈，每3分钟向内扩大一圈，凡是处于毒气圈内的玩家将会受到伤害；\n\n`
-                                                + `8. 地图上分布有各类道具，玩家移动进入地图格子时，可以立即拾取枪械或防具，或触发地图事件（如武器空投）；\n\n`
-                                                + `9. 当同一格子内有多名玩家时，每30秒一轮的判决将会让玩家相互攻击；\n\n`
-                                                + `10. 当有一半玩家阵亡时，地图上将会在某个格子上空投EOS（空投发生时，该格子上的玩家将被全部杀死）；\n\n`
-                                                + `11. 击杀其他玩家，可获得被击杀玩家身上一定比例的EOS，以及额外的击杀奖励；\n\n`
-                                                + `12. 击杀数最高的玩家，将会获得“杀手”的奖励，游戏的最后一名玩家，将会获得“胜利者”的奖励 \n\n`
-                                                + `另外，关于scatter钱包的设置，请参考：\n`
-                                                + `1. https://get-scatter.com \n`
-                                                + `2. https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle`
-                        */
+                        `游戏规则说明：\n\n`
+                                            + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
+                                            + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
+                                            + `3. 游戏的局主点击左列中间按钮随机出该局的地图道具分布；\n\n`
+                                            + `4. 之后，其他玩家可以选择地图上的某个格子位置，点击弹出scatter界面，确认后加入游戏，玩家的角色将空降到该地图格子中；\n\n`
+                                            + `5. 局主可以在参与人数达到2人或2人以上的情况下，随时点击左列“开始游戏”按钮来开局（在设置地图道具后半小时内未开局的情况下系统将自动关闭游戏）；\n\n`
+                                            + `6. 游戏将以30秒间隔的时间节奏来推进游戏，所有参与玩家可以在30秒内移动一步（或原地不动），30秒后游戏将做出一轮判决，直到判决出游戏的最终胜利者结束；\n\n`
+                                            + `7. 地图上有毒气圈，每3分钟向内扩大一圈，凡是处于毒气圈内的玩家将会受到伤害；\n\n`
+                                            + `8. 地图上分布有各类道具，玩家移动进入地图格子时，可以立即拾取枪械或防具，或触发地图事件（如武器空投）；\n\n`
+                                            + `9. 当同一格子内有多名玩家时，每30秒一轮的判决将会让玩家相互攻击；\n\n`
+                                            + `10. 当有一半玩家阵亡时，地图上将会在某个格子上空投EOS（空投发生时，该格子上的玩家将被全部杀死）；\n\n`
+                                            + `11. 击杀其他玩家，可获得被击杀玩家身上一定比例的EOS，以及额外的击杀奖励；\n\n`
+                                            + `12. 击杀数最高的玩家，将会获得“杀手”的奖励，游戏的最后一名玩家，将会获得“胜利者”的奖励 \n\n`
+                                            + `另外，关于scatter钱包的设置，请参考：\n`
+                                            + `1. <a href = 'https://get-scatter.com'><u>https://get-scatter.com</u></a> \n`
+                                            + `2. <a href = 'https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle'><u>https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle </u></a>`
+                    )
+                    
+                    this.description.text = `游戏规则说明：\n\n`
+                                            + `1. 进入游戏大厅，点击左上角按钮弹出scatter界面，确认后创建新的一局游戏，新局将出现在游戏大厅中，新局的创建者叫局主；\n\n`
+                                            + `2. 在游戏大厅中点击新建的游戏，进入游戏界面；\n\n`
+                                            + `3. 游戏的局主点击左列中间按钮随机出该局的地图道具分布；\n\n`
+                                            + `4. 之后，其他玩家可以选择地图上的某个格子位置，点击弹出scatter界面，确认后加入游戏，玩家的角色将空降到该地图格子中；\n\n`
+                                            + `5. 局主可以在参与人数达到2人或2人以上的情况下，随时点击左列“开始游戏”按钮来开局（在设置地图道具后半小时内未开局的情况下系统将自动关闭游戏）；\n\n`
+                                            + `6. 游戏将以30秒间隔的时间节奏来推进游戏，所有参与玩家可以在30秒内移动一步（或原地不动），30秒后游戏将做出一轮判决，直到判决出游戏的最终胜利者结束；\n\n`
+                                            + `7. 地图上有毒气圈，每3分钟向内扩大一圈，凡是处于毒气圈内的玩家将会受到伤害；\n\n`
+                                            + `8. 地图上分布有各类道具，玩家移动进入地图格子时，可以立即拾取枪械或防具，或触发地图事件（如武器空投）；\n\n`
+                                            + `9. 当同一格子内有多名玩家时，每30秒一轮的判决将会让玩家相互攻击；\n\n`
+                                            + `10. 当有一半玩家阵亡时，地图上将会在某个格子上空投EOS（空投发生时，该格子上的玩家将被全部杀死）；\n\n`
+                                            + `11. 击杀其他玩家，可获得被击杀玩家身上一定比例的EOS，以及额外的击杀奖励；\n\n`
+                                            + `12. 击杀数最高的玩家，将会获得“杀手”的奖励，游戏的最后一名玩家，将会获得“胜利者”的奖励 \n\n`
+                                            + `另外，关于scatter钱包的设置，请参考：\n`
+                                            + `1. https://get-scatter.com \n`
+                                            + `2. https://chrome.google.com/webstore/detail/scatter/ammjpmhgckkpcamddpolhchgomcojkle`
+                    */
                         this.description.scrollV = 0;
                         this.descriptionContainer.addChild(this.description);
                         //游戏房间列表（卡牌）容器
                         this.oneEosContainer.x = 180;
                         this.oneEosContainer.y = 70;
-                        this.stage.addChild(this.oneEosContainer);
+                        this.gameContainer.addChild(this.oneEosContainer);
                         this.threeEosContainer.x = 180;
                         this.threeEosContainer.y = 390;
-                        this.stage.addChild(this.threeEosContainer);
+                        this.gameContainer.addChild(this.threeEosContainer);
                         this.fiveEosContainer.x = 180;
                         this.fiveEosContainer.y = 700;
-                        this.stage.addChild(this.fiveEosContainer);
+                        this.gameContainer.addChild(this.fiveEosContainer);
                         //this.stage.addChild(this.textfield)
                         //this.popMessageBox()
+                        if ((navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i))) {
+                            this.mobile = true;
+                        }
                         //更新游戏房间列表，位置为上栏
                         this.refreshHouseList();
+                        staticLabelI18N = function () {
+                            _this.description.textFlow = new egret.HtmlTextParser().parser(LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc"));
+                            _this.descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc.caption");
+                            _this.messageTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.notice.bar.title");
+                            descriptionTitle.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.desc.caption");
+                            progress_all_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all");
+                            progress_all_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all");
+                            progress_all_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.all");
+                            progress_1_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable");
+                            progress_1_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable");
+                            progress_1_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable");
+                            progress_2_1eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing");
+                            progress_2_3eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing");
+                            progress_2_5eos_text.text = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing");
+                            _this.updateGameList(_this.eos_one.slice(0, 7), "game_png", _this.oneEosContainer, _this.eos_one, 0);
+                            _this.updateGameList(_this.eos_three.slice(0, 7), "game_1_png", _this.threeEosContainer, _this.eos_three, 0);
+                            _this.updateGameList(_this.eos_five.slice(0, 7), "game_2_png", _this.fiveEosContainer, _this.eos_five, 0);
+                        };
                         return [2 /*return*/];
                 }
             });
@@ -536,9 +607,9 @@ var Main = (function (_super) {
             // this.stage.removeChild(this.message)
             // this.stage.removeChild(this.messageContainer)
             _this.message.text = "";
-            _this.stage.removeChild(_this.messageContainer);
+            _this.gameContainer.removeChild(_this.messageContainer);
         }, this, 4000);
-        this.stage.addChild(this.messageContainer);
+        this.gameContainer.addChild(this.messageContainer);
         this.message.text = msgText;
     };
     /**
@@ -598,7 +669,7 @@ var Main = (function (_super) {
                                         return [3 /*break*/, 5];
                                     case 4:
                                         //alert("无游戏信息")
-                                        this.popMessageBox("无游戏信息");
+                                        this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale, "game.not.found"));
                                         _d.label = 5;
                                     case 5: return [2 /*return*/];
                                 }
@@ -606,7 +677,7 @@ var Main = (function (_super) {
                         }); }).catch(function (e) {
                             console.error(e);
                             //alert("获取游戏信息失败")
-                            _this.popMessageBox("获取游戏信息失败");
+                            _this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale, "game.fetch.failure"));
                         })];
                     case 1:
                         // 
@@ -670,23 +741,23 @@ var Main = (function (_super) {
                 var color;
                 switch (gameJson.game_progress) {
                     case 0:
-                        progress = "游戏未开始";
+                        progress = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.notstart"); //"游戏未开始"
                         color = 0x00EE00;
                         break;
                     case 1:
-                        progress = "游戏可加入";
+                        progress = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.joinable"); //"游戏可加入"
                         color = 0x00EE00;
                         break;
                     case 2:
-                        progress = "游戏进行中";
+                        progress = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.ongoing"); //"游戏进行中"
                         color = 0xFFFF00;
                         break;
                     case 3:
-                        progress = "游戏已结束";
+                        progress = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.over"); //"游戏已结束"
                         color = 0xFF0000;
                         break;
                     default:
-                        progress = "游戏未开始";
+                        progress = LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status.notstart"); //"游戏未开始"
                 }
                 var detailBox = new egret.Shape();
                 detailBox.graphics.beginFill(color);
@@ -699,8 +770,8 @@ var Main = (function (_super) {
                 message.y = 216;
                 message.size = 18;
                 message.textColor = 0x000000;
-                message.text = " \u623F\u53F7:" + (gameJson.game_id + 1) + "   \u73A9\u5BB6: " + gameJson.players.length + "\n"
-                    + (" \u72B6\u6001: " + progress);
+                message.text = " " + LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.room.num") + (gameJson.game_id + 1) + "   " + LocaleUtils.getLabelById(LocaleUtils.locale, "game.player") + " " + gameJson.players.length + "\n"
+                    + (" " + LocaleUtils.getLabelById(LocaleUtils.locale, "hall.game.status") + " " + progress);
                 container.addChild(message);
             });
         });
@@ -736,7 +807,7 @@ var Main = (function (_super) {
         ScatterUtils.getIdentity().then(function (identity) {
             if (identity == null) {
                 //alert(ScatterUtils.message.authority)
-                _this.popMessageBox(ScatterUtils.message.authority);
+                _this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale, "game.wallet.authority"));
                 return;
             }
             ScatterUtils.createGame(game_eos + " EOS").then(function (transaction) {
@@ -749,12 +820,12 @@ var Main = (function (_super) {
                 else {
                     transaction = JSON.parse(transaction);
                     //alert("创建游戏失败:"+transaction.error.details[0].message)
-                    _this.popMessageBox("创建游戏失败:" + transaction.error.details[0].message);
+                    _this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale, "hall.notice.failed.create", [transaction.error.details[0].message]));
                 }
             }).catch(function (e) {
                 console.log(e);
                 //alert("取消创建游戏")
-                _this.popMessageBox("取消创建游戏");
+                _this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale, "hall.notice.cancel.create"));
             });
         });
     };
@@ -811,18 +882,23 @@ var Main = (function (_super) {
             return __generator(this, function (_a) {
                 ScatterUtils.login().then(function (message) {
                     if (message.login) {
-                        alert("欢迎: " + message.details);
+                        //alert("欢迎: "+ message.details)
                         //this.popMessageBox("欢迎: "+ message.details)
-                        if (_this.stage.contains(_this.login)) {
-                            _this.stage.removeChild(_this.login);
+                        if (_this.gameContainer.contains(_this.login)) {
+                            _this.gameContainer.removeChild(_this.login);
                         }
-                        if (!_this.stage.contains(_this.logout)) {
-                            _this.stage.addChild(_this.logout);
+                        if (!_this.gameContainer.contains(_this.logout)) {
+                            _this.gameContainer.addChild(_this.logout);
                         }
+                        _this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale, "game.message.login.success", [message.account]));
                     }
                     else {
-                        alert(message.details);
-                        //this.popMessageBox(message.details)
+                        if (message.code == 1) {
+                            _this.popMessageBox(LocaleUtils.getLabelById(LocaleUtils.locale, "game.wallet.nowallet"));
+                        }
+                        else if (message.code == 2) {
+                            _this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale, "game.wallet.locked", [LocaleUtils.getLabelById(LocaleUtils.locale, "game.wallet.walletlock"), LocaleUtils.getLabelById(LocaleUtils.locale, "game.wallet.noidentity")]));
+                        }
                     }
                 }).catch(function (e) {
                     console.log("e", e);
@@ -843,20 +919,24 @@ var Main = (function (_super) {
             return __generator(this, function (_a) {
                 ScatterUtils.logout().then(function (message) {
                     //     ScatterUtils.getCurrentAccountName().then( name=>{
-                    alert(message.details);
+                    //alert(message.details)
                     //this.popMessageBox(message.details)
                     if (message.logout) {
-                        if (_this.stage.contains(_this.logout)) {
-                            _this.stage.removeChild(_this.logout);
+                        if (_this.gameContainer.contains(_this.logout)) {
+                            _this.gameContainer.removeChild(_this.logout);
                         }
-                        if (!_this.stage.contains(_this.login)) {
-                            _this.stage.addChild(_this.login);
+                        if (!_this.gameContainer.contains(_this.login)) {
+                            _this.gameContainer.addChild(_this.login);
                         }
+                        _this.popMessageBox(LocaleUtils.getLabelByIdAndValue(LocaleUtils.locale, "game.message.logout.success", [message.account]));
+                    }
+                    else {
+                        // logout fail
                     }
                     //       })                                           
                 }).catch(function (e) {
                     console.log("e", e);
-                    alert(e);
+                    _this.popMessageBox(e);
                 });
                 return [2 /*return*/];
             });
@@ -1198,35 +1278,51 @@ var Main = (function (_super) {
         result.texture = texture;
         return result;
     };
-    /**
-     *  鼠标左键按下
-     */
     Main.prototype.mouseDown = function (evt) {
-        this._touchStatus = true;
-        this._distance.x = evt.stageX - evt.target.x;
-        this._distance.y = evt.stageY - evt.target.y;
-        this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
-    };
-    /**
-     *  鼠标移动
-     */
-    Main.prototype.mouseMove = function (evt) {
-        if (this._touchStatus) {
-            try {
-                evt.target.x = evt.stageX - this._distance.x;
-                evt.target.y = evt.stageY - this._distance.y;
-            }
-            catch (e) {
-                console.log(e);
-            }
+        if (this.touchPoints[evt.touchPointID] == null) {
+            this.touchPoints[evt.touchPointID] = new egret.Point(evt.stageX, evt.stageY);
+            this.touchPoints["names"].push(evt.touchPointID);
+        }
+        this.touchCon++;
+        if (this.touchCon == 2) {
+            this.distance = this.getTouchDistance();
         }
     };
-    /**
-     *  鼠标左键抬起
-     */
+    Main.prototype.mouseMove = function (evt) {
+        //egret.log("touch move:"+evt.touchPointID);
+        if (this.touchCon == 2) {
+            this.touchPoints[evt.touchPointID].x = evt.stageX;
+            this.touchPoints[evt.touchPointID].y = evt.stageY;
+            var newdistance = this.getTouchDistance();
+            this.gameContainer.scaleX = newdistance / this.distance;
+            this.gameContainer.scaleY = this.gameContainer.scaleX;
+        }
+        else if (this.mobile) {
+            var _x = evt.stageX - this.touchPoints[evt.touchPointID].x;
+            var _y = evt.stageY - this.touchPoints[evt.touchPointID].y;
+            this.gameContainer.x = _x + this.lastPositionX;
+            this.gameContainer.y = _y + this.lastPositionY;
+        }
+    };
     Main.prototype.mouseUp = function (evt) {
-        this._touchStatus = false;
-        this.stage.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.mouseMove, this);
+        delete this.touchPoints[evt.touchPointID];
+        this.touchCon--;
+        this.lastPositionX = this.gameContainer.x;
+        this.lastPositionY = this.gameContainer.y;
+        //
+        this.width *= this.scaleX;
+        this.height *= this.scaleY;
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.anchorOffsetX = this.width / 2;
+        this.anchorOffsetY = this.height / 2;
+    };
+    Main.prototype.getTouchDistance = function () {
+        var _distance = 0;
+        var names = this.touchPoints["names"];
+        _distance = egret.Point.distance(this.touchPoints[names[names.length - 1]], this.touchPoints[names[names.length - 2]]);
+        //alert(_distance) 
+        return _distance;
     };
     /**
      *  从顶部士兵标签栏移除指定士兵

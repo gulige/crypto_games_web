@@ -120,7 +120,7 @@ class ScatterUtils extends Object {
         await this.connect();
         if (!this.connected) {
             console.log('not connected');
-            return { login:false, details : this.message.nowallet }  
+            return { login:false, code : 1 }  
         }
         try {
             //*** 验证Scatter钱包身份，如果Scatter没有解锁 或者 没有身份 则抛Excetion */
@@ -142,14 +142,14 @@ class ScatterUtils extends Object {
                 */
                 //console.log("login success,", this.currentAccount)
 
-                return { login:true, details :this.currentAccount.name }
+                return { login:true, account :this.currentAccount.name } // login success
             })
-            return message
+            return message  
               
         } catch (e) {           
             //console.log("login fail,", e)
             //没有解锁或没有身份
-            return { login:false, details : "未能使用钱包，可能是"+this.message.walletlock+"或者"+this.message.noidentity }  
+            return { login:false, code: 2 }  
         }
     }
 
@@ -400,16 +400,16 @@ class ScatterUtils extends Object {
      */
     public static async logout(){
         //ScatterJS.scatter.forgetIdentity();
+        let _currentAccountName = this.currentAccount.name
         try{
-            //ScatterJS.scatter.logout();
-            let _currentAccountName = this.currentAccount.name
+            //ScatterJS.scatter.logout();            
             ScatterJS.scatter.forgetIdentity();
             this.currentAccount = null;
             this.eos = null;
-            return {logout:true, details: _currentAccountName + this.message.logout}
+            return {logout:true, account: _currentAccountName}
         } catch (e){
             console.log(e)
-            return {logout:false, details: "登出失败"}
+            return {logout:false, account: _currentAccountName}
         }
         
 

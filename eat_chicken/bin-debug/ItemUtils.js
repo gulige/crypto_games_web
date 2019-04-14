@@ -10,9 +10,8 @@ r.prototype = e.prototype, t.prototype = new r();
 };
 var ItemUtils = (function (_super) {
     __extends(ItemUtils, _super);
-    function ItemUtils(rowX, colY, id) {
-        return _super.call(this) || this;
-        //this.itemBitMap = this.createBitmapByName(name)
+    function ItemUtils() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     ItemUtils.createBitmapById = function (id) {
         var result = new egret.Bitmap();
@@ -27,26 +26,26 @@ var ItemUtils = (function (_super) {
         item.setId(id);
         return item;
     };
-    ItemUtils.getItemNameById = function (id) {
-        var name = this.items['id_' + id].name;
+    ItemUtils.getItemNameById = function (id, locale) {
+        var name = this.items['id_' + id][locale];
         return name;
     };
     ItemUtils.items = {
-        id_0: { name: '', png: 'empty_png' },
-        id_1: { name: '炸弹', png: 'explosive_png' },
-        id_2: { name: '', png: 'gun4_png' },
-        id_3: { name: '手枪', png: 'gun1_png' },
-        id_4: { name: '步枪', png: 'gun2_png' },
-        id_5: { name: '超级步枪', png: 'gun4_png' },
-        id_6: { name: '一级防具', png: 'shield1_png' },
-        id_7: { name: '二级防具', png: 'shield2_png' },
-        id_8: { name: '三级防具', png: 'shield3_png' },
-        id_9: { name: '决斗卡', png: 'combat_png' },
-        id_10: { name: '复活卡', png: 'rebirth_png' },
-        id_11: { name: '药箱', png: 'medicine_png' },
-        id_12: { name: '急救箱', png: 'first_aid_png' },
-        id_13: { name: '', png: 'money_png' },
-        id_14: { name: '黄金矿点', png: 'gold_png' },
+        id_0: { zh_CN: '', en_US: '', png: 'empty_png' },
+        id_1: { zh_CN: '炸弹', en_US: 'Bomb', png: 'explosive_png' },
+        id_2: { zh_CN: '', en_US: '', png: 'gun4_png' },
+        id_3: { zh_CN: '手枪', en_US: 'Pistol', png: 'gun1_png' },
+        id_4: { zh_CN: '步枪', en_US: 'Rifle', png: 'gun2_png' },
+        id_5: { zh_CN: '超级步枪', en_US: 'Super Gun', png: 'gun4_png' },
+        id_6: { zh_CN: '一级防具', en_US: 'Shield Ⅰ', png: 'shield1_png' },
+        id_7: { zh_CN: '二级防具', en_US: 'Shield Ⅱ', png: 'shield2_png' },
+        id_8: { zh_CN: '三级防具', en_US: 'Shield Ⅲ', png: 'shield3_png' },
+        id_9: { zh_CN: '决斗卡', en_US: 'Combat Card', png: 'combat_png' },
+        id_10: { zh_CN: '复活卡', en_US: 'Rebirth Card', png: 'rebirth_png' },
+        id_11: { zh_CN: '药箱', en_US: 'Medicine', png: 'medicine_png' },
+        id_12: { zh_CN: '急救箱', en_US: 'First Aid', png: 'first_aid_png' },
+        id_13: { zh_CN: '', en_US: '', png: 'money_png' },
+        id_14: { zh_CN: '黄金矿点', en_US: 'Gold', png: 'gold_png' },
     };
     return ItemUtils;
 }(egret.HashObject));
